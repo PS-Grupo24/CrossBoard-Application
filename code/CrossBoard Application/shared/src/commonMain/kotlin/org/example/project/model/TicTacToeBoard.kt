@@ -3,13 +3,15 @@ package org.example.project.model
 sealed class TicTacToeBoard(
     override val positions: List<Position>,
     override val moves:List<Move>,
-    override val turn:Player
+    override val turn:Player,
+    override val player1: Player,
+    override val player2: Player
 ) : Board{
     companion object{
         const val BOARD_DIM = 3
         const val MAX_MOVES = BOARD_DIM * BOARD_DIM
     }
-    abstract override fun play(player: Player, square: Square):Board
+    abstract override fun play(player: Player, row: Int, column: Char):Board
     abstract override fun forfeit(player: Player):Board
     override fun get(square: Square) = positions.find { it.square == square }?.player
 }
@@ -18,22 +20,28 @@ class TicTacToeBoardRun(
     positions: List<Position>,
     moves: List<Move>,
     turn: Player,
-) : TicTacToeBoard(positions, moves, turn) {
-    override fun play(player: Player, square: Square): Board {
+    player1: Player,
+    player2: Player
+) : TicTacToeBoard(positions, moves, turn, player1, player2) {
+    override fun play(player: Player, row: Int, column: Char): Board {
         require(player == turn){"Not this player's turn to play!"}
+        val square =  Square(Row(row, BOARD_DIM), Column.invoke(column))
         require(get(square) == Player.EMPTY) {"This position is not empty!"}
 
         val move = Move(player, square)
         val newPositions = positions.map { if (it.square == square) Position(player, square) else it }
 
         return when {
-            verifyWinner(newPositions, move) -> TicTacToeBoardWin(player, newPositions, moves + move, turn.other())
-            moves.size == MAX_MOVES - 1 -> TicTacToeBoardDraw(newPositions, moves + move, turn.other())
-            else -> TicTacToeBoardRun(newPositions, moves + move, turn.other())
+            verifyWinner(newPositions, move) ->
+                TicTacToeBoardWin(player, newPositions, moves + move, turn.other(), player1, player2)
+            moves.size == MAX_MOVES - 1 ->
+                TicTacToeBoardDraw(newPositions, moves + move, turn.other(),player1, player2)
+            else ->
+                TicTacToeBoardRun(newPositions, moves + move, turn.other(), player1, player2)
         }
     }
 
-    override fun forfeit(player: Player): Board = TicTacToeBoardWin(player.other(), positions, moves, turn)
+    override fun forfeit(player: Player): Board = TicTacToeBoardWin(player.other(), positions, moves, turn, player1, player2)
 
     private fun verifyWinner(positions: List<Position>, move: Move): Boolean {
         val playerPositions = positions.filter { it.player == move.player}
@@ -48,9 +56,11 @@ class TicTacToeBoardWin(
     val winner: Player,
     positions: List<Position>,
     moves: List<Move>,
-    turn: Player
-) : TicTacToeBoard(positions, moves, turn){
-    override fun play(player: Player, square: Square): Board {
+    turn: Player,
+    player1: Player,
+    player2: Player
+) : TicTacToeBoard(positions, moves, turn, player1, player2){
+    override fun play(player: Player, row: Int, column: Char): Board {
         throw IllegalStateException("The player $winner already won the game.")
     }
 
@@ -62,10 +72,12 @@ class TicTacToeBoardWin(
 class TicTacToeBoardDraw(
     positions: List<Position>,
     moves: List<Move>,
-    turn: Player
-) : TicTacToeBoard(positions, moves, turn){
+    turn: Player,
+    player1: Player,
+    player2: Player
+) : TicTacToeBoard(positions, moves, turn, player1, player2){
 
-    override fun play(player: Player, square: Square): Board {
+    override fun play(player: Player, row: Int, column: Char): Board {
         throw IllegalStateException("The game has already ended on a draw.")
     }
 
