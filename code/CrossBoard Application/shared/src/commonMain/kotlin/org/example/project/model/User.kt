@@ -2,8 +2,13 @@ package org.example.project.model
 
 import kotlin.jvm.JvmInline
 
+//Constant representing the minimum size of a username.
 const val MIN_USERNAME_SIZE = 3
 
+/**
+ * Inline class "Username" represents the username of a user.
+ * @param value the username value.
+ */
 @JvmInline
 value class Username (val value: String){
 
@@ -13,6 +18,10 @@ value class Username (val value: String){
     }
 }
 
+/**
+ * Inline class "Email" represents the email of a user.
+ * @param value the email value.
+ */
 @JvmInline
 value class Email(val value: String){
 
@@ -24,6 +33,10 @@ value class Email(val value: String){
     }
 }
 
+/**
+ * Inline class "Password" represents the password of a user.
+ * @param value the password value.
+ */
 @JvmInline
 value class Password(val value: String){
     init {
@@ -36,10 +49,16 @@ value class Password(val value: String){
     }
 }
 
-
+/**
+ * Data class "User" represents a user of the application.
+ * @param id the id of the user.
+ * @param username the username of the user.
+ * @param email the email of the user.
+ * @param password the password of the user.
+ */
 data class User(
     val id:UInt,
-    val userName:Username,
+    val username:Username,
     val email:Email,
     val password:Password
 ){
