@@ -1,4 +1,4 @@
-package org.example.project.model
+package domain
 
 /**
  * Interface "Board" representing the game board and their properties.
@@ -12,12 +12,12 @@ package org.example.project.model
  * @property get Function to get the player at a specific square or to verify if it is occupied the square.
  */
 interface Board {
-    val positions: List<Position>;
+    val positions: List<Position>
     val moves: List<Move>
     val player1: Player
     val player2: Player
     val turn: Player
-    fun play(player: Player, row: Int, column: Char): Board
+    fun play(move: Move): Board
     fun forfeit(player: Player): Board
     fun get(square: Square): Player?
 }

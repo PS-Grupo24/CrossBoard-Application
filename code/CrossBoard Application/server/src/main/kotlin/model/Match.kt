@@ -1,10 +1,21 @@
-package org.example.project.model
+package model
+
+import domain.Board
+import domain.Difficulty
+import domain.Move
+import domain.Player
+import domain.TicTacToeBoardRun
+import domain.initialTicTacToePositions
+import kotlinx.serialization.Serializable
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 /**
  * Interface "Game" represents a game.
  * @property board the board of the game.
  */
-interface Game {
+interface Match {
+    val id: UInt
     val board: Board;
 }
 
@@ -24,19 +35,25 @@ enum class GameType(type: String) {
  * @param player2 the second player.
  * @return Game the game that was created as a multiplayer game.
  */
-class MultiPlayerGame(override val board: Board, val player1: User, val player2:User):Game {
+@Serializable
+class MultiPlayerMatch(
+    override val board: Board,
+    override val id: UInt,
+    val player1: UInt,
+    var player2: UInt? = null,
+    val gameType: GameType
+): Match {
     companion object{
         /**
          * Function startGame responsible to start a game.
          * @param player1 the first player.
-         * @param player2 the second player.
          * @param gameType the type of the game.
          * @return Game the game that was created.
          */
-        fun startGame(player1: User, player2: User, gameType: GameType):Game = when(gameType){
+        fun startGame(player1: UInt, gameType: GameType): MultiPlayerMatch = when(gameType){
             GameType.TicTacToe -> {
                 val p1 = Player.random()
-                MultiPlayerGame(
+                MultiPlayerMatch(
                     TicTacToeBoardRun(
                         initialTicTacToePositions(),
                         emptyList(),
@@ -44,8 +61,10 @@ class MultiPlayerGame(override val board: Board, val player1: User, val player2:
                         p1,
                         p1.other()
                         ),
+                    Random.nextUInt(),
                     player1,
-                    player2
+                    null,
+                    gameType
                 )
             }
         }
@@ -53,21 +72,16 @@ class MultiPlayerGame(override val board: Board, val player1: User, val player2:
 
     /**
      * Function play responsible to play a move on the board.
-     * @param player the player that is playing.
-     * @param row the row of the move.
-     * @param column the column of the move.
+     * @param move The move to be made.
      * @return MultiPlayerGame the game after the move was played.
      */
-    fun play(player:User, row: Int, column: Char):MultiPlayerGame {
-        val p = getPlayerType(player)
-        return MultiPlayerGame(
-            board.play(
-                p,
-                row,
-                column
-            ),
+    fun play(move: Move): MultiPlayerMatch {
+        return MultiPlayerMatch(
+            board.play(move),
+            id,
             player1,
-            player2
+            player2,
+            gameType
         )
     }
 
@@ -76,9 +90,9 @@ class MultiPlayerGame(override val board: Board, val player1: User, val player2:
      * @param player the player that is forfeiting.
      * @return MultiPlayerGame the game after the forfeit.
      */
-    fun forfeit(player: User):MultiPlayerGame {
+    fun forfeit(player: UInt): MultiPlayerMatch {
         val playerType = getPlayerType(player)
-        return MultiPlayerGame(board.forfeit(playerType), player1, player2)
+        return MultiPlayerMatch(board.forfeit(playerType), id,player1, player2,gameType)
     }
 
     /**
@@ -86,15 +100,15 @@ class MultiPlayerGame(override val board: Board, val player1: User, val player2:
      * @param player the player.
      * @return Player the player type.
      */
-    private fun getPlayerType(player: User):Player =
+    private fun getPlayerType(player: UInt): Player =
         if (player == player1) board.player1 else board.player2
 }
 
 /**
  * Class "SinglePlayerGame" represents a single player game.
  * @param board the board of the game.
- * @param player the player.
+ * @param user the player.
  * @param difficulty the difficulty of the game.
  * @return Game the game that was created as a single player game.
  */
-class SinglePlayerGame(override val board: Board, val player: User, difficulty: Difficulty):Game
+class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty): Match

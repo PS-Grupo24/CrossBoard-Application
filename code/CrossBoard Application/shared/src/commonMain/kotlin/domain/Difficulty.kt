@@ -1,4 +1,4 @@
-package org.example.project.model
+package domain
 
 /**
  * Enum class "Difficulty" represents the difficulty of the game.

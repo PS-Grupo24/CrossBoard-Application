@@ -1,4 +1,4 @@
-package org.example.project.model
+package domain
 
 /**
  * Data class "Position" represents a position in the game.

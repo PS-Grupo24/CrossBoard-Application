@@ -1,4 +1,4 @@
-package org.example.project.model
+package domain
 
 /**
  * Data class "TicTacToeBoard" represents a Tic Tac Toe board.
@@ -12,10 +12,10 @@ package org.example.project.model
 sealed class TicTacToeBoard(
     override val positions: List<Position>,
     override val moves:List<Move>,
-    override val turn:Player,
+    override val turn: Player,
     override val player1: Player,
     override val player2: Player
-):Board {
+): Board {
     companion object{
         //The board dimension and the maximum moves.
         const val BOARD_DIM = 3
@@ -24,19 +24,17 @@ sealed class TicTacToeBoard(
 
     /**
      * Function play responsible to play a move on the board.
-     * @param player the player that is playing.
-     * @param row the row of the move.
-     * @param column the column of the move.
+     * @param move the move to be done in the play.
      * @return Board the game after the move was played.
      */
-    abstract override fun play(player: Player, row: Int, column: Char):Board
+    abstract override fun play(move: Move): Board
 
     /**
      * Function forfeit responsible to forfeit the game board.
      * @param player the player that is forfeiting.
      * @return Board the game after the player forfeited.
      */
-    abstract override fun forfeit(player: Player):Board
+    abstract override fun forfeit(player: Player): Board
 
     /**
      * Function get responsible to get the player at a specific square or to verify if it is occupied the square.
@@ -64,22 +62,18 @@ class TicTacToeBoardRun(
 ) : TicTacToeBoard(positions, moves, turn, player1, player2) {
     /**
      * Function play responsible to play a move on the board.
-     * @param player the player that is playing.
-     * @param row the row of the move.
-     * @param column the column of the move.
+     * @param move the move to be done in this play.
      * @return Board the board after the move was played.
      */
-    override fun play(player: Player, row: Int, column: Char): Board {
-        require(player == turn){"Not this player's turn to play!"}
-        val square =  Square(Row(row, BOARD_DIM), Column.invoke(column))
-        require(get(square) == Player.EMPTY) {"This position is not empty!"}
-
-        val move = Move(player, square)
-        val newPositions = positions.map { if (it.square == square) Position(player, square) else it }
+    override fun play(move: Move): Board {
+        require(move is TicTacToeMove){"Wrong move format"}
+        require(move.player == turn){"Not this player's turn to play!"}
+        require(get(move.square) == Player.EMPTY) {"This position is not empty!"}
+        val newPositions = positions.map { if (it.square == move.square) Position(move.player, move.square) else it }
 
         return when {
             verifyWinner(newPositions, move) ->
-                TicTacToeBoardWin(player, newPositions, moves + move, turn.other(), player1, player2)
+                TicTacToeBoardWin(move.player, newPositions, moves + move, turn.other(), player1, player2)
             moves.size == MAX_MOVES - 1 ->
                 TicTacToeBoardDraw(newPositions, moves + move, turn.other(),player1, player2)
             else ->
@@ -101,6 +95,7 @@ class TicTacToeBoardRun(
      * @return Boolean true if there is a winner, false otherwise.
      */
     private fun verifyWinner(positions: List<Position>, move: Move): Boolean {
+        require(move is TicTacToeMove){"Wrong type of move!"}
         val playerPositions = positions.filter { it.player == move.player}
         return playerPositions.count{it.square.column == move.square.column} == BOARD_DIM
                 || playerPositions.count{it.square.row == move.square.row} == BOARD_DIM
@@ -134,7 +129,7 @@ class TicTacToeBoardWin(
      * @param column the column of the move.
      * @return Board the board after the move was played.
      */
-    override fun play(player: Player, row: Int, column: Char): Board {
+    override fun play(move: Move): Board {
         throw IllegalStateException("The player $winner already won the game.")
     }
 
@@ -172,7 +167,7 @@ class TicTacToeBoardDraw(
      * @param column the column of the move.
      * @return Board the board after the move was played.
      */
-    override fun play(player: Player, row: Int, column: Char):Board {
+    override fun play(move: Move): Board {
         throw IllegalStateException("The game has already ended on a draw.")
     }
 
@@ -181,8 +176,8 @@ class TicTacToeBoardDraw(
      * @param player the player that is forfeiting.
      * @return Board the game after the player forfeited.
      */
-    override fun forfeit(player: Player):Board {
-        throw IllegalStateException("Can not forfeit and already finished game!")
+    override fun forfeit(player: Player): Board {
+        throw IllegalStateException("Can not forfeit an already finished game!")
     }
 }
 
