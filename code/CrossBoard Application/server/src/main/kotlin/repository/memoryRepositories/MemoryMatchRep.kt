@@ -1,5 +1,6 @@
 package repository.memoryRepositories
 
+import domain.BoardRun
 import model.GameType
 import model.MultiPlayerMatch
 import repository.interfaces.MatchRepository
@@ -12,8 +13,8 @@ object MemoryMatchRep: MatchRepository {
         return match
     }
 
-    override suspend fun getMatchByUser(userId: UInt): MultiPlayerMatch? {
-        return matches.find { it.player1 == userId || it.player2 == userId }
+    override suspend fun getRunningMatchByUser(userId: UInt): MultiPlayerMatch? {
+        return matches.find { (it.player1 == userId || it.player2 == userId) && it.board is BoardRun}
     }
 
     override suspend fun getMatchById(matchId: UInt): MultiPlayerMatch? {

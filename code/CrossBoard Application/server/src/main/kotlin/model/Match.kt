@@ -40,7 +40,7 @@ class MultiPlayerMatch(
     override val board: Board,
     override val id: UInt,
     val player1: UInt,
-    var player2: UInt? = null,
+    val player2: UInt? = null,
     val gameType: GameType
 ): Match {
     companion object{
@@ -81,7 +81,8 @@ class MultiPlayerMatch(
             id,
             player1,
             player2,
-            gameType
+            gameType,
+
         )
     }
 

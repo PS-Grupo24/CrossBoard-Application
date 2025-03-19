@@ -59,7 +59,7 @@ class TicTacToeBoardRun(
     turn: Player,
     player1: Player,
     player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2) {
+) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardRun {
     /**
      * Function play responsible to play a move on the board.
      * @param move the move to be done in this play.
@@ -121,7 +121,7 @@ class TicTacToeBoardWin(
     turn: Player,
     player1: Player,
     player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2){
+) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardWin{
     /**
      * Function play responsible to play a move on the board.
      * @param player the player that is playing.
@@ -158,7 +158,7 @@ class TicTacToeBoardDraw(
     turn: Player,
     player1: Player,
     player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2){
+) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardDraw{
 
     /**
      * Function play responsible to play a move on the board.

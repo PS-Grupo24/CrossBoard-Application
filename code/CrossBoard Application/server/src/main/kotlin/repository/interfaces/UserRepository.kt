@@ -12,6 +12,6 @@ interface UserRepository {
     suspend fun getUserProfileByName(username: Username): UserProfileInfo?
     suspend fun getUserFullDetails(userId: UInt): User?
     suspend fun deleteUser(userId: UInt): Boolean
-    suspend fun updateUser(userId: UInt, username: Username?, email: Email?, password: Password?): UserProfileInfo?
+    suspend fun updateUser(userId: UInt, username: Username?, email: Email?, password: Password?): UserProfileInfo
     suspend fun addUser(username: Username, email: Email, password: Password): UserProfileInfo
 }

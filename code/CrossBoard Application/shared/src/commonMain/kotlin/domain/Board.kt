@@ -22,3 +22,9 @@ interface Board {
     fun get(square: Square): Player?
 }
 
+interface BoardRun : Board
+
+interface BoardWin : Board
+
+interface BoardDraw : Board
+
