@@ -17,6 +17,7 @@ import kotlin.random.nextUInt
 interface Match {
     val id: UInt
     val board: Board;
+    fun getPlayerType(userId: UInt): Player
 }
 
 /**
@@ -98,11 +99,11 @@ class MultiPlayerMatch(
 
     /**
      * Function getPlayerType responsible to get the player type.
-     * @param player the player.
+     * @param userId the player.
      * @return Player the player type.
      */
-    private fun getPlayerType(player: UInt): Player =
-        if (player == player1) board.player1 else board.player2
+    override fun getPlayerType(userId: UInt): Player =
+        if (userId == player1) board.player1 else board.player2
 }
 
 /**
@@ -112,4 +113,7 @@ class MultiPlayerMatch(
  * @param difficulty the difficulty of the game.
  * @return Game the game that was created as a single player game.
  */
-class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty): Match
+class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty): Match{
+    override fun getPlayerType(userId: UInt): Player = board.player1
+
+}

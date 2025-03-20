@@ -41,6 +41,6 @@ data class UserProfileInfo(
 @Serializable
 data class UserUpdate(
     val username: Username?,
-    val email: Email?,
-    val password: Password?
+    val email: Email? = null,
+    val password: Password? = null
 )

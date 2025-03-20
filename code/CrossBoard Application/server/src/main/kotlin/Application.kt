@@ -2,6 +2,10 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.example.project.SERVER_PORT
+import repository.memoryRepositories.MemoryMatchRep
+import repository.memoryRepositories.MemoryUserRep
+import service.MatchService
+import service.UsersService
 
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
@@ -9,8 +13,10 @@ fun main() {
 }
 
 fun Application.module() {
+    val userService = UsersService(MemoryUserRep)
+    val matchService = MatchService(MemoryMatchRep)
     configureSerialization()
-    configureRouting()
+    configureRouting(userService, matchService)
 }
 
 

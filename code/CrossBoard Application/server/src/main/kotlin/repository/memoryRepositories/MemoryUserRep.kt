@@ -13,7 +13,7 @@ object MemoryUserRep : UserRepository {
     private val users = mutableListOf<User>(
         User(1U, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!")),
         User(2U, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!")),
-        User(3U, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345"))
+        User(3U, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"))
     )
     override suspend fun getUserProfileById(userId: UInt): UserProfileInfo? {
         val u = users.find { it.id == userId } ?: return null
