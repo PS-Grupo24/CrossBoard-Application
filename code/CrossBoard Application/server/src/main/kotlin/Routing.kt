@@ -1,3 +1,4 @@
+import httpModel.MatchCreation
 import httpModel.UserCreation
 import httpModel.UserUpdate
 import io.ktor.http.*
@@ -32,6 +33,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     }
                 }
             }
+            //Route to update a user
             put {
                 runHttp(call){
                     val userId = call.parameters["userId"]?.toUIntOrNull()
@@ -52,6 +54,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
+        //Route to create a user
         route("/user"){
             post {
                 runHttp(call){
@@ -64,15 +67,37 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
+        //Route to join a match
+        route("/match/user/{userId}"){
+            post {
+                runHttp(call){
+                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+
+                    val matchCreationInfo = call.receive<MatchCreation>()
+                    when(val createdMatch = matchService.enterMatch(userId, matchCreationInfo.gameType)){
+                        is Success -> call.respond(createdMatch.value)
+                        is Failure -> handleFailure(call, createdMatch.value)
+                    }
+                }
+            }
+        }
+
+        TODO("Route to make a play")
+        TODO("Route to forfeit a match")
+        TODO("Route to get a match by Id")
     }
 }
 
-private suspend fun handleFailure(call: RoutingCall, error: API_Error) {
+private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
     when (error) {
-        API_Error.USER_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "User not found")
-        API_Error.USERNAME_ALREADY_EXISTS -> call.respond(HttpStatusCode.Conflict, "Username already exists")
-        API_Error.EMAIL_ALREADY_EXISTS  -> call.respond(HttpStatusCode.Conflict, "Email already exists")
-        API_Error.UNAUTHORIZED -> call.respond(HttpStatusCode.Unauthorized, "Unauthorized action")
+        ApiError.USER_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "User not found")
+        ApiError.USERNAME_ALREADY_EXISTS -> call.respond(HttpStatusCode.Conflict, "Username already exists")
+        ApiError.EMAIL_ALREADY_EXISTS  -> call.respond(HttpStatusCode.Conflict, "Email already exists")
+        ApiError.UNAUTHORIZED -> call.respond(HttpStatusCode.Unauthorized, "Unauthorized action")
+        ApiError.MATCH_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "Match not found")
+        ApiError.USER_ALREADY_IN_MATCH -> call.respond(HttpStatusCode.Conflict, "User already in an ongoing match")
+        ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, "User does not belong in this match")
         else -> call.respond(HttpStatusCode.InternalServerError, "Unexpected error")
     }
 }
@@ -81,6 +106,6 @@ suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     try {
         block()
     } catch (e: Throwable) {
-        call.respond(HttpStatusCode.InternalServerError, e.cause?.message ?: "Unknown error")
+        call.respond(HttpStatusCode.InternalServerError, e.cause?.message ?: e.message ?: "Unknown error")
     }
 }

@@ -45,6 +45,12 @@ kotlin {
             // put your Multiplatform dependencies here
             implementation(libs.bundles.ktorClient)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
+    sourceSets.commonTest.dependencies {
+        implementation(kotlin("test"))
     }
 }
 

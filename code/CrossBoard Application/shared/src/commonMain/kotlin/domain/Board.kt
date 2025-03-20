@@ -1,5 +1,7 @@
 package domain
 
+import kotlinx.serialization.Serializable
+
 /**
  * Interface "Board" representing the game board and their properties.
  * @property positions List of all positions on the board.
@@ -11,7 +13,8 @@ package domain
  * @property forfeit Function to forfeit the game board.
  * @property get Function to get the player at a specific square or to verify if it is occupied the square.
  */
-interface Board {
+@Serializable
+sealed interface Board {
     val positions: List<Position>
     val moves: List<Move>
     val player1: Player
@@ -22,9 +25,9 @@ interface Board {
     fun get(square: Square): Player?
 }
 
-interface BoardRun : Board
+sealed interface BoardRun : Board
 
-interface BoardWin : Board
+sealed interface BoardWin : Board
 
-interface BoardDraw : Board
+sealed interface BoardDraw : Board
 

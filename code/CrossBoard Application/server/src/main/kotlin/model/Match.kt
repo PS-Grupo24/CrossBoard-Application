@@ -6,6 +6,7 @@ import domain.Move
 import domain.Player
 import domain.TicTacToeBoardRun
 import domain.initialTicTacToePositions
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 import kotlin.random.nextUInt
@@ -22,11 +23,11 @@ interface Match {
 
 /**
  * Enum class "GameType" represents the type of the game.
- * @param type the type of the game.
  * @property TicTacToe the Tic Tac Toe game.
  */
-enum class GameType(type: String) {
-    TicTacToe("tic")
+enum class GameType {
+    @SerialName("tic")
+    TicTacToe
 }
 
 /**

@@ -2,9 +2,12 @@ package util
 
 interface Error
 
-enum class API_Error: Error {
+enum class ApiError: Error {
     USER_NOT_FOUND,
     UNAUTHORIZED,
     EMAIL_ALREADY_EXISTS,
-    USERNAME_ALREADY_EXISTS
+    USERNAME_ALREADY_EXISTS,
+    USER_ALREADY_IN_MATCH,
+    MATCH_NOT_FOUND,
+    USER_NOT_IN_THIS_MATCH
 }

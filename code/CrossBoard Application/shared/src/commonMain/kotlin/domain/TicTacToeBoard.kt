@@ -1,5 +1,9 @@
 package domain
 
+import kotlinx.serialization.Polymorphic
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /**
  * Data class "TicTacToeBoard" represents a Tic Tac Toe board.
  * @param positions the list of positions in the board.
@@ -9,18 +13,23 @@ package domain
  * @param player2 the second player.
  * @return Board the Tic Tac Toe board.
  */
-sealed class TicTacToeBoard(
-    override val positions: List<Position>,
-    override val moves:List<Move>,
-    override val turn: Player,
-    override val player1: Player,
-    override val player2: Player
-): Board {
+@Serializable
+@SerialName("TicTacToeBoard")
+sealed class TicTacToeBoard
+
+: Board {
+
     companion object{
         //The board dimension and the maximum moves.
         const val BOARD_DIM = 3
         const val MAX_MOVES = BOARD_DIM * BOARD_DIM
     }
+
+    abstract override val positions: List<Position>
+    abstract override val moves:List<Move>
+    abstract override val turn: Player
+    abstract override val player1: Player
+    abstract override val player2: Player
 
     /**
      * Function play responsible to play a move on the board.
@@ -53,13 +62,15 @@ sealed class TicTacToeBoard(
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a running state with the information.
  */
+@Serializable
+@SerialName("TicTacToeBoardRun")
 class TicTacToeBoardRun(
-    positions: List<Position>,
-    moves: List<Move>,
-    turn: Player,
-    player1: Player,
-    player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardRun {
+    override val positions: List<Position>,
+    override val moves: List<Move>,
+    override val turn: Player,
+    override val player1: Player,
+    override val player2: Player
+) : TicTacToeBoard(), BoardRun {
     /**
      * Function play responsible to play a move on the board.
      * @param move the move to be done in this play.
@@ -114,14 +125,16 @@ class TicTacToeBoardRun(
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a win state with the information.
  */
+@Serializable
+@SerialName("TicTacToeBoardWin")
 class TicTacToeBoardWin(
     val winner: Player,
-    positions: List<Position>,
-    moves: List<Move>,
-    turn: Player,
-    player1: Player,
-    player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardWin{
+    override val positions: List<Position>,
+    override val moves: List<Move>,
+    override val turn: Player,
+    override val player1: Player,
+    override val player2: Player
+) : TicTacToeBoard(), BoardWin{
     /**
      * Function play responsible to play a move on the board.
      * @param player the player that is playing.
@@ -152,13 +165,15 @@ class TicTacToeBoardWin(
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a draw state with the information.
  */
+@Serializable
+@SerialName("TicTacToeBoardDraw")
 class TicTacToeBoardDraw(
-    positions: List<Position>,
-    moves: List<Move>,
-    turn: Player,
-    player1: Player,
-    player2: Player
-) : TicTacToeBoard(positions, moves, turn, player1, player2), BoardDraw{
+    override val positions: List<Position>,
+    override val moves: List<Move>,
+    override val turn: Player,
+    override val player1: Player,
+    override val player2: Player
+) : TicTacToeBoard(), BoardDraw{
 
     /**
      * Function play responsible to play a move on the board.
@@ -185,13 +200,21 @@ class TicTacToeBoardDraw(
  * Function initialTicTacToePositions responsible to create the initial positions of the Tic Tac Toe board.
  * @return List<Position> the list of initial positions.
  */
-fun initialTicTacToePositions():List<Position> =
-    List(TicTacToeBoard.BOARD_DIM * TicTacToeBoard.BOARD_DIM){
-        Position(
-            Player.EMPTY,
-            Square(
-                Row.invoke(it, TicTacToeBoard.BOARD_DIM),
-                Column('a' + it)
-            )
-        )
+fun initialTicTacToePositions():List<Position> {
+    val positions = mutableListOf<Position>()
+    repeat(TicTacToeBoard.BOARD_DIM){ line ->
+        repeat(TicTacToeBoard.BOARD_DIM){ col ->
+                positions.add(
+                    Position(
+                    Player.EMPTY,
+                        Square(
+                            Row.invoke(line, TicTacToeBoard.BOARD_DIM),
+                            Column('a' + col)
+                        )
+                    )
+                )
+        }
     }
+    return positions
+}
+
