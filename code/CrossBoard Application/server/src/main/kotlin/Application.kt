@@ -13,7 +13,8 @@ fun main() {
 }
 
 fun Application.module() {
-    val userService = UsersService(MemoryUserRep)
+    val userRep = MemoryUserRep()
+    val userService = UsersService(userRep)
     val matchService = MatchService(MemoryMatchRep)
     configureSerialization()
     configureRouting(userService, matchService)

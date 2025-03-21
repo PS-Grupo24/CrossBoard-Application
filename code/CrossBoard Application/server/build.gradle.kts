@@ -18,6 +18,6 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.bundles.ktorServer)
-    testImplementation(libs.ktor.server.tests)
+    //testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
 }
