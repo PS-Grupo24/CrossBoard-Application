@@ -15,7 +15,8 @@ fun main() {
 fun Application.module() {
     val userRep = MemoryUserRep()
     val userService = UsersService(userRep)
-    val matchService = MatchService(MemoryMatchRep)
+    val matchRep = MemoryMatchRep()
+    val matchService = MatchService(matchRep)
     configureSerialization()
     configureRouting(userService, matchService)
 }

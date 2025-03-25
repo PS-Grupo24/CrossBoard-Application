@@ -38,7 +38,7 @@ enum class GameType {
  * @return Game the game that was created as a multiplayer game.
  */
 @Serializable
-class MultiPlayerMatch(
+data class MultiPlayerMatch(
     override val board: Board,
     override val id: UInt,
     val player1: UInt,

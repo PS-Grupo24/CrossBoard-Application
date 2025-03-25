@@ -13,11 +13,11 @@ class MatchService(private val matchRepository: MatchRepository) {
         val waitingMatch = matchRepository.getWaitingMatch(gameType)
         if (waitingMatch != null){
             val updatedMatch = MultiPlayerMatch(waitingMatch.board, waitingMatch.id, waitingMatch.player1, userId, waitingMatch.gameType)
-            matchRepository.updateMatch(updatedMatch)
+            matchRepository.updateMatch(updatedMatch.id, updatedMatch.board, updatedMatch.player1, updatedMatch.player2, updatedMatch.gameType)
             return Either.Right(updatedMatch)
         }
         val m = MultiPlayerMatch.startGame(userId, gameType)
-        matchRepository.addMatch(m)
+        matchRepository.addMatch(m.board, m.player1, m.player2, m.gameType)
         return Either.Right(m)
     }
 
@@ -45,7 +45,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
         val updatedMatch = match.play(move)
-        matchRepository.updateMatch(updatedMatch)
+        matchRepository.updateMatch(updatedMatch.id, updatedMatch.board, updatedMatch.player1, updatedMatch.player2, updatedMatch.gameType)
         return Either.Right(updatedMatch)
     }
 
@@ -54,7 +54,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
         val forfeitedMatch = match.forfeit(userId)
-        matchRepository.updateMatch(forfeitedMatch)
+        matchRepository.updateMatch(forfeitedMatch.id, forfeitedMatch.board, forfeitedMatch.player1, forfeitedMatch.player2, forfeitedMatch.gameType)
         return Either.Right(forfeitedMatch)
     }
 

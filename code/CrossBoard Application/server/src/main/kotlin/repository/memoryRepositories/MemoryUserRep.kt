@@ -102,7 +102,7 @@ class MemoryUserRep : UserRepository {
         email: Email,
         password: Password
     ): UserProfileInfo {
-        val lastId = if(users.isEmpty()) 1U else users.maxOf { it.id }
+        val lastId = if(users.isEmpty()) 0U else users.maxOf { it.id }
 
         val newUser = User(lastId + 1U, username, email, password)
         users.add(newUser)
