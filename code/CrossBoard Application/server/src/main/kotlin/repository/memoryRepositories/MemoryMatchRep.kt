@@ -16,11 +16,8 @@ class MemoryMatchRep: MatchRepository {
 
     /**
      * Function "addMatch" responsible to add the match to the list of matches.
-     * @param board the board of the match.
-     * @param player1 the first player.
-     * @param player2 the second player.
-     * @param gametype the type of the game.
-     * @return MultiPlayerMatch the match that was added.
+     * @param match represents the match information to be added.
+     * @return UInt the match id that was added.
      */
     override fun addMatch(match: MultiPlayerMatch): UInt {
         matches.add(match)
@@ -32,18 +29,15 @@ class MemoryMatchRep: MatchRepository {
      * @param userId the id of the user.
      * @return MultiPlayerMatch? the running match if found, null otherwise.
      */
-    override fun getRunningMatchByUser(userId: UInt): MultiPlayerMatch? {
-        return matches.find { (it.player1 == userId || it.player2 == userId) && it.board is BoardRun}
-    }
+    override fun getRunningMatchByUser(userId: UInt): MultiPlayerMatch? =
+        matches.find { (it.player1 == userId || it.player2 == userId) && it.board is BoardRun}
 
     /**
      * Function "getMatchById" responsible to get the match by its id.
      * @param matchId the id of the match.
      * @return MultiPlayerMatch? the match if found, null otherwise.
      */
-    override fun getMatchById(matchId: UInt): MultiPlayerMatch? {
-        return matches.find { it.id == matchId }
-    }
+    override fun getMatchById(matchId: UInt): MultiPlayerMatch? = matches.find { it.id == matchId }
 
     /**
      * Function "getWaitingMatch" responsible to get the waiting match.

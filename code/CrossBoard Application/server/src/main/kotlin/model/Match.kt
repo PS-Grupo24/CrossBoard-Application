@@ -13,7 +13,9 @@ import kotlin.random.nextUInt
 
 /**
  * Interface "Game" represents a game.
+ * @property id the id of the game.
  * @property board the board of the game.
+ * @property getPlayerType Function to get the player type.
  */
 interface Match {
     val id: UInt
@@ -33,9 +35,11 @@ enum class GameType {
 /**
  * Class "MultiPlayerGame" represents a multiplayer game.
  * @param board the board of the game.
+ * @param id the id of the match.
  * @param player1 the first player.
  * @param player2 the second player.
- * @return Game the game that was created as a multiplayer game.
+ * @param gameType the type of the match.
+ * @return Match the match that was created as a multiplayer game.
  */
 @Serializable
 data class MultiPlayerMatch(
