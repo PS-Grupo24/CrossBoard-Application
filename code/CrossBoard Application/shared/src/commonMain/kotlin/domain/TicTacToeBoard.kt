@@ -1,6 +1,5 @@
 package domain
 
-import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -50,7 +49,7 @@ sealed class TicTacToeBoard
      * @param square the square to get the player.
      * @return Player the player at the square.
      */
-    override fun get(square: Square) = positions.find { it.square == square }?.player
+    override fun get(square: Square) = positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
 }
 
 /**
@@ -79,8 +78,13 @@ class TicTacToeBoardRun(
     override fun play(move: Move): Board {
         require(move is TicTacToeMove){"Wrong move format"}
         require(move.player == turn){"Not this player's turn to play!"}
-        require(get(move.square) == Player.EMPTY) {"This position is not empty!"}
-        val newPositions = positions.map { if (it.square == move.square) Position(move.player, move.square) else it }
+        val square = Square(Row(move.row, BOARD_DIM), Column(move.column))
+        require(get(square) == Player.EMPTY) {"This position is not empty!"}
+        val newPositions = positions.map {
+            if (it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol)
+                    Position(move.player, square)
+            else it
+        }
 
         return when {
             verifyWinner(newPositions, move) ->
@@ -107,9 +111,10 @@ class TicTacToeBoardRun(
      */
     private fun verifyWinner(positions: List<Position>, move: Move): Boolean {
         require(move is TicTacToeMove){"Wrong type of move!"}
+        val square = Square(Row(move.row, BOARD_DIM), Column(move.column))
         val playerPositions = positions.filter { it.player == move.player}
-        return playerPositions.count{it.square.column == move.square.column} == BOARD_DIM
-                || playerPositions.count{it.square.row == move.square.row} == BOARD_DIM
+        return playerPositions.count{it.square.column.symbol == square.column.symbol} == BOARD_DIM
+                || playerPositions.count{it.square.row.number == square.row.number} == BOARD_DIM
                 || playerPositions.count{it.square.row.index == it.square.column.index} == BOARD_DIM
                 || playerPositions.count{it.square.row.index == BOARD_DIM - it.square.column.index - 1} == BOARD_DIM
     }

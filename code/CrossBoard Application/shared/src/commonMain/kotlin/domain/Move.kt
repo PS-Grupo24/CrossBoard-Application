@@ -1,8 +1,10 @@
 package domain
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-interface Move {
+@Serializable
+sealed interface Move {
     val player: Player
 }
 
@@ -12,5 +14,6 @@ interface Move {
  * @param square the square where the move was made.
  */
 @Serializable
-data class TicTacToeMove (override val player: Player, val square: Square) : Move
+@SerialName("TicTacToeMove")
+data class TicTacToeMove (override val player: Player, val row: Int, val column: Char) : Move
 

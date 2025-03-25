@@ -84,7 +84,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to forfeit a match.
-        route("/match/forfeit/{matchId}/{userId}"){
+        route("/match/{matchId}/forfeit/{userId}"){
             put {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toUIntOrNull()
@@ -144,6 +144,7 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
         ApiError.MATCH_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "Match not found")
         ApiError.USER_ALREADY_IN_MATCH -> call.respond(HttpStatusCode.Conflict, "User already in an ongoing match")
         ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, "User does not belong in this match")
+        ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, "This user is not the specified player type in the match")
         else -> call.respond(HttpStatusCode.InternalServerError, "Unexpected error")
     }
 }
