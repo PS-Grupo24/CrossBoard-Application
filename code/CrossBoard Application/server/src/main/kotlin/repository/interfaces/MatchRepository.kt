@@ -9,7 +9,7 @@ import model.MultiPlayerMatch
  */
 interface MatchRepository {
     //Function responsible to add the match to the list of matches.
-    fun addMatch(board: Board, player1: UInt, player2: UInt?, gametype: GameType): MultiPlayerMatch
+    fun addMatch(match: MultiPlayerMatch): UInt
     //Function responsible to get the running match by the user.
     fun getRunningMatchByUser(userId:UInt): MultiPlayerMatch?
     //Function responsible to get the match by its id.

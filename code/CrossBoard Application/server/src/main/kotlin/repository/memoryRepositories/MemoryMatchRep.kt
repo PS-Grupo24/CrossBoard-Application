@@ -22,12 +22,9 @@ class MemoryMatchRep: MatchRepository {
      * @param gametype the type of the game.
      * @return MultiPlayerMatch the match that was added.
      */
-    override fun addMatch(board: Board, player1: UInt, player2: UInt?, gametype: GameType): MultiPlayerMatch {
-        val lastId = if(matches.isEmpty()) 0U else matches.maxOf { it.id }
-
-        val newMatch = MultiPlayerMatch(board, lastId + 1U, player1, player2, gametype)
-        matches.add(newMatch)
-        return newMatch
+    override fun addMatch(match: MultiPlayerMatch): UInt {
+        matches.add(match)
+        return match.id
     }
 
     /**

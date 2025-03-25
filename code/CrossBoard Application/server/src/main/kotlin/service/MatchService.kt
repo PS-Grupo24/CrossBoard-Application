@@ -8,7 +8,7 @@ import util.ApiError
 import util.Either
 
 class MatchService(private val matchRepository: MatchRepository) {
-    suspend fun enterMatch(userId: UInt, gameType: GameType): Either<ApiError, MultiPlayerMatch>{
+    fun enterMatch(userId: UInt, gameType: GameType): Either<ApiError, MultiPlayerMatch>{
         if (matchRepository.getRunningMatchByUser(userId) != null) return Either.Left(ApiError.USER_ALREADY_IN_MATCH)
         val waitingMatch = matchRepository.getWaitingMatch(gameType)
         if (waitingMatch != null){
@@ -17,30 +17,30 @@ class MatchService(private val matchRepository: MatchRepository) {
             return Either.Right(updatedMatch)
         }
         val m = MultiPlayerMatch.startGame(userId, gameType)
-        matchRepository.addMatch(m.board, m.player1, m.player2, m.gameType)
+        matchRepository.addMatch(m)
         return Either.Right(m)
     }
 
-    suspend fun getMatchById(matchId: UInt): Either<ApiError, MultiPlayerMatch> =
+    fun getMatchById(matchId: UInt): Either<ApiError, MultiPlayerMatch> =
         when(val m = matchRepository.getMatchById(matchId)){
             null -> Either.Left(ApiError.MATCH_NOT_FOUND)
             else -> Either.Right(m)
         }
 
 
-    suspend fun getMatchByUser(userId: UInt): Either<ApiError, MultiPlayerMatch> =
+    fun getMatchByUser(userId: UInt): Either<ApiError, MultiPlayerMatch> =
         when(val match = matchRepository.getRunningMatchByUser(userId)){
             null -> Either.Left(ApiError.MATCH_NOT_FOUND)
             else -> Either.Right(match)
         }
 
-    suspend fun getWaitingMatch(gameType: GameType): Either<ApiError, MultiPlayerMatch> =
+    fun getWaitingMatch(gameType: GameType): Either<ApiError, MultiPlayerMatch> =
         when(val match = matchRepository.getWaitingMatch(gameType)){
             null -> Either.Left(ApiError.MATCH_NOT_FOUND)
             else -> Either.Right(match)
         }
 
-    suspend fun playMatch(matchId: UInt, userId: UInt, move: Move): Either<ApiError, MultiPlayerMatch> {
+    fun playMatch(matchId: UInt, userId: UInt, move: Move): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
@@ -49,7 +49,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         return Either.Right(updatedMatch)
     }
 
-    suspend fun forfeit(matchId: UInt, userId: UInt): Either<ApiError, MultiPlayerMatch> {
+    fun forfeit(matchId: UInt, userId: UInt): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
