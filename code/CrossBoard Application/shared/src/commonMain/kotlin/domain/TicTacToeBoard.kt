@@ -1,7 +1,5 @@
 package domain
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 /**
  * Data class "TicTacToeBoard" represents a Tic Tac Toe board.
@@ -12,8 +10,6 @@ import kotlinx.serialization.Serializable
  * @param player2 the second player.
  * @return Board the Tic Tac Toe board.
  */
-@Serializable
-@SerialName("TicTacToeBoard")
 sealed class TicTacToeBoard
 
 : Board {
@@ -61,8 +57,6 @@ sealed class TicTacToeBoard
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a running state with the information.
  */
-@Serializable
-@SerialName("TicTacToeBoardRun")
 class TicTacToeBoardRun(
     override val positions: List<Position>,
     override val moves: List<Move>,
@@ -130,8 +124,6 @@ class TicTacToeBoardRun(
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a win state with the information.
  */
-@Serializable
-@SerialName("TicTacToeBoardWin")
 class TicTacToeBoardWin(
     val winner: Player,
     override val positions: List<Position>,
@@ -170,8 +162,6 @@ class TicTacToeBoardWin(
  * @param player2 the second player.
  * @return TicTacToeBoard the Tic Tac Toe board in a draw state with the information.
  */
-@Serializable
-@SerialName("TicTacToeBoardDraw")
 class TicTacToeBoardDraw(
     override val positions: List<Position>,
     override val moves: List<Move>,

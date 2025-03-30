@@ -1,9 +1,9 @@
 package httpModel
 
 import kotlinx.serialization.Serializable
-import model.Email
-import model.Password
-import model.Username
+import domain.Email
+import domain.Password
+import domain.Username
 
 
 /**

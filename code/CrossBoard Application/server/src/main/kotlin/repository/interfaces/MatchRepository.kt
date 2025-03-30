@@ -1,8 +1,8 @@
 package repository.interfaces
 
 import domain.Board
-import model.GameType
-import model.MultiPlayerMatch
+import domain.GameType
+import domain.MultiPlayerMatch
 
 /**
  * Interface "MatchRepository" represents the repository of the match.

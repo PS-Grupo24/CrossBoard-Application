@@ -1,8 +1,8 @@
 import httpModel.UserProfileInfo
-import model.Email
-import model.Password
-import model.User
-import model.Username
+import domain.Email
+import domain.Password
+import domain.User
+import domain.Username
 import repository.memoryRepositories.MemoryUserRep
 import kotlin.test.*
 

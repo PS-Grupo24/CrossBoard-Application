@@ -1,8 +1,8 @@
 package service
 
 import domain.Move
-import model.GameType
-import model.MultiPlayerMatch
+import domain.GameType
+import domain.MultiPlayerMatch
 import repository.interfaces.MatchRepository
 import util.ApiError
 import util.Either

@@ -1,10 +1,10 @@
 package repository.interfaces
 
 import httpModel.UserProfileInfo
-import model.Email
-import model.Password
-import model.User
-import model.Username
+import domain.Email
+import domain.Password
+import domain.User
+import domain.Username
 
 /**
  * Interface UserRepository represents the repository for the user.

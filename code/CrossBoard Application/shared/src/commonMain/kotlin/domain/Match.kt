@@ -1,13 +1,5 @@
-package model
+package domain
 
-import domain.Board
-import domain.Difficulty
-import domain.Move
-import domain.Player
-import domain.TicTacToeBoardRun
-import domain.initialTicTacToePositions
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
@@ -28,7 +20,6 @@ interface Match {
  * @property TicTacToe the Tic Tac Toe game.
  */
 enum class GameType {
-    @SerialName("tic")
     TicTacToe
 }
 
@@ -41,7 +32,6 @@ enum class GameType {
  * @param gameType the type of the match.
  * @return Match the match that was created as a multiplayer game.
  */
-@Serializable
 data class MultiPlayerMatch(
     override val board: Board,
     override val id: UInt,
@@ -118,7 +108,8 @@ data class MultiPlayerMatch(
  * @param difficulty the difficulty of the game.
  * @return Game the game that was created as a single player game.
  */
-class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty): Match{
+class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty):
+    Match {
     override fun getPlayerType(userId: UInt): Player = board.player1
 
 }

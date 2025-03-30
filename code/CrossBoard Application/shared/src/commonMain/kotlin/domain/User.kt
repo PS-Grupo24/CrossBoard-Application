@@ -1,13 +1,11 @@
-package model
+package domain
 
-import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 /**
  * Inline class "Username" represents the username of a user.
  * @param value the username value.
  */
-@Serializable
 @JvmInline
 value class Username (val value: String){
 
@@ -25,7 +23,6 @@ value class Username (val value: String){
  * Inline class "Email" represents the email of a user.
  * @param value the email value.
  */
-@Serializable
 @JvmInline
 value class Email(val value: String){
 
@@ -41,7 +38,6 @@ value class Email(val value: String){
  * Inline class "Password" represents the password of a user.
  * @param value the password value.
  */
-@Serializable
 @JvmInline
 value class Password(val value: String){
     init {
@@ -61,7 +57,6 @@ value class Password(val value: String){
  * @param email the email of the user.
  * @param password the password of the user.
  */
-@Serializable
 data class User(
     val id:UInt,
     val username: Username,

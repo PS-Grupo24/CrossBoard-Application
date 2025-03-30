@@ -1,7 +1,7 @@
 package httpModel
 
 import kotlinx.serialization.Serializable
-import model.GameType
+import domain.GameType
 
 @Serializable
 data class MatchCreation(

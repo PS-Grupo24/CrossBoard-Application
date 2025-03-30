@@ -1,13 +1,11 @@
 package domain
 
-import kotlinx.serialization.Serializable
 
 /**
  * Data class "Row" represents a row in the game.
  * @param index the index of the row.
  * @param boardDim the dimension of the board.
  */
- @Serializable
 class Row private constructor(val index:Int, val boardDim:Int) {
     //The number of the row.
     val number = boardDim - index

@@ -1,8 +1,8 @@
 package repository.memoryRepositories
 
 import domain.BoardRun
-import model.GameType
-import model.MultiPlayerMatch
+import domain.GameType
+import domain.MultiPlayerMatch
 import repository.interfaces.MatchRepository
 import domain.Board
 

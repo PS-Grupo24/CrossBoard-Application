@@ -1,12 +1,9 @@
 package domain
 
-import kotlinx.serialization.Serializable
-
 /**
  * Class "Column" represents the Column of the board.
  * @param symbol the symbol of the column.
  */
-@Serializable
 class Column private constructor(val symbol:Char) {
     //The index of the column.
     val index = symbol - 'a'

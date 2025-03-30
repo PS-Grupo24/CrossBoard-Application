@@ -7,5 +7,4 @@ import kotlinx.serialization.Serializable
  * @param player the player at the position.
  * @param square the square of the position.
  */
-@Serializable
 data class Position(val player: Player, val square: Square)

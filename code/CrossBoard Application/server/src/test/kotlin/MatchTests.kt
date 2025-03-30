@@ -1,8 +1,8 @@
 import domain.Player
 import domain.TicTacToeBoardRun
 import domain.initialTicTacToePositions
-import model.GameType
-import model.MultiPlayerMatch
+import domain.GameType
+import domain.MultiPlayerMatch
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

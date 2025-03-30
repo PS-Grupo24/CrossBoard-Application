@@ -2,9 +2,9 @@ package service
 
 import httpModel.UserProfileInfo
 import util.ApiError
-import model.Email
-import model.Password
-import model.Username
+import domain.Email
+import domain.Password
+import domain.Username
 import repository.interfaces.UserRepository
 import util.Either
 

@@ -1,8 +1,8 @@
 
-import model.Email
-import model.Password
-import model.User
-import model.Username
+import domain.Email
+import domain.Password
+import domain.User
+import domain.Username
 import org.junit.Assert.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
