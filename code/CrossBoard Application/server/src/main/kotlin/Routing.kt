@@ -1,7 +1,14 @@
-import domain.Move
-import httpModel.MatchCreation
-import httpModel.UserCreation
-import httpModel.UserUpdate
+import domain.Email
+import domain.Password
+import domain.Username
+import domain.toGameType
+import httpModel.MatchCreationInput
+import httpModel.MoveInput
+import httpModel.UserCreationInput
+import httpModel.UserUpdateInput
+import httpModel.toMatchOutput
+import httpModel.toMove
+import httpModel.toMoveOutput
 import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.request.receive
@@ -25,7 +32,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/user/{userId}") {
             get {
                 runHttp(call) {
-                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                    val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
                     when (val user = usersService.getUserById(userId)) {
@@ -37,16 +44,19 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             //Route to update a user
             put {
                 runHttp(call){
-                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                    val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
-                    val newUserInfo = call.receive<UserUpdate>()
+                    val newUserInfo = call.receive<UserUpdateInput>()
+                    val userName = if (newUserInfo.username != null) Username(newUserInfo.username) else null
+                    val email = if (newUserInfo.email != null) Email(newUserInfo.email) else null
+                    val password = if (newUserInfo.password != null) Password(newUserInfo.password) else null
                     when (val updatedUser =
                         usersService.updateUser(
                             userId,
-                            newUserInfo.username,
-                            newUserInfo.email,
-                            newUserInfo.password
+                            userName,
+                            email,
+                            password
                         )
                     ) {
                         is Success -> call.respond(updatedUser.value)
@@ -59,9 +69,13 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/user"){
             post {
                 runHttp(call){
-                    val user = call.receive<UserCreation>()
-
-                    when(val createdUser = usersService.createUser(user.username, user.email, user.password)){
+                    val user = call.receive<UserCreationInput>()
+                    when(
+                        val createdUser = usersService.createUser(
+                        Username(user.username),
+                        Email(user.email),
+                        Password(user.password))
+                    ){
                         is Success -> call.respond(createdUser.value)
                         is Failure -> handleFailure(call, createdUser.value)
                     }
@@ -72,12 +86,13 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/match/user/{userId}"){
             post {
                 runHttp(call){
-                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                    val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
-                    val matchCreationInfo = call.receive<MatchCreation>()
-                    when(val createdMatch = matchService.enterMatch(userId, matchCreationInfo.gameType)){
-                        is Success -> call.respond(createdMatch.value)
+                    val matchCreationInfo = call.receive<MatchCreationInput>()
+                    val gameType = matchCreationInfo.gameType.toGameType() ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Unknown GameType")
+                    when(val createdMatch = matchService.enterMatch(userId, gameType)){
+                        is Success -> call.respond(createdMatch.value.toMatchOutput())
                         is Failure -> handleFailure(call, createdMatch.value)
                     }
                 }
@@ -87,14 +102,14 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/match/{matchId}/forfeit/{userId}"){
             put {
                 runHttp(call){
-                    val matchId = call.parameters["matchId"]?.toUIntOrNull()
+                    val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
 
-                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                    val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
                     when(val forfeitedMatch = matchService.forfeit(matchId, userId)){
-                        is Success -> call.respond(forfeitedMatch.value)
+                        is Success -> call.respond(forfeitedMatch.value.toMatchOutput())
                         is Failure -> handleFailure(call, forfeitedMatch.value)
                     }
                 }
@@ -104,11 +119,11 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/match/{matchId}"){
             get {
                 runHttp(call){
-                    val matchId = call.parameters["matchId"]?.toUIntOrNull()
+                    val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
 
                     when(val match = matchService.getMatchById(matchId)){
-                        is Success -> call.respond(match.value)
+                        is Success -> call.respond(match.value.toMatchOutput())
                         is Failure -> handleFailure(call, match.value)
                     }
                 }
@@ -118,15 +133,16 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/match/{matchId}/play/{userId}"){
             put {
                 runHttp(call){
-                    val matchId = call.parameters["matchId"]?.toUIntOrNull()
+                    val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
 
-                    val userId = call.parameters["userId"]?.toUIntOrNull()
+                    val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
-                    val move = call.receive<Move>()
+                    val move = call.receive<MoveInput>().toMove() ?:
+                        return@runHttp call.respond(HttpStatusCode.BadRequest, "Error converting moveInput to Move")
                     when(val updatedMatch = matchService.playMatch(matchId, userId, move)){
-                        is Success -> call.respond(updatedMatch.value)
+                        is Success -> call.respond(updatedMatch.value.toMoveOutput())
                         is Failure -> handleFailure(call, updatedMatch.value)
                     }
                 }

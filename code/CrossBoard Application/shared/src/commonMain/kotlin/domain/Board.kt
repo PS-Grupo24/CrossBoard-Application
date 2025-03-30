@@ -24,7 +24,9 @@ sealed interface Board {
 
 sealed interface BoardRun : Board
 
-sealed interface BoardWin : Board
+sealed interface BoardWin : Board{
+    val winner: Player
+}
 
 sealed interface BoardDraw : Board
 

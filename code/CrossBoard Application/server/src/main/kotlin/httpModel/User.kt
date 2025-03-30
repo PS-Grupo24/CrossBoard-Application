@@ -1,9 +1,6 @@
 package httpModel
 
 import kotlinx.serialization.Serializable
-import domain.Email
-import domain.Password
-import domain.Username
 
 
 /**
@@ -13,10 +10,10 @@ import domain.Username
  * @param password the password of the new user.
  */
 @Serializable
-data class UserCreation(
-    val username: Username,
-    val email: Email,
-    val password: Password
+data class UserCreationInput(
+    val username: String,
+    val email: String,
+    val password: String
 )
 
 /**
@@ -26,10 +23,10 @@ data class UserCreation(
  * @param id the id of the new user.
  */
 @Serializable
-data class UserProfileInfo(
-    val id:UInt,
-    val username: Username,
-    val email: Email,
+data class UserProfileOutput(
+    val id:Int,
+    val username: String,
+    val email: String,
 )
 
 /**
@@ -39,8 +36,8 @@ data class UserProfileInfo(
  * @param password the password of the new user.
  */
 @Serializable
-data class UserUpdate(
-    val username: Username?,
-    val email: Email? = null,
-    val password: Password? = null
+data class UserUpdateInput(
+    val username: String? = null,
+    val email: String? = null,
+    val password: String? = null
 )

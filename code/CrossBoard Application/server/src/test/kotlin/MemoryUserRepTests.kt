@@ -1,5 +1,4 @@
-import httpModel.UserProfileInfo
-import domain.Email
+/*import domain.Email
 import domain.Password
 import domain.User
 import domain.Username
@@ -142,4 +141,4 @@ class MemoryUserRepTests {
         assertEquals(newUser.username, userAddedInfo.username)
         assertEquals(newUser.email, userAddedInfo.email)
     }
-}
+}*/

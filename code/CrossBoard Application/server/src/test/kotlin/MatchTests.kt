@@ -25,10 +25,10 @@ class MatchTests {
             player,
             player.other()
         )
-        val newMatch = MultiPlayerMatch.startGame(1U, GameType.TicTacToe)
+        val newMatch = MultiPlayerMatch.startGame(1, GameType.TicTacToe)
 
         assertEquals(board, newMatch.board)
-        assertEquals(1U, newMatch.player1)
+        assertEquals(1, newMatch.player1)
         assertEquals(null, newMatch.player2)
         assertEquals(GameType.TicTacToe, newMatch.gameType)
     }

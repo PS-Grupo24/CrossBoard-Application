@@ -26,4 +26,20 @@ enum class Player(val char: Char) {
          */
         fun random() = listOf(BLACK, WHITE).random()
     }
+
+    override fun toString(): String {
+        return when(this){
+            WHITE -> "WHITE"
+            BLACK -> "BLACK"
+            EMPTY -> "EMPTY"
+        }
+    }
+}
+
+fun String.toPlayer() : Player? {
+    return when(this){
+        "BLACK" -> Player.BLACK
+        "WHITE" -> Player.WHITE
+        else -> null
+    }
 }

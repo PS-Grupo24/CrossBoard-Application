@@ -1,10 +1,10 @@
 package repository.memoryRepositories
 
-import httpModel.UserProfileInfo
 import domain.Email
 import domain.Password
 import domain.User
 import domain.Username
+import httpModel.UserProfileOutput
 import repository.interfaces.UserRepository
 
 /**
@@ -14,9 +14,9 @@ import repository.interfaces.UserRepository
 class MemoryUserRep : UserRepository {
     //Value storing the list of users of the app.
     private val users = mutableListOf<User>(
-        User(1U, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!")),
-        User(2U, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!")),
-        User(3U, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"))
+        User(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!")),
+        User(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!")),
+        User(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"))
     )
 
     /**
@@ -24,9 +24,9 @@ class MemoryUserRep : UserRepository {
      * @param userId the id of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileById(userId: UInt): UserProfileInfo? {
+    override fun getUserProfileById(userId: Int): UserProfileOutput? {
         val u = users.find { it.id == userId } ?: return null
-        return UserProfileInfo(u.id, u.username, u.email)
+        return UserProfileOutput(u.id, u.username.value, u.email.value)
     }
 
     /**
@@ -34,9 +34,9 @@ class MemoryUserRep : UserRepository {
      * @param email the email of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileByEmail(email: Email): UserProfileInfo? {
+    override fun getUserProfileByEmail(email: Email): UserProfileOutput? {
         val u = users.find { it.email == email } ?: return null
-        return UserProfileInfo(u.id, u.username, u.email)
+        return UserProfileOutput(u.id, u.username.value, u.email.value)
     }
 
     /**
@@ -44,9 +44,9 @@ class MemoryUserRep : UserRepository {
      * @param username the username of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileByName(username: Username): UserProfileInfo? {
+    override fun getUserProfileByName(username: Username): UserProfileOutput? {
         val u = users.find { it.username == username } ?: return null
-        return UserProfileInfo(u.id, u.username, u.email)
+        return UserProfileOutput(u.id, u.username.value, u.email.value)
     }
 
     /**
@@ -54,7 +54,7 @@ class MemoryUserRep : UserRepository {
      * @param userId the id of the user being deleted.
      * @return Boolean true if the user was deleted, false otherwise.
      */
-    override fun deleteUser(userId: UInt): Boolean {
+    override fun deleteUser(userId: Int): Boolean {
         return users.remove(users.find { it.id == userId })
     }
 
@@ -67,11 +67,11 @@ class MemoryUserRep : UserRepository {
      * @return UserProfileInfo the user profile information of the updated user.
      */
     override fun updateUser(
-        userId: UInt,
+        userId: Int,
         username: Username?,
         email: Email?,
         password: Password?
-    ): UserProfileInfo {
+    ): UserProfileOutput {
         val user = getUserFullDetails(userId)!!
         val newName = username ?: user.username
         val newEmail = email ?: user.email
@@ -80,7 +80,7 @@ class MemoryUserRep : UserRepository {
         val updatedUser = User(user.id, newName, newEmail, newPassword)
         users.remove(user)
         users.add(updatedUser)
-        return UserProfileInfo(updatedUser.id, updatedUser.username, updatedUser.email)
+        return UserProfileOutput(updatedUser.id, updatedUser.username.value, updatedUser.email.value)
     }
 
     /**
@@ -88,7 +88,7 @@ class MemoryUserRep : UserRepository {
      * @param userId the id of the user being searched.
      * @return User? the user if found, null otherwise.
      */
-    override fun getUserFullDetails(userId: UInt): User? = users.find { it.id == userId }
+    override fun getUserFullDetails(userId: Int): User? = users.find { it.id == userId }
 
     /**
      * Function "addUser" responsible to add a new user to the list of users.
@@ -101,11 +101,11 @@ class MemoryUserRep : UserRepository {
         username: Username,
         email: Email,
         password: Password
-    ): UserProfileInfo {
-        val lastId = if(users.isEmpty()) 0U else users.maxOf { it.id }
+    ): UserProfileOutput {
+        val lastId = if(users.isEmpty()) 0 else users.maxOf { it.id }
 
-        val newUser = User(lastId + 1U, username, email, password)
+        val newUser = User(lastId + 1, username, email, password)
         users.add(newUser)
-        return UserProfileInfo(newUser.id, newUser.username, newUser.email)
+        return UserProfileOutput(newUser.id, newUser.username.value, newUser.email.value)
     }
 }

@@ -77,12 +77,12 @@ class UserTests {
     @Test fun userClassTest() {
 
         assertThrows(IllegalArgumentException::class.java) {
-            User(0U, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
+            User(0, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
         }
 
-        val user = User(1U, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
+        val user = User(1, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
 
-        assertEquals(1U, user.id)
+        assertEquals(1, user.id)
         assertEquals("ABC", user.username.value)
         assertEquals("abc@hotmail.com", user.email.value)
         assertEquals("Aa12345!", user.password.value)

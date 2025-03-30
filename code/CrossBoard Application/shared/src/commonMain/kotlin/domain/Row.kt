@@ -6,7 +6,7 @@ package domain
  * @param index the index of the row.
  * @param boardDim the dimension of the board.
  */
-class Row private constructor(val index:Int, val boardDim:Int) {
+class Row private constructor(val index:Int, boardDim:Int) {
     //The number of the row.
     val number = boardDim - index
 

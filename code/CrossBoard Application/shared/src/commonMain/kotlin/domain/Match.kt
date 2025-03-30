@@ -1,7 +1,6 @@
 package domain
 
 import kotlin.random.Random
-import kotlin.random.nextUInt
 
 /**
  * Interface "Game" represents a game.
@@ -10,17 +9,9 @@ import kotlin.random.nextUInt
  * @property getPlayerType Function to get the player type.
  */
 interface Match {
-    val id: UInt
+    val id: Int
     val board: Board;
-    fun getPlayerType(userId: UInt): Player
-}
-
-/**
- * Enum class "GameType" represents the type of the game.
- * @property TicTacToe the Tic Tac Toe game.
- */
-enum class GameType {
-    TicTacToe
+    fun getPlayerType(userId: Int): Player
 }
 
 /**
@@ -34,9 +25,9 @@ enum class GameType {
  */
 data class MultiPlayerMatch(
     override val board: Board,
-    override val id: UInt,
-    val player1: UInt,
-    val player2: UInt? = null,
+    override val id: Int,
+    val player1: Int,
+    val player2: Int? = null,
     val gameType: GameType
 ): Match {
     companion object{
@@ -46,7 +37,7 @@ data class MultiPlayerMatch(
          * @param gameType the type of the game.
          * @return Game the game that was created.
          */
-        fun startGame(player1: UInt, gameType: GameType): MultiPlayerMatch = when(gameType){
+        fun startGame(player1: Int, gameType: GameType): MultiPlayerMatch = when(gameType){
             GameType.TicTacToe -> {
                 val p1 = Player.random()
                 MultiPlayerMatch(
@@ -57,7 +48,7 @@ data class MultiPlayerMatch(
                         p1,
                         p1.other()
                         ),
-                    Random.nextUInt(),
+                    Random.nextInt(from = 1, Int.MAX_VALUE),
                     player1,
                     null,
                     gameType
@@ -87,7 +78,7 @@ data class MultiPlayerMatch(
      * @param player the player that is forfeiting.
      * @return MultiPlayerGame the game after the forfeit.
      */
-    fun forfeit(player: UInt): MultiPlayerMatch {
+    fun forfeit(player: Int): MultiPlayerMatch {
         val playerType = getPlayerType(player)
         return MultiPlayerMatch(board.forfeit(playerType), id,player1, player2,gameType)
     }
@@ -97,7 +88,7 @@ data class MultiPlayerMatch(
      * @param userId the player.
      * @return Player the player type.
      */
-    override fun getPlayerType(userId: UInt): Player =
+    override fun getPlayerType(userId: Int): Player =
         if (userId == player1) board.player1 else board.player2
 }
 
@@ -108,8 +99,8 @@ data class MultiPlayerMatch(
  * @param difficulty the difficulty of the game.
  * @return Game the game that was created as a single player game.
  */
-class SinglePlayerMatch(override val board: Board, override val id: UInt, val user: UInt, difficulty: Difficulty):
+class SinglePlayerMatch(override val board: Board, override val id: Int, val user: UInt, difficulty: Difficulty):
     Match {
-    override fun getPlayerType(userId: UInt): Player = board.player1
+    override fun getPlayerType(userId: Int): Player = board.player1
 
 }

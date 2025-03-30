@@ -9,5 +9,6 @@ sealed interface Move {
  * @param player the player who made the move.
  * @param square the square where the move was made.
  */
-data class TicTacToeMove (override val player: Player, val row: Int, val column: Char) : Move
+data class TicTacToeMove (override val player: Player, val square: Square) : Move
+
 

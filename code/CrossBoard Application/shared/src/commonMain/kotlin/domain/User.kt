@@ -58,12 +58,12 @@ value class Password(val value: String){
  * @param password the password of the user.
  */
 data class User(
-    val id:UInt,
+    val id:Int,
     val username: Username,
     val email: Email,
     val password: Password
 ){
     init {
-        require(id > 0U) {"Id must not be greater than 0."}
+        require(id > 0) {"Id must not be greater than 0."}
     }
 }

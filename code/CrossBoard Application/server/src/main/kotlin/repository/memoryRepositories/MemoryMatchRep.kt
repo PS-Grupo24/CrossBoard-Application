@@ -17,9 +17,9 @@ class MemoryMatchRep: MatchRepository {
     /**
      * Function "addMatch" responsible to add the match to the list of matches.
      * @param match represents the match information to be added.
-     * @return UInt the match id that was added.
+     * @return Int the match id that was added.
      */
-    override fun addMatch(match: MultiPlayerMatch): UInt {
+    override fun addMatch(match: MultiPlayerMatch): Int {
         matches.add(match)
         return match.id
     }
@@ -29,7 +29,7 @@ class MemoryMatchRep: MatchRepository {
      * @param userId the id of the user.
      * @return MultiPlayerMatch? the running match if found, null otherwise.
      */
-    override fun getRunningMatchByUser(userId: UInt): MultiPlayerMatch? =
+    override fun getRunningMatchByUser(userId: Int): MultiPlayerMatch? =
         matches.find { (it.player1 == userId || it.player2 == userId) && it.board is BoardRun}
 
     /**
@@ -37,7 +37,7 @@ class MemoryMatchRep: MatchRepository {
      * @param matchId the id of the match.
      * @return MultiPlayerMatch? the match if found, null otherwise.
      */
-    override fun getMatchById(matchId: UInt): MultiPlayerMatch? = matches.find { it.id == matchId }
+    override fun getMatchById(matchId: Int): MultiPlayerMatch? = matches.find { it.id == matchId }
 
     /**
      * Function "getWaitingMatch" responsible to get the waiting match.
@@ -54,12 +54,12 @@ class MemoryMatchRep: MatchRepository {
      * @param board the board of the match.
      * @param player1 the first player.
      * @param player2 the second player.
-     * @param gametype the type of the game.
+     * @param gameType the type of the game.
      */
-    override fun updateMatch(matchId: UInt, board: Board, player1: UInt, player2: UInt?, gametype: GameType): MultiPlayerMatch {
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType): MultiPlayerMatch {
         val m = getMatchById(matchId)
         matches.remove(m)
-        val match = MultiPlayerMatch(board, matchId, player1, player2, gametype)
+        val match = MultiPlayerMatch(board, matchId, player1, player2, gameType)
         matches.add(match)
         return match
     }
