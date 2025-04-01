@@ -8,7 +8,7 @@ import util.ApiError
 import util.Either
 
 class MatchService(private val matchRepository: MatchRepository) {
-    fun enterMatch(userId: Int, gameType: GameType): Either<ApiError, MultiPlayerMatch>{
+    fun enterMatch(userId: Int, gameType: GameType): Either<ApiError, MultiPlayerMatch> {
         if (matchRepository.getRunningMatchByUser(userId) != null) return Either.Left(ApiError.USER_ALREADY_IN_MATCH)
         val waitingMatch = matchRepository.getWaitingMatch(gameType)
         if (waitingMatch != null){

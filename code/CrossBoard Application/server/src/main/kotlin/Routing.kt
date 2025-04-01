@@ -48,9 +48,9 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
 
                     val newUserInfo = call.receive<UserUpdateInput>()
-                    val userName = if (newUserInfo.username != null) Username(newUserInfo.username) else null
-                    val email = if (newUserInfo.email != null) Email(newUserInfo.email) else null
-                    val password = if (newUserInfo.password != null) Password(newUserInfo.password) else null
+                    val userName = if (newUserInfo.username != null) Username((newUserInfo.username) as String) else null
+                    val email = if (newUserInfo.email != null) Email((newUserInfo.email) as String) else null
+                    val password = if (newUserInfo.password != null) Password((newUserInfo.password) as String) else null
                     when (val updatedUser =
                         usersService.updateUser(
                             userId,

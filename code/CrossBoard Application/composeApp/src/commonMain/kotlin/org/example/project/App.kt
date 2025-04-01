@@ -2,36 +2,90 @@ package org.example.project
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import httpModel.MatchOutput
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import util.Failure
+import util.Success
 
-import crossboardapplication.composeapp.generated.resources.Res
-import crossboardapplication.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
-fun App() {
+fun App(client: MatchClient) {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+        var match by remember { mutableStateOf<MatchOutput?>(null) }
+
+        var userId by remember { mutableStateOf("") }
+
+        var gameType by remember { mutableStateOf("") }
+
+        var isLoading by remember { mutableStateOf(false) }
+
+        var errorMessage by remember { mutableStateOf<String?>(null) }
+
+        val scope = rememberCoroutineScope()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+            ){
+                TextField(
+                    value = userId,
+                    onValueChange = { userId = it },
+                    placeholder = { Text("User id") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                )
+                TextField(
+                    value = gameType,
+                    onValueChange = { gameType = it },
+                    placeholder = { Text("Game type") },
+                    modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                )
+                Button(onClick = {
+                    scope.launch {
+                        isLoading = true
+                        errorMessage = null
+
+                        val request = client.enterMatch(userId.toInt(), gameType)
+
+                        when (request) {
+                            is Success -> match = request.value
+                            is Failure -> errorMessage = request.value
+                        }
+                        isLoading = false
+                    }
+                }) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(15.dp),
+                            strokeWidth = 1.dp,
+                            color = Color.White
+                        )
+                    }
+                    else{
+                        Text("Find Match")
+                    }
+                }
+                errorMessage?.let {
+                    Text(
+                        color = Color.Red,
+                        text = it
+                    )
                 }
             }
-        }
     }
+
 }

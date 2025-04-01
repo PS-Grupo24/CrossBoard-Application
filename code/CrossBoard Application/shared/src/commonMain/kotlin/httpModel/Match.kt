@@ -46,7 +46,8 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
             player2,
             getPlayerType(player1).other().toString()
         ),
-        BoardOutput(winner,
+        BoardOutput(
+            winner,
             board.turn.toString(),
             board.positions.map { it.toString() },
             when(board){

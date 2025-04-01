@@ -40,7 +40,7 @@ data class TicTacToeMoveOutput(
     val square: String
 ) : MoveOutput
 
-fun Move.toMoveOutput() : MoveOutput{
+fun Move.toMoveOutput() : MoveOutput {
     return when(this){
         is TicTacToeMove -> TicTacToeMoveOutput(player.toString(), square.toString())
     }
