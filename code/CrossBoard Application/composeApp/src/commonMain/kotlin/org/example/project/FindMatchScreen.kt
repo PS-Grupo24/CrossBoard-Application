@@ -51,7 +51,7 @@ fun FindMatchScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-
+        println("isLoading: $isLoading")
         Button(onClick = onFindMatchClick, enabled = !isLoading) {
             if(isLoading){
                 CircularProgressIndicator(

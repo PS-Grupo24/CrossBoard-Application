@@ -22,8 +22,7 @@ fun ticTacToeApp(client: MatchClient) {
     val currentUserId: Int? = userIdInput.toIntOrNull()
 
     fun findMatch(){
-        val userId = userIdInput.toIntOrNull()
-        if (userId == null) {
+        if (currentUserId == null) {
             errorMessage = "Please enter a valid user id"
             return
         }
@@ -36,7 +35,7 @@ fun ticTacToeApp(client: MatchClient) {
             errorMessage = null
 
 
-            when (val result = client.enterMatch(userId, gameTypeInput)) {
+            when (val result = client.enterMatch(currentUserId, gameTypeInput)) {
                 is Success -> { currentMatch = result.value}
                 is Failure -> {errorMessage = result.value}
             }
@@ -127,7 +126,7 @@ fun ticTacToeApp(client: MatchClient) {
                 onUserIdChange = {userIdInput = it},
                 gameType = gameTypeInput,
                 onGameTypeChange = {gameTypeInput = it},
-                onFindMatchClick = {::findMatch},
+                onFindMatchClick = ::findMatch,
                 isLoading = isLoading,
                 errorMessage = errorMessage
             )
