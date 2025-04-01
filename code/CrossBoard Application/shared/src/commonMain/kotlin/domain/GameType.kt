@@ -5,7 +5,13 @@ package domain
  * @property TicTacToe the Tic Tac Toe game.
  */
 enum class GameType {
-    TicTacToe
+    TicTacToe;
+
+    override fun toString(): String {
+        return when (this) {
+            TicTacToe -> "tic"
+        }
+    }
 }
 
 fun String.toGameType() : GameType? =
@@ -13,3 +19,4 @@ fun String.toGameType() : GameType? =
         this == "tic" -> GameType.TicTacToe
         else -> null
     }
+

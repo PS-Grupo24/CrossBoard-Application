@@ -11,6 +11,11 @@ package domain
  * @property forfeit Function to forfeit the game board.
  * @property get Function to get the player at a specific square or to verify if it is occupied the square.
  */
+
+const val RUNNING_STATE = "RUNNING"
+const val DRAW_STATE = "DRAW"
+const val WIN_STATE = "WIN"
+
 sealed interface Board {
     val positions: List<Position>
     val moves: List<Move>
@@ -30,3 +35,10 @@ sealed interface BoardWin : Board{
 
 sealed interface BoardDraw : Board
 
+fun getBoardState(board: Board): String{
+    return when(board){
+        is BoardRun -> RUNNING_STATE
+        is BoardDraw -> DRAW_STATE
+        is BoardWin -> WIN_STATE
+    }
+}

@@ -1,9 +1,6 @@
 package httpModel
 
-import domain.BoardDraw
-import domain.BoardRun
-import domain.BoardWin
-import domain.MultiPlayerMatch
+import domain.*
 import kotlinx.serialization.Serializable
 
 
@@ -17,7 +14,8 @@ data class MatchOutput(
     val matchId: Int,
     val player1: PlayerOutput,
     val player2: PlayerOutput,
-    val board: BoardOutput
+    val board: BoardOutput,
+    val gameType: String
 )
 
 @Serializable
@@ -35,7 +33,7 @@ data class BoardOutput(
 )
 
 fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
-    val winner = if (board is BoardWin) (board as BoardWin).winner.toString() else null
+    val winner = if (board is BoardWin) board.winner.toString() else null
     return MatchOutput(
         id,
         PlayerOutput(
@@ -50,11 +48,8 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
             winner,
             board.turn.toString(),
             board.positions.map { it.toString() },
-            when(board){
-                is BoardRun -> "RUNNING"
-                is BoardDraw -> "DRAW"
-                is BoardWin -> "WIN"
-            }
-            )
+            getBoardState(board)
+            ),
+        gameType.toString()
     )
 }

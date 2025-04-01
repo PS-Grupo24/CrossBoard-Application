@@ -1,9 +1,5 @@
 package httpModel
-import domain.Move
-import domain.TicTacToeBoard
-import domain.TicTacToeMove
-import domain.toPlayer
-import domain.toSquare
+import domain.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
