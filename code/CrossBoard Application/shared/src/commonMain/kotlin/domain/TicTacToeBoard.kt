@@ -10,7 +10,7 @@ package domain
  * @param player2 the second player.
  * @return Board the Tic Tac Toe board.
  */
-sealed class TicTacToeBoard
+abstract class TicTacToeBoard
 
 : Board {
 
@@ -19,33 +19,19 @@ sealed class TicTacToeBoard
         const val BOARD_DIM = 3
         const val MAX_MOVES = BOARD_DIM * BOARD_DIM
     }
-
-    abstract override val positions: List<Position>
-    abstract override val moves:List<Move>
-    abstract override val turn: Player
-    abstract override val player1: Player
-    abstract override val player2: Player
-
-    /**
-     * Function play responsible to play a move on the board.
-     * @param move the move to be done in the play.
-     * @return Board the game after the move was played.
-     */
-    abstract override fun play(move: Move): Board
-
-    /**
-     * Function forfeit responsible to forfeit the game board.
-     * @param player the player that is forfeiting.
-     * @return Board the game after the player forfeited.
-     */
-    abstract override fun forfeit(player: Player): Board
-
     /**
      * Function get responsible to get the player at a specific square or to verify if it is occupied the square.
      * @param square the square to get the player.
      * @return Player the player at the square.
      */
-    override fun get(square: Square) = positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+    override fun get(square: Square) =
+        positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+    override fun equals(other: Any?) =
+        other is TicTacToeBoard && other.positions == positions
+
+
+    override fun hashCode(): Int = positions.hashCode()
+
 }
 
 /**

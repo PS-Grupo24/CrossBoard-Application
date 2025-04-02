@@ -59,7 +59,6 @@ data class MultiPlayerMatch(
             }
         }
     }
-
     /**
      * Function play responsible to play a move on the board.
      * @param move The move to be made.
@@ -93,6 +92,13 @@ data class MultiPlayerMatch(
      */
     override fun getPlayerType(userId: Int): Player =
         if (userId == player1) board.player1 else board.player2
+
+    override fun equals(other: Any?): Boolean {
+        TODO()
+    }
+    override fun hashCode(): Int {
+        TODO()
+    }
 }
 
 /**
