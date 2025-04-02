@@ -3,6 +3,7 @@ package service
 import domain.Move
 import domain.GameType
 import domain.MultiPlayerMatch
+import httpModel.MatchOutput
 import repository.interfaces.MatchRepository
 import util.ApiError
 import util.Either

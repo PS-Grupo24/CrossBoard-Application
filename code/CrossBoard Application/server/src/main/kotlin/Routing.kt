@@ -1,14 +1,5 @@
-import domain.Email
-import domain.Password
-import domain.Username
-import domain.toGameType
-import httpModel.MatchCreationInput
-import httpModel.MoveInput
-import httpModel.UserCreationInput
-import httpModel.UserUpdateInput
-import httpModel.toMatchOutput
-import httpModel.toMove
-import httpModel.toMoveOutput
+import domain.*
+import httpModel.*
 import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.request.receive
@@ -23,7 +14,6 @@ import service.MatchService
 import service.UsersService
 import util.*
 
-
 fun Application.configureRouting(usersService: UsersService, matchService: MatchService) {
     routing {
         route("/") {
@@ -33,7 +23,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             get {
                 runHttp(call) {
                     val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
                     when (val user = usersService.getUserById(userId)) {
                         is Success -> call.respond(user.value)
@@ -45,7 +35,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             put {
                 runHttp(call){
                     val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
                     val newUserInfo = call.receive<UserUpdateInput>()
                     val userName = if (newUserInfo.username != null) Username((newUserInfo.username) as String) else null
@@ -87,10 +77,11 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             post {
                 runHttp(call){
                     val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
                     val matchCreationInfo = call.receive<MatchCreationInput>()
-                    val gameType = matchCreationInfo.gameType.toGameType() ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Unknown GameType")
+                    val gameType = matchCreationInfo.gameType.toGameType()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Unknown GameType"))
                     when(val createdMatch = matchService.enterMatch(userId, gameType)){
                         is Success -> call.respond(createdMatch.value.toMatchOutput())
                         is Failure -> handleFailure(call, createdMatch.value)
@@ -103,10 +94,10 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             put {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
                     val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
                     when(val forfeitedMatch = matchService.forfeit(matchId, userId)){
                         is Success -> call.respond(forfeitedMatch.value.toMatchOutput())
@@ -120,7 +111,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             get {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
                     when(val match = matchService.getMatchById(matchId)){
                         is Success -> call.respond(match.value.toMatchOutput())
@@ -134,13 +125,13 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             put {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing matchId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
                     val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, "Invalid or missing userId")
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
                     val move = call.receive<MoveInput>().toMove() ?:
-                        return@runHttp call.respond(HttpStatusCode.BadRequest, "Error converting moveInput to Move")
+                        return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Error deserializing move"))
                     when(val updatedMatch = matchService.playMatch(matchId, userId, move)){
                         is Success -> call.respond(updatedMatch.value.toMoveOutput())
                         is Failure -> handleFailure(call, updatedMatch.value)
@@ -153,15 +144,15 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
 private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
     when (error) {
-        ApiError.USER_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "User not found")
-        ApiError.USERNAME_ALREADY_EXISTS -> call.respond(HttpStatusCode.Conflict, "Username already exists")
-        ApiError.EMAIL_ALREADY_EXISTS  -> call.respond(HttpStatusCode.Conflict, "Email already exists")
-        ApiError.UNAUTHORIZED -> call.respond(HttpStatusCode.Unauthorized, "Unauthorized action")
-        ApiError.MATCH_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, "Match not found")
-        ApiError.USER_ALREADY_IN_MATCH -> call.respond(HttpStatusCode.Conflict, "User already in an ongoing match")
-        ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, "User does not belong in this match")
-        ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, "This user is not the specified player type in the match")
-        else -> call.respond(HttpStatusCode.InternalServerError, "Unexpected error")
+        ApiError.USER_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, ErrorMessage("User not found"))
+        ApiError.USERNAME_ALREADY_EXISTS -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Username already exists"))
+        ApiError.EMAIL_ALREADY_EXISTS  -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Email already exists"))
+        ApiError.UNAUTHORIZED -> call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Unauthorized action"))
+        ApiError.MATCH_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, ErrorMessage("Match not found"))
+        ApiError.USER_ALREADY_IN_MATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("User already in an ongoing match"))
+        ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, ErrorMessage("User does not belong in this match"))
+        ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, ErrorMessage("This user is not the specified player type in the match"))
+        else -> call.respond(HttpStatusCode.InternalServerError, ErrorMessage("Unexpected error"))
     }
 }
 
@@ -169,6 +160,6 @@ suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     try {
         block()
     } catch (e: Throwable) {
-        call.respond(HttpStatusCode.InternalServerError, e.cause?.message ?: e.message ?: "Unknown error")
+        call.respond(HttpStatusCode.InternalServerError, ErrorMessage(e.cause?.message ?: e.message ?: "Unknown error"))
     }
 }

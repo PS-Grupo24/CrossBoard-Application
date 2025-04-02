@@ -1,5 +1,6 @@
 package org.example.project
 
+import domain.Move
 import httpModel.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -14,6 +15,9 @@ private const val baseUrl = "http://127.0.0.1:8080"
 class MatchClient(
     private val client: HttpClient
 ) {
+
+
+
     suspend fun enterMatch(userId: Int, gameType: String): Either<String, MatchOutput> {
         val response = try {
             client.post(
@@ -34,7 +38,10 @@ class MatchClient(
             val match = response.body<MatchOutput>()
             Either.Right(match)
         }
-        else Either.Left(response.status.description)
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
     }
 
     suspend fun forfeitMatch(userId: Int, matchId: Int): Either<String, MatchOutput> {
@@ -56,7 +63,10 @@ class MatchClient(
             val forfeitedMatch = response.body<MatchOutput>()
             Either.Right(forfeitedMatch)
         }
-        else Either.Left(response.status.description)
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
     }
 
     suspend fun getMatch(matchId: Int): Either<String, MatchOutput>{
@@ -73,10 +83,13 @@ class MatchClient(
         }
 
         return if (response.status.value in 200 .. 299){
-            val forfeitedMatch = response.body<MatchOutput>()
-            Either.Right(forfeitedMatch)
+            val match = response.body<MatchOutput>()
+            Either.Right(match)
         }
-        else Either.Left(response.status.description)
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
     }
 
     suspend fun playMatch(
@@ -85,13 +98,16 @@ class MatchClient(
         player:String,
         row: Int,
         column: Char
-    ): Either<String, MatchOutput>{
+    ): Either<String, MoveOutput>{
+        val moveInput = TicTacToeMoveInput(player, "$row$column")
+        val moveInputString = clientJson.encodeToString(MoveInput.serializer(),moveInput)
+        println("Sending JSON String: $moveInputString")
         val response = try {
             client.put(
                 urlString = "$baseUrl/match/$matchId/play/$userId",
             ){
                 contentType(ContentType.Application.Json)
-                setBody(TicTacToeMoveInput(player, "$row$column"))
+                setBody(moveInputString)
             }
         }
         catch (e: SerializationException) {
@@ -102,9 +118,12 @@ class MatchClient(
         }
 
         return if (response.status.value in 200 .. 299){
-            val forfeitedMatch = response.body<MatchOutput>()
-            Either.Right(forfeitedMatch)
+            val move = response.body<MoveOutput>()
+            Either.Right(move)
         }
-        else Either.Left(response.status.description)
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
     }
 }

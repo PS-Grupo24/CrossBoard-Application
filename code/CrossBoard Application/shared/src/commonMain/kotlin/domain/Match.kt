@@ -1,5 +1,8 @@
 package domain
 
+import httpModel.BoardOutput
+import httpModel.MatchOutput
+import httpModel.PlayerOutput
 import kotlin.random.Random
 
 /**
@@ -103,4 +106,27 @@ class SinglePlayerMatch(override val board: Board, override val id: Int, val use
     Match {
     override fun getPlayerType(userId: Int): Player = board.player1
 
+}
+
+fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
+    val winner = if (board is BoardWin) board.winner.toString() else null
+    return MatchOutput(
+        id,
+        PlayerOutput(
+            player1,
+            getPlayerType(player1).toString()
+        ),
+        PlayerOutput(
+            player2,
+            getPlayerType(player1).other().toString()
+        ),
+        BoardOutput(
+            winner,
+            board.turn.toString(),
+            board.positions.map { it.toString() },
+            board.moves.map { moveToString(it) },
+            getBoardState(board)
+        ),
+        gameType.toString()
+    )
 }

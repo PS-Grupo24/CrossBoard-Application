@@ -3,7 +3,6 @@ import domain.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 sealed interface MoveInput
 
@@ -22,6 +21,7 @@ fun MoveInput.toMove() : Move? {
 
             return TicTacToeMove(player, square)
         }
+        else -> return null
     }
 }
 

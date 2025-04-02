@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import domain.Board
 import domain.Player
 import domain.TicTacToeBoard
 import httpModel.BoardOutput
 
 @Composable
 fun ticTacToeBoardView(
-    board: BoardOutput,
+    board: Board,
     onCellClick: (row: Int, col: Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -25,9 +26,9 @@ fun ticTacToeBoardView(
             ){
                 (0..<TicTacToeBoard.BOARD_DIM).forEach { colIndex ->
                     val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + colIndex
-                    val playerSymbol = when(board.positions[positionIndex]){
-                        Player.WHITE.toString() -> "W"
-                        Player.BLACK.toString() -> "B"
+                    val playerSymbol = when(board.positions[positionIndex].player){
+                        Player.WHITE -> "W"
+                        Player.BLACK -> "B"
                         else -> null
                     }
 

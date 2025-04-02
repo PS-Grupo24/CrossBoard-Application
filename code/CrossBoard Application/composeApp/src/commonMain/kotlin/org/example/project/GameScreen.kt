@@ -7,14 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import domain.DRAW_STATE
-import domain.RUNNING_STATE
-import domain.WIN_STATE
+import domain.*
 import httpModel.MatchOutput
 
 @Composable
 fun GameScreen(
-    match: MatchOutput,
+    match: MultiPlayerMatch,
     currentUserId: Int?,
     onCellClick: (row: Int, col: Int) -> Unit,
     onForfeitClick: () -> Unit,
@@ -23,15 +21,16 @@ fun GameScreen(
     onPlayAgainClick: () -> Unit
 ){
     val board = match.board
-    val isGameOver = board.state != RUNNING_STATE
+    val isGameOver = match.board !is BoardRun
 
     val p1Symbol = "X"
     val p2Symbol = "O"
+    val turnSymbol = if (board.turn == match.getPlayerType(match.player1)) p1Symbol else p2Symbol
+    val status = when(board){
 
-    val status = when(board.state){
-        RUNNING_STATE -> "Turn: ${board.turn}"
-        WIN_STATE -> "Winner: ${board.winner}"
-        DRAW_STATE -> "Draw"
+        is BoardRun -> "Turn: $turnSymbol"
+        is BoardWin -> "Winner: ${board.winner}"
+        is BoardDraw -> "Draw"
         else -> "Unknown"
     }
 
@@ -42,12 +41,12 @@ fun GameScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
-        Text("Match ID: ${match.matchId}", style = MaterialTheme.typography.h2)
+        Text("Match ID: ${match.id}", style = MaterialTheme.typography.h2)
         Spacer(Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-            Text("P1 ($p1Symbol): ${match.player1.userId}")
-            Text("P2 ($p2Symbol): ${match.player2.userId ?: "Waiting"}")
+            Text("P1 ($p1Symbol): ${match.player1}")
+            Text("P2 ($p2Symbol): ${match.player2?: "Waiting"}")
         }
         Spacer(Modifier.height(16.dp))
 

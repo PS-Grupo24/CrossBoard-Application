@@ -50,6 +50,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -70,4 +71,5 @@ ktorServer = [
 ktorClient = [
     "ktor-serialization-kotlinx-json",
     "ktor-client-content-negotiation",
+    "ktor-client-logging"
 ]

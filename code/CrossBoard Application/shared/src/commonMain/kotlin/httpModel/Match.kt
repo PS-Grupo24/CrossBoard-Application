@@ -29,27 +29,61 @@ data class BoardOutput(
     val winner: String?,
     val turn: String,
     val positions: List<String>,
+    val moves: List<String>,
     val state: String
 )
 
-fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
-    val winner = if (board is BoardWin) board.winner.toString() else null
-    return MatchOutput(
-        id,
-        PlayerOutput(
-            player1,
-            getPlayerType(player1).toString()
-        ),
-        PlayerOutput(
-            player2,
-            getPlayerType(player1).other().toString()
-        ),
-        BoardOutput(
-            winner,
-            board.turn.toString(),
-            board.positions.map { it.toString() },
-            getBoardState(board)
-            ),
-        gameType.toString()
+fun BoardOutput.toBoard(gameType: String, player1Type: String): Board? {
+    when(gameType) {
+        "tic" -> {
+            val pos = positions.map {
+                it.toPosition(TicTacToeBoard.BOARD_DIM) ?: return null
+            }
+            val mov = moves.map { it.toMove(gameType) ?: return null }
+            val tur = turn.toPlayer() ?: return null
+            val player1 = player1Type.toPlayer() ?: return null
+            val player2 = player1.other()
+            return when(state){
+                RUNNING_STATE -> TicTacToeBoardRun(
+                    pos,
+                    mov,
+                    tur,
+                    player1,
+                    player2
+                )
+                WIN_STATE -> TicTacToeBoardWin(
+                    winner?.toPlayer() ?: return null,
+                    pos,
+                    mov,
+                    tur,
+                    player1,
+                    player2
+                    )
+                DRAW_STATE -> TicTacToeBoardDraw(
+                    pos,
+                    mov,
+                    tur,
+                    player1,
+                    player2
+                )
+                else -> null
+            }
+
+        }
+        else -> {
+            println("Unknown gameType: $gameType")
+            return null
+        }
+    }
+}
+
+
+fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
+    return MultiPlayerMatch(
+        board.toBoard(gameType, player1.playerType) ?: return null,
+        matchId,
+        player1.userId ?: return null,
+        player2.userId,
+        gameType.toGameType() ?: return null,
     )
 }

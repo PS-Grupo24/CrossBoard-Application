@@ -40,6 +40,7 @@ fun String.toPlayer() : Player? {
     return when(this){
         "BLACK" -> Player.BLACK
         "WHITE" -> Player.WHITE
+        "EMPTY" -> Player.EMPTY
         else -> null
     }
 }
