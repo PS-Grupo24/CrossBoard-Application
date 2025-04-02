@@ -17,6 +17,9 @@ fun ticTacToeBoardView(
     onCellClick: (row: Int, col: Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    player1Symbol: String,
+    player2Symbol: String,
+    player1Type: Player
 ){
     Column(modifier = modifier) {
         (0..<TicTacToeBoard.BOARD_DIM).forEach { rowIndex ->
@@ -27,8 +30,8 @@ fun ticTacToeBoardView(
                 (0..<TicTacToeBoard.BOARD_DIM).forEach { colIndex ->
                     val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + colIndex
                     val playerSymbol = when(board.positions[positionIndex].player){
-                        Player.WHITE -> "W"
-                        Player.BLACK -> "B"
+                        player1Type -> player1Symbol
+                        player1Type.other() -> player2Symbol
                         else -> null
                     }
 
@@ -36,6 +39,7 @@ fun ticTacToeBoardView(
                         playerSymbol = playerSymbol,
                         onClick = { onCellClick(rowIndex, colIndex) },
                         enabled = enabled && playerSymbol == null,
+                        player1Symbol = player1Symbol,
                     )
                 }
             }

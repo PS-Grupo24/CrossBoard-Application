@@ -40,5 +40,6 @@ fun getBoardState(board: Board): String{
         is BoardRun -> RUNNING_STATE
         is BoardDraw -> DRAW_STATE
         is BoardWin -> WIN_STATE
+        else -> throw IllegalArgumentException("Wrong state")
     }
 }

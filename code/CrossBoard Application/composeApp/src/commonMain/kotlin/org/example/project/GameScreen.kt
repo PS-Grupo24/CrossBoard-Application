@@ -25,7 +25,8 @@ fun GameScreen(
 
     val p1Symbol = "X"
     val p2Symbol = "O"
-    val turnSymbol = if (board.turn == match.getPlayerType(match.player1)) p1Symbol else p2Symbol
+    val player1Type = match.getPlayerType(match.player1)
+    val turnSymbol = if (board.turn == player1Type) p1Symbol else p2Symbol
     val status = when(board){
 
         is BoardRun -> "Turn: $turnSymbol"
@@ -61,7 +62,10 @@ fun GameScreen(
                     onCellClick(row, col)
                 }
             },
-            enabled = !isLoading && !isGameOver
+            enabled = !isLoading && !isGameOver,
+            player1Type = player1Type,
+            player1Symbol = p1Symbol,
+            player2Symbol = p2Symbol,
         )
         Spacer(Modifier.height(16.dp))
 

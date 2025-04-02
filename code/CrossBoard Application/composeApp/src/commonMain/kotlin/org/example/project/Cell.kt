@@ -19,7 +19,8 @@ fun Cell(
     playerSymbol: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    player1Symbol: String
 ){
     Box(
         modifier = modifier
@@ -35,7 +36,7 @@ fun Cell(
                 style = TextStyle(
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if(playerSymbol == "X") Color.White else Color.Black
+                    color = if(playerSymbol == player1Symbol) Color.Red else Color.Black
                 )
             )
         }
