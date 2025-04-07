@@ -17,5 +17,5 @@ interface MatchRepository {
     //Function responsible to get the waiting match.
     fun getWaitingMatch(gameType: GameType): MultiPlayerMatch?
     //Function responsible to update the match information.
-    fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType): MultiPlayerMatch
+    fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType, version: Int): MultiPlayerMatch
 }

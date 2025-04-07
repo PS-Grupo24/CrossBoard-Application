@@ -15,7 +15,8 @@ data class MatchOutput(
     val player1: PlayerOutput,
     val player2: PlayerOutput,
     val board: BoardOutput,
-    val gameType: String
+    val gameType: String,
+    val version: Int
 )
 
 @Serializable
@@ -85,5 +86,6 @@ fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
         player1.userId ?: return null,
         player2.userId,
         gameType.toGameType() ?: return null,
+        version
     )
 }

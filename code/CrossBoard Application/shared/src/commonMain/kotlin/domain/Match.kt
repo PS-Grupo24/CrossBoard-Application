@@ -13,7 +13,7 @@ import kotlin.random.Random
  */
 interface Match {
     val id: Int
-    val board: Board;
+    val board: Board
     fun getPlayerType(userId: Int): Player
 }
 
@@ -31,7 +31,8 @@ data class MultiPlayerMatch(
     override val id: Int,
     val player1: Int,
     val player2: Int? = null,
-    val gameType: GameType
+    val gameType: GameType,
+    val version: Int
 ): Match {
     companion object{
         /**
@@ -54,7 +55,8 @@ data class MultiPlayerMatch(
                     Random.nextInt(from = 1, Int.MAX_VALUE),
                     player1,
                     null,
-                    gameType
+                    gameType,
+                    1
                 )
             }
         }
@@ -71,7 +73,7 @@ data class MultiPlayerMatch(
             player1,
             player2,
             gameType,
-
+            version + 1
         )
     }
 
@@ -82,7 +84,7 @@ data class MultiPlayerMatch(
      */
     fun forfeit(player: Int): MultiPlayerMatch {
         val playerType = getPlayerType(player)
-        return MultiPlayerMatch(board.forfeit(playerType), id,player1, player2,gameType)
+        return MultiPlayerMatch(board.forfeit(playerType), id,player1, player2,gameType, version + 1)
     }
 
     /**
@@ -93,11 +95,9 @@ data class MultiPlayerMatch(
     override fun getPlayerType(userId: Int): Player =
         if (userId == player1) board.player1 else board.player2
 
-    override fun equals(other: Any?): Boolean {
-        TODO()
-    }
+    override fun equals(other: Any?) = other is MultiPlayerMatch && id == other.id && other.version == version
     override fun hashCode(): Int {
-        TODO()
+        return id.hashCode() + version.hashCode()
     }
 }
 
@@ -133,6 +133,7 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
             board.moves.map { moveToString(it) },
             getBoardState(board)
         ),
-        gameType.toString()
+        gameType.toString(),
+        version
     )
 }

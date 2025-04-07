@@ -56,10 +56,10 @@ class MemoryMatchRep: MatchRepository {
      * @param player2 the second player.
      * @param gameType the type of the game.
      */
-    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType): MultiPlayerMatch {
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType, version: Int): MultiPlayerMatch {
         val m = getMatchById(matchId)
         matches.remove(m)
-        val match = MultiPlayerMatch(board, matchId, player1, player2, gameType)
+        val match = MultiPlayerMatch(board, matchId, player1, player2, gameType, version)
         matches.add(match)
         return match
     }
