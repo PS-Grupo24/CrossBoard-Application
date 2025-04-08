@@ -1,6 +1,10 @@
 package domain
 
+
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.JvmInline
+import kotlin.random.Random
 
 /**
  * Inline class "Username" represents the username of a user.
@@ -61,9 +65,16 @@ data class User(
     val id:Int,
     val username: Username,
     val email: Email,
-    val password: Password
+    val password: Password,
+    val token: String
 ){
     init {
         require(id > 0) {"Id must not be greater than 0."}
     }
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+fun generateTokenValue(tokenSizeInBytes: Int = 32): String {
+    val byteArray = Random.nextBytes(tokenSizeInBytes)
+    return Base64.encode(byteArray)
 }

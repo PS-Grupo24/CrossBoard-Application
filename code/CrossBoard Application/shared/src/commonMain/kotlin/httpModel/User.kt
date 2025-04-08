@@ -27,6 +27,7 @@ data class UserProfileOutput(
     val id:Int,
     val username: String,
     val email: String,
+    val token: String
 )
 
 /**

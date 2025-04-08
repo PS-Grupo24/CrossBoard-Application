@@ -24,4 +24,6 @@ interface UserRepository {
     fun getUserFullDetails(userId: Int): User?
     //Function responsible to add the user to the list of users.
     fun addUser(username: Username, email: Email, password: Password): UserProfileOutput
+
+    fun getUserProfileByToken(token: String): UserProfileOutput?
 }

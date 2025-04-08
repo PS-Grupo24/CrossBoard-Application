@@ -26,4 +26,9 @@ class UsersService(private val userRepo: UserRepository) {
         val u = userRepo.getUserProfileById(userId) ?: return Either.Left(ApiError.USER_NOT_FOUND)
         return Either.Right(u)
     }
+
+    fun getUserByToken(userToken: String): Either<ApiError, UserProfileOutput> {
+        val u = userRepo.getUserProfileByToken(userToken) ?: return Either.Left(ApiError.USER_NOT_FOUND)
+        return Either.Right(u)
+    }
 }

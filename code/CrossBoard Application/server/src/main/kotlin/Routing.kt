@@ -19,13 +19,13 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/") {
             get { call.respond("Hello World!") }
         }
-        route("/user/{userId}") {
+        route("/user") {
             get {
                 runHttp(call) {
-                    val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
 
-                    when (val user = usersService.getUserById(userId)) {
+                    when (val user = usersService.getUserByToken(userToken)) {
                         is Success -> call.respond(user.value)
                         is Failure -> handleFailure(call, user.value)
                     }
@@ -34,24 +34,31 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             //Route to update a user
             put {
                 runHttp(call){
-                    val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
 
-                    val newUserInfo = call.receive<UserUpdateInput>()
-                    val userName = if (newUserInfo.username != null) Username((newUserInfo.username) as String) else null
-                    val email = if (newUserInfo.email != null) Email((newUserInfo.email) as String) else null
-                    val password = if (newUserInfo.password != null) Password((newUserInfo.password) as String) else null
-                    when (val updatedUser =
-                        usersService.updateUser(
-                            userId,
-                            userName,
-                            email,
-                            password
-                        )
-                    ) {
-                        is Success -> call.respond(updatedUser.value)
-                        is Failure -> handleFailure(call, updatedUser.value)
+                    when(val user = usersService.getUserByToken(userToken)) {
+                        is Failure -> handleFailure(call, user.value)
+                        is Success -> {
+                            val newUserInfo = call.receive<UserUpdateInput>()
+                            val userName = if (newUserInfo.username != null) Username((newUserInfo.username) as String) else null
+                            val email = if (newUserInfo.email != null) Email((newUserInfo.email) as String) else null
+                            val password = if (newUserInfo.password != null) Password((newUserInfo.password) as String) else null
+                            when (val updatedUser =
+                                usersService.updateUser(
+                                    user.value.id,
+                                    userName,
+                                    email,
+                                    password
+                                )
+                            ) {
+                                is Success -> call.respond(updatedUser.value)
+                                is Failure -> handleFailure(call, updatedUser.value)
+                            }
+                        }
                     }
+
+
                 }
             }
         }
@@ -73,36 +80,51 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to join a match.
-        route("/match/user/{userId}"){
+        route("/match/{gametype}"){
             post {
                 runHttp(call){
-                    val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
 
-                    val matchCreationInfo = call.receive<MatchCreationInput>()
-                    val gameType = matchCreationInfo.gameType.toGameType()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Unknown GameType"))
-                    when(val createdMatch = matchService.enterMatch(userId, gameType)){
-                        is Success -> call.respond(createdMatch.value.toMatchOutput())
-                        is Failure -> handleFailure(call, createdMatch.value)
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
+
+                    when(val user = usersService.getUserByToken(userToken)) {
+                        is Failure -> handleFailure(call, user.value)
+                        is Success -> {
+                            val gametypeInput = call.parameters["gametype"]
+                                ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Missing game type"))
+
+                            val gameType = gametypeInput.toGameType()
+                                ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Unknown GameType"))
+                            when(val createdMatch = matchService.enterMatch(user.value.id, gameType)){
+                                is Success -> call.respond(createdMatch.value.toMatchOutput())
+                                is Failure -> handleFailure(call, createdMatch.value)
+                            }
+                        }
                     }
+
                 }
             }
         }
         //Route to forfeit a match.
-        route("/match/{matchId}/forfeit/{userId}"){
-            put {
+        route("/match/{matchId}/forfeit"){
+            post {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
-                    val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
 
-                    when(val forfeitedMatch = matchService.forfeit(matchId, userId)){
-                        is Success -> call.respond(forfeitedMatch.value.toMatchOutput())
-                        is Failure -> handleFailure(call, forfeitedMatch.value)
+                    when(val user = usersService.getUserByToken(userToken)) {
+                        is Failure -> handleFailure(call, user.value)
+                        is Success -> {
+                            when(val forfeitedMatch = matchService.forfeit(matchId, user.value.id)){
+                                is Success -> call.respond(forfeitedMatch.value.toMatchOutput())
+                                is Failure -> handleFailure(call, forfeitedMatch.value)
+                            }
+                        }
                     }
+
                 }
             }
         }
@@ -121,20 +143,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to play a match.
-        route("/match/{matchId}/play/{userId}"){
+        route("/match/{matchId}/{version}"){
             put {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
-                    val userId = call.parameters["userId"]?.toIntOrNull()
-                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
 
-                    val move = call.receive<MoveInput>().toMove() ?:
-                        return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Error deserializing move"))
-                    when(val updatedMatch = matchService.playMatch(matchId, userId, move)){
-                        is Success -> call.respond(updatedMatch.value.toMoveOutput())
-                        is Failure -> handleFailure(call, updatedMatch.value)
+                    val version = call.parameters["version"]?.toIntOrNull()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing version"))
+
+                    when(val user = usersService.getUserByToken(userToken)) {
+                        is Failure -> handleFailure(call, user.value)
+                        is Success -> {
+                            val move = call.receive<MoveInput>().toMove() ?:
+                            return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Error deserializing move"))
+                            when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
+                                is Success -> call.respond(updatedMatch.value.toMoveOutput())
+                                is Failure -> handleFailure(call, updatedMatch.value)
+                            }
+                        }
                     }
                 }
             }
@@ -152,6 +182,7 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
         ApiError.USER_ALREADY_IN_MATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("User already in an ongoing match"))
         ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, ErrorMessage("User does not belong in this match"))
         ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, ErrorMessage("This user is not the specified player type in the match"))
+        ApiError.VERSION_MISMATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Version mismatch"))
         else -> call.respond(HttpStatusCode.InternalServerError, ErrorMessage("Unexpected error"))
     }
 }

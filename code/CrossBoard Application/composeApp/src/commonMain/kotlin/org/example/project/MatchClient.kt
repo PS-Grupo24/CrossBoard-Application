@@ -16,15 +16,13 @@ class MatchClient(
     private val client: HttpClient
 ) {
 
-
-
-    suspend fun enterMatch(userId: Int, gameType: String): Either<String, MatchOutput> {
+    suspend fun enterMatch(userToken: String, gameType: String): Either<String, MatchOutput> {
         val response = try {
             client.post(
-                urlString = "$baseUrl/match/user/$userId",
+                urlString = "$baseUrl/match/$gameType",
             ){
                 contentType(ContentType.Application.Json)
-                setBody(MatchCreationInput(gameType))
+                header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }
         catch (e: SerializationException) {
@@ -44,12 +42,13 @@ class MatchClient(
         }
     }
 
-    suspend fun forfeitMatch(userId: Int, matchId: Int): Either<String, MatchOutput> {
+    suspend fun forfeitMatch(userToken: String, matchId: Int): Either<String, MatchOutput> {
         val response = try {
-            client.put(
-                urlString = "$baseUrl/match/$matchId/forfeit/$userId}",
+            client.post(
+                urlString = "$baseUrl/match/$matchId/forfeit",
             ){
                 contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }
         catch (e: SerializationException) {
@@ -93,8 +92,9 @@ class MatchClient(
     }
 
     suspend fun playMatch(
-        userId: Int,
+        userToken: String,
         matchId: Int,
+        version: Int,
         player:String,
         row: Int,
         column: Char
@@ -104,10 +104,11 @@ class MatchClient(
         println("Sending JSON String: $moveInputString")
         val response = try {
             client.put(
-                urlString = "$baseUrl/match/$matchId/play/$userId",
+                urlString = "$baseUrl/match/$matchId/$version",
             ){
                 contentType(ContentType.Application.Json)
                 setBody(moveInputString)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }
         catch (e: SerializationException) {

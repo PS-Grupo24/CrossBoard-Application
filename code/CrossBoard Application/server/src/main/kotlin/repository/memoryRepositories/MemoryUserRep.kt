@@ -1,9 +1,6 @@
 package repository.memoryRepositories
 
-import domain.Email
-import domain.Password
-import domain.User
-import domain.Username
+import domain.*
 import httpModel.UserProfileOutput
 import repository.interfaces.UserRepository
 
@@ -14,9 +11,9 @@ import repository.interfaces.UserRepository
 class MemoryUserRep : UserRepository {
     //Value storing the list of users of the app.
     private val users = mutableListOf<User>(
-        User(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!")),
-        User(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!")),
-        User(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"))
+        User(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!"), generateTokenValue()),
+        User(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!"), generateTokenValue()),
+        User(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"), generateTokenValue()),
     )
 
     /**
@@ -26,7 +23,7 @@ class MemoryUserRep : UserRepository {
      */
     override fun getUserProfileById(userId: Int): UserProfileOutput? {
         val u = users.find { it.id == userId } ?: return null
-        return UserProfileOutput(u.id, u.username.value, u.email.value)
+        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token)
     }
 
     /**
@@ -36,7 +33,7 @@ class MemoryUserRep : UserRepository {
      */
     override fun getUserProfileByEmail(email: Email): UserProfileOutput? {
         val u = users.find { it.email == email } ?: return null
-        return UserProfileOutput(u.id, u.username.value, u.email.value)
+        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token)
     }
 
     /**
@@ -46,7 +43,7 @@ class MemoryUserRep : UserRepository {
      */
     override fun getUserProfileByName(username: Username): UserProfileOutput? {
         val u = users.find { it.username == username } ?: return null
-        return UserProfileOutput(u.id, u.username.value, u.email.value)
+        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token)
     }
 
     /**
@@ -77,10 +74,10 @@ class MemoryUserRep : UserRepository {
         val newEmail = email ?: user.email
         val newPassword = password ?: user.password
 
-        val updatedUser = User(user.id, newName, newEmail, newPassword)
+        val updatedUser = User(user.id, newName, newEmail, newPassword, user.token)
         users.remove(user)
         users.add(updatedUser)
-        return UserProfileOutput(updatedUser.id, updatedUser.username.value, updatedUser.email.value)
+        return UserProfileOutput(updatedUser.id, updatedUser.username.value, updatedUser.email.value, updatedUser.token)
     }
 
     /**
@@ -104,8 +101,13 @@ class MemoryUserRep : UserRepository {
     ): UserProfileOutput {
         val lastId = if(users.isEmpty()) 0 else users.maxOf { it.id }
 
-        val newUser = User(lastId + 1, username, email, password)
+        val newUser = User(lastId + 1, username, email, password, generateTokenValue())
         users.add(newUser)
-        return UserProfileOutput(newUser.id, newUser.username.value, newUser.email.value)
+        return UserProfileOutput(newUser.id, newUser.username.value, newUser.email.value, newUser.token)
+    }
+
+    override fun getUserProfileByToken(token: String): UserProfileOutput? {
+        val u = users.find { it.token == token } ?: return null
+        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token)
     }
 }

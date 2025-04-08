@@ -55,10 +55,13 @@ class MatchService(private val matchRepository: MatchRepository) {
             else -> Either.Right(match)
         }
 
-    fun playMatch(matchId: Int, userId: Int, move: Move): Either<ApiError, Move> {
+    fun playMatch(matchId: Int, userId: Int, move: Move, version: Int): Either<ApiError, Move> {
         val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
+        if(match.version != version)
+            return Either.Left(ApiError.VERSION_MISMATCH)
+
         val p = if (match.player1 == userId) match.board.player1 else match.board.player2
         if (p != move.player) return Either.Left(ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER)
         val updatedMatch = match.play(move)
