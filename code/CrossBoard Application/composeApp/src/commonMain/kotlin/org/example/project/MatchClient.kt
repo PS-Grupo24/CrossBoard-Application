@@ -16,6 +16,29 @@ class MatchClient(
     private val client: HttpClient
 ) {
 
+    suspend fun getMatchByVersion(matchId: Int, version: Int): Either<String, MatchOutput> {
+        val response = try {
+            client.get("$baseUrl$matchId/$version"){
+                contentType(ContentType.Application.Json)
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception) {
+            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            val match = response.body<MatchOutput>()
+            Either.Right(match)
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
+
     suspend fun enterMatch(userToken: String, gameType: String): Either<String, MatchOutput> {
         val response = try {
             client.post(

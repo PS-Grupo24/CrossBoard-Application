@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.delay
 import service.MatchService
 import service.UsersService
 import util.*
@@ -86,7 +87,6 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
-
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
                         is Success -> {
@@ -166,6 +166,17 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                             }
                         }
                     }
+                }
+            }
+            get {
+                runHttp(call){
+                    val matchId = call.parameters["matchId"]?.toIntOrNull()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
+
+                    val version = call.parameters["version"]?.toIntOrNull()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing version"))
+
+
                 }
             }
         }

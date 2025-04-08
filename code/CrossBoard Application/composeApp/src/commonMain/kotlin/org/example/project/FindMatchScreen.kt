@@ -29,7 +29,7 @@ fun FindMatchScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
-        Text("Enter Match Details", style = MaterialTheme.typography.h1)
+        Text("Enter Match Details", style = MaterialTheme.typography.h5)
 
         OutlinedTextField(
             value = userId,

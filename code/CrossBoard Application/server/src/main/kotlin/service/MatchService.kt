@@ -4,6 +4,7 @@ import domain.Move
 import domain.GameType
 import domain.MultiPlayerMatch
 import httpModel.MatchOutput
+import kotlinx.coroutines.delay
 import repository.interfaces.MatchRepository
 import util.ApiError
 import util.Either
@@ -42,6 +43,9 @@ class MatchService(private val matchRepository: MatchRepository) {
             else -> Either.Right(m)
         }
 
+    fun getMatchByVersion(matchId: Int, version: Int): Either<ApiError, MultiPlayerMatch>{
+        TODO()
+    }
 
     fun getMatchByUser(userId: Int): Either<ApiError, MultiPlayerMatch> =
         when(val match = matchRepository.getRunningMatchByUser(userId)){

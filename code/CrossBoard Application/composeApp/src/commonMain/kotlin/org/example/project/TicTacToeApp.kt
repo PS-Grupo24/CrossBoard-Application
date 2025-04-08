@@ -3,8 +3,6 @@ package org.example.project
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.*
 import domain.*
-import httpModel.MatchOutput
-import httpModel.toBoard
 import httpModel.toMultiplayerMatch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,7 +19,8 @@ fun ticTacToeApp(client: MatchClient) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    val currentUserId: Int? = userIdInput.toIntOrNull()
+    val currentUserId = userIdInput.toIntOrNull()
+    val currentUserToken = userIdInput
 
     suspend fun fetchMatchUpdates(matchId: Int): Boolean {
             when (val result = client.getMatch(matchId)) {
@@ -47,8 +46,23 @@ fun ticTacToeApp(client: MatchClient) {
         }
     }
 
+    fun getMatchByVersion(matchId: Int, version: Int){
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            when (val result = client.getMatchByVersion(matchId, version)) {
+                is Success -> {
+                    currentMatch = result.value.toMultiplayerMatch()
+                }
+                is Failure -> {
+                    errorMessage = result.value
+                }
+            }
+        }
+    }
+
     fun findMatch(){
-        if (currentUserId == null) {
+        if (currentUserToken == null) {
             errorMessage = "Please enter a valid user id"
             return
         }
@@ -61,7 +75,7 @@ fun ticTacToeApp(client: MatchClient) {
             errorMessage = null
 
 
-            when (val result = client.enterMatch(currentUserId, gameTypeInput)) {
+            when (val result = client.enterMatch(currentUserToken, gameTypeInput)) {
                 is Success -> {
                     currentMatch = result.value.toMultiplayerMatch()
                     startPolling(result.value.matchId)
@@ -75,7 +89,7 @@ fun ticTacToeApp(client: MatchClient) {
     fun makeMove(rowIndex: Int, columnIndex: Int) {
         val match = currentMatch ?: return
         val userId = currentUserId ?: return
-
+        val userToken = currentUserToken ?: return
         val board = match.board
 
         val playerType = match.getPlayerType(userId)
@@ -103,8 +117,9 @@ fun ticTacToeApp(client: MatchClient) {
             errorMessage = null
 
             when(val result = client.playMatch(
-                userId,
+                userToken,
                 match.id,
+                match.version,
                 playerType.toString(),
                 rowNumber,
                 columnChar
@@ -130,11 +145,10 @@ fun ticTacToeApp(client: MatchClient) {
     fun forfeit(){
         val match = currentMatch ?: return
         val userId = currentUserId ?: return
-
         scope.launch {
             isLoading = true
             errorMessage = null
-            when(val result = client.forfeitMatch(userId, match.id)){
+            when(val result = client.forfeitMatch(currentUserToken, match.id)){
                 is Success -> {
                     currentMatch = match.forfeit(userId)
                 }
