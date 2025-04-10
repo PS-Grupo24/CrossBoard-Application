@@ -161,7 +161,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                             val move = call.receive<MoveInput>().toMove() ?:
                             return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Error deserializing move"))
                             when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
-                                is Success -> call.respond(updatedMatch.value.toMoveOutput())
+                                is Success -> call.respond(updatedMatch.value.toPlayedMatch())
                                 is Failure -> handleFailure(call, updatedMatch.value)
                             }
                         }

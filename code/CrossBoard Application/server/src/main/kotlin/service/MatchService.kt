@@ -3,8 +3,6 @@ package service
 import domain.Move
 import domain.GameType
 import domain.MultiPlayerMatch
-import httpModel.MatchOutput
-import kotlinx.coroutines.delay
 import repository.interfaces.MatchRepository
 import util.ApiError
 import util.Either
@@ -59,7 +57,7 @@ class MatchService(private val matchRepository: MatchRepository) {
             else -> Either.Right(match)
         }
 
-    fun playMatch(matchId: Int, userId: Int, move: Move, version: Int): Either<ApiError, Move> {
+    fun playMatch(matchId: Int, userId: Int, move: Move, version: Int): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
             return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
@@ -70,7 +68,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         if (p != move.player) return Either.Left(ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER)
         val updatedMatch = match.play(move)
         matchRepository.updateMatch(updatedMatch.id, updatedMatch.board, updatedMatch.player1, updatedMatch.player2, updatedMatch.gameType, updatedMatch.version)
-        return Either.Right(move)
+        return Either.Right(updatedMatch)
     }
 
     fun forfeit(matchId: Int, userId: Int): Either<ApiError, MultiPlayerMatch> {

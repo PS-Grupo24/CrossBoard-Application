@@ -20,6 +20,9 @@ data class MatchOutput(
 )
 
 @Serializable
+data class MatchPlayedOutput(val move: MoveOutput, val version: Int)
+
+@Serializable
 data class PlayerOutput(
     val userId: Int?,
     val playerType: String

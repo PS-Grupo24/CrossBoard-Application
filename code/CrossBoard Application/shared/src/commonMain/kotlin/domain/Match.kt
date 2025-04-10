@@ -1,8 +1,6 @@
 package domain
 
-import httpModel.BoardOutput
-import httpModel.MatchOutput
-import httpModel.PlayerOutput
+import httpModel.*
 import kotlin.random.Random
 
 /**
@@ -137,3 +135,5 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
         version
     )
 }
+
+fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(), this.version)

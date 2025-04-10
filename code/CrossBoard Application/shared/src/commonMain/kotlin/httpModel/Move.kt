@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 sealed interface MoveInput
 
 @Serializable
-@SerialName("ticMoveInput")
 data class TicTacToeMoveInput(
     val player: String,
     val square: String
