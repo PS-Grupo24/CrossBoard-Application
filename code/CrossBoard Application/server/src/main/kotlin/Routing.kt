@@ -144,7 +144,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to play a match.
         route("/match/{matchId}/{version}"){
-            put {
+            post {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
