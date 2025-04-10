@@ -143,7 +143,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to play a match.
-        route("/match/{matchId}/{version}"){
+        route("/match/{matchId}/{version}/play"){
             post {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
