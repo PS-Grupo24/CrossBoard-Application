@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border

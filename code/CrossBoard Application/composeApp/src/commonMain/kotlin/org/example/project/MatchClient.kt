@@ -1,6 +1,5 @@
 package org.example.project
 
-import domain.Move
 import httpModel.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -8,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
+import org.example.project.utils.clientJson
 import util.Either
 
 private const val baseUrl = "http://127.0.0.1:8080"

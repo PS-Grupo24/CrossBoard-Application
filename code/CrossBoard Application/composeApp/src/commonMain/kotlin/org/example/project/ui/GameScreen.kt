@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import domain.*
-import httpModel.MatchOutput
 
 @Composable
 fun GameScreen(

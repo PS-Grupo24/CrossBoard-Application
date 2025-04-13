@@ -1,44 +1,44 @@
-/*package org.example.project
+package org.example.project
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import domain.*
 import httpModel.toMultiplayerMatch
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.example.project.ui.FindMatchScreen
-import org.example.project.ui.GameScreen
 import util.Failure
 import util.Success
 
+class TicTacToeViewModel(private val scope: CoroutineScope, private val client: MatchClient) {
 
-@Composable
-fun ticTacToeApp(client: MatchClient) {
-    var currentMatch by remember { mutableStateOf<MultiPlayerMatch?>(null) }
-    var userIdInput by remember { mutableStateOf("") }
-    var gameTypeInput by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    var currentMatch by mutableStateOf<MultiPlayerMatch?>(null)
+    var userIdInput by mutableStateOf("")
+    var gameTypeInput by mutableStateOf("")
+    var isLoading by mutableStateOf(false)
+    var errorMessage by mutableStateOf<String?>(null)
 
     val currentUserId = userIdInput.toIntOrNull()
     val currentUserToken = userIdInput
 
     suspend fun fetchMatchUpdates(matchId: Int): Boolean {
-            when (val result = client.getMatch(matchId)) {
-                is Success -> {
-                    if (result.value.board.state != RUNNING_STATE && currentMatch?.board !is BoardRun) {
-                        return false
-                    }
-                    currentMatch = result.value.toMultiplayerMatch()
-                    return true
+        when (val result = client.getMatch(matchId)) {
+            is Success -> {
+                if (result.value.board.state != RUNNING_STATE && currentMatch?.board !is BoardRun) {
+                    return false
                 }
-                is Failure -> {
-                    errorMessage = result.value
-                    return true
-                }
+                currentMatch = result.value.toMultiplayerMatch()
+                return true
             }
+            is Failure -> {
+                errorMessage = result.value
+                return true
+            }
+        }
     }
+
     fun startPolling(matchId: Int) {
         scope.launch {
             while (true) {
@@ -162,28 +162,4 @@ fun ticTacToeApp(client: MatchClient) {
         }
     }
 
-    AnimatedContent(targetState = currentMatch){ match ->
-        if (match == null){
-            FindMatchScreen(
-                userIdInput,
-                onUserIdChange = {userIdInput = it},
-                gameType = gameTypeInput,
-                onGameTypeChange = {gameTypeInput = it},
-                onFindMatchClick = ::findMatch,
-                isLoading = isLoading,
-                errorMessage = errorMessage
-            )
-        }
-        else{
-            GameScreen(
-                match = match,
-                currentUserId = currentUserId,
-                onCellClick = ::makeMove,
-                onForfeitClick = ::forfeit,
-                isLoading = isLoading,
-                errorMessage = errorMessage,
-                onPlayAgainClick = {currentMatch = null },
-            )
-        }
-    }
-}*/
+}

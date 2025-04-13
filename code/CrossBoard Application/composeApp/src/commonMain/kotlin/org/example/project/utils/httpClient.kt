@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.utils
 
 import httpModel.MoveInput
 import httpModel.TicTacToeMoveInput
@@ -23,7 +23,6 @@ val clientJson = Json{
 }
 
 fun createHttpClient(engine: HttpClientEngine): HttpClient {
-
     return HttpClient(engine) {
         install(ContentNegotiation) {
             json(

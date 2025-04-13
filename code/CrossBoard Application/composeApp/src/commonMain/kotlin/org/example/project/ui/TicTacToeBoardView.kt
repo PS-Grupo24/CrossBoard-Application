@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import domain.Board
 import domain.Player
 import domain.TicTacToeBoard
-import httpModel.BoardOutput
 
 @Composable
 fun ticTacToeBoardView(
