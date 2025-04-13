@@ -1,3 +1,4 @@
+//import httpModel.MoveInput
 import httpModel.MoveInput
 import httpModel.TicTacToeMoveInput
 import io.ktor.serialization.kotlinx.json.json
@@ -21,6 +22,7 @@ fun Application.configureSerialization(){
             prettyPrint = true
             isLenient = true
             ignoreUnknownKeys = true
+
             classDiscriminator = "type"
             serializersModule = appJsonModule
         })

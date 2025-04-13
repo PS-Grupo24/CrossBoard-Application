@@ -2,7 +2,7 @@ import domain.*
 import httpModel.*
 import io.ktor.http.*
 import io.ktor.server.application.Application
-import io.ktor.server.request.receive
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.routing.get
@@ -143,7 +143,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to play a match.
-        route("/match/{matchId}/{version}/play"){
+        route("/match/{matchId}/version/{version}/play"){
             post {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
@@ -155,15 +155,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     val version = call.parameters["version"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing version"))
 
+                    val match = matchService.getMatchById(matchId)
+                    if(match is Failure) return@runHttp call.respond(HttpStatusCode.NotFound, ErrorMessage("Match not found"))
+
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
                         is Success -> {
-                            val move = call.receive<MoveInput>().toMove() ?:
-                            return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Error deserializing move"))
-                            when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
-                                is Success -> call.respond(updatedMatch.value.toPlayedMatch())
-                                is Failure -> handleFailure(call, updatedMatch.value)
+                            when(val match = matchService.getMatchById(matchId)) {
+                                is Failure -> handleFailure(call, match.value)
+                                is Success -> {
+                                    val gametype = match.value.gameType
+                                    val moveInput = call.receive<MoveInput>()
+                                    //val moveInput = parseMoveInput(body, gametype) ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
+
+                                    val move = moveInput.toMove(gametype) ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
+
+                                    when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
+                                        is Success -> call.respond(updatedMatch.value.toPlayedMatch())
+                                        is Failure -> handleFailure(call, updatedMatch.value)
+                                    }
+                                }
                             }
+
                         }
                     }
                 }

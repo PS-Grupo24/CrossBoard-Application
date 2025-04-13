@@ -125,7 +125,7 @@ fun ticTacToeApp(client: MatchClient) {
                 columnChar
             )){
                 is Success -> {
-                    val move = result.value.toMove()
+                    val move = result.value.move.toMove()
                     if (move == null) {
                         errorMessage = "There was an error with the move conversion"
                         return@launch

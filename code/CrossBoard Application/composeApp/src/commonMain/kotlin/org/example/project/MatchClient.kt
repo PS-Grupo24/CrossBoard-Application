@@ -121,13 +121,13 @@ class MatchClient(
         player:String,
         row: Int,
         column: Char
-    ): Either<String, MoveOutput>{
+    ): Either<String, MatchPlayedOutput>{
         val moveInput = TicTacToeMoveInput(player, "$row$column")
         val moveInputString = clientJson.encodeToString(MoveInput.serializer(),moveInput)
         println("Sending JSON String: $moveInputString")
         val response = try {
-            client.put(
-                urlString = "$baseUrl/match/$matchId/$version",
+            client.post(
+                urlString = "$baseUrl/match/$matchId/version/$version/play",
             ){
                 contentType(ContentType.Application.Json)
                 setBody(moveInputString)
@@ -142,7 +142,7 @@ class MatchClient(
         }
 
         return if (response.status.value in 200 .. 299){
-            val move = response.body<MoveOutput>()
+            val move = response.body<MatchPlayedOutput>()
             Either.Right(move)
         }
         else {
