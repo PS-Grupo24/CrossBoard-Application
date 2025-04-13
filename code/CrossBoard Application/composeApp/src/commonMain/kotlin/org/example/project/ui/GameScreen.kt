@@ -2,7 +2,7 @@ package org.example.project.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -12,91 +12,193 @@ import domain.*
 @Composable
 fun GameScreen(
     match: MultiPlayerMatch,
-    currentUserId: Int?,
+    currentUserId: Int,
     onCellClick: (row: Int, col: Int) -> Unit,
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
     onPlayAgainClick: () -> Unit
-){
+) {
     val board = match.board
-    val isGameOver = match.board !is BoardRun
+    val isGameOver = board !is BoardRun
 
-    val p1Symbol = "X"
-    val p2Symbol = "O"
-    val player1Type = match.getPlayerType(match.player1)
-    val turnSymbol = if (board.turn == player1Type) p1Symbol else p2Symbol
-    val status = when(board){
+    val player1Symbol = "X"
+    val player2Symbol = "O"
 
-        is BoardRun -> "Turn: $turnSymbol"
-        is BoardWin -> "Winner: ${board.winner}"
-        is BoardDraw -> "Draw"
-        else -> "Unknown"
-    }
+    val player1Type = remember(match.player1) { match.getPlayerType(match.player1) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
-        Text("Match ID: ${match.id}", style = MaterialTheme.typography.h2)
-        Spacer(Modifier.height(8.dp))
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        MatchInfoPanel(
+            matchId = match.id,
+            currentUserId = currentUserId,
+            player1Id = match.player1,
+            player2Id = match.player2,
+            player1Symbol = player1Symbol,
+            player2Symbol = player2Symbol
+        )
 
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-            Text("P1 ($p1Symbol): ${match.player1}")
-            Text("P2 ($p2Symbol): ${match.player2?: "Waiting"}")
-        }
-        Spacer(Modifier.height(16.dp))
 
-        Text(status, style = MaterialTheme.typography.caption)
-
-        Spacer(Modifier.height(16.dp))
-
-        ticTacToeBoardView(
+        GameStatusAndBoard(
             board = board,
-            onCellClick = { row, col ->
-                if (!isGameOver) {
-                    onCellClick(row, col)
+            player1Type = player1Type,
+            player1Symbol = player1Symbol,
+            player2Symbol = player2Symbol,
+            isGameOver = isGameOver,
+            isLoading = isLoading,
+            onCellClick = onCellClick
+        )
+
+        GameActions(
+            isLoading = isLoading,
+            errorMessage = errorMessage,
+            isGameOver = isGameOver,
+            onForfeitClick = onForfeitClick,
+            onPlayAgainClick = onPlayAgainClick
+        )
+    }
+}
+
+@Composable
+fun MatchInfoPanel(
+    matchId: Int,
+    currentUserId: Int,
+    player1Id: Int,
+    player2Id: Int?,
+    player1Symbol: String,
+    player2Symbol: String
+){
+    val me = if (currentUserId == player1Id) player1Symbol else player2Symbol
+    val opponent = if (me == player1Symbol) player2Symbol else player1Symbol
+    Text("Match ID: $matchId", style = MaterialTheme.typography.h6)
+    Spacer(Modifier.height(8.dp))
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("Me: $me", style = MaterialTheme.typography.body1)
+        val opponentText = if (player2Id == null) "Waiting..." else opponent
+        Text("Opponent: $opponentText", style = MaterialTheme.typography.body1)
+    }
+}
+
+@Composable
+fun GameStatusAndBoard(
+    board: Board,
+    player1Type: Player,
+    player1Symbol: String,
+    player2Symbol: String,
+    isGameOver: Boolean,
+    isLoading: Boolean,
+    onCellClick: (row: Int, col: Int) -> Unit
+) {
+    val turnSymbol = if (board.turn == player1Type) player1Symbol else player2Symbol
+    val status = when(board){
+        is BoardRun -> "Turn: $turnSymbol"
+        is BoardWin -> {
+            val winner = if (board.winner == player1Type) player1Symbol else player2Symbol
+            "Winner: $winner"
+        }
+        is BoardDraw -> "Draw"
+        else -> "Unknown State"
+    }
+
+    Text(status, style = MaterialTheme.typography.h5)
+    Spacer(Modifier.height(16.dp))
+    ticTacToeBoardView(
+        board = board,
+        onCellClick = { row, col -> if (!isGameOver) onCellClick(row, col) },
+        enabled = !isLoading && !isGameOver,
+        player1Type = player1Type,
+        player1Symbol = player1Symbol,
+        player2Symbol = player2Symbol,
+    )
+}
+
+@Composable
+fun GameActions(
+    isLoading: Boolean,
+    errorMessage: String?,
+    isGameOver: Boolean,
+    onForfeitClick: () -> Unit,
+    onPlayAgainClick: () -> Unit
+) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showConfirmDialog = false
+            },
+            title = {
+                Text("Confirm Forfeit")
+            },
+            text = {
+                Text("Are you sure you want to forfeit the match?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmDialog = false
+                        onForfeitClick()
+                    }
+                ) {
+                    Text("Yes, Forfeit")
                 }
             },
-            enabled = !isLoading && !isGameOver,
-            player1Type = player1Type,
-            player1Symbol = p1Symbol,
-            player2Symbol = p2Symbol,
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showConfirmDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
         )
-        Spacer(Modifier.height(16.dp))
+    }
 
-        if (isLoading){
-            CircularProgressIndicator()
-            Spacer(Modifier.height(8.dp))
-        }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        val elementHeight = 48.dp
 
-        errorMessage?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colors.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(16.dp)
-                )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        if(isGameOver){
-            Text("Game Over", style = MaterialTheme.typography.h3)
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = { onPlayAgainClick() }) {
-                Text("Play Again")
+        Box(modifier = Modifier.height(elementHeight)) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colors.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp).align(Alignment.Center)
+                    )
+                }
             }
         }
-        else {
-            Button(
-                onClick = { onForfeitClick() },
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
-            ) {
-                Text("Forfeit Match")
+
+        Box(modifier = Modifier.height(elementHeight)) {
+            if (isGameOver) {
+
+                Button(
+                    onClick = onPlayAgainClick,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Text("Play Again")
+                }
+            } else {
+                Button(
+                    onClick = { showConfirmDialog = true },
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error),
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Text("Forfeit Match")
+                }
             }
         }
     }

@@ -12,14 +12,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         if (matchRepository.getRunningMatchByUser(userId) != null) return Either.Left(ApiError.USER_ALREADY_IN_MATCH)
         val waitingMatch = matchRepository.getWaitingMatch(gameType)
         if (waitingMatch != null){
-            val updatedMatch = MultiPlayerMatch(
-                waitingMatch.board,
-                waitingMatch.id,
-                waitingMatch.player1,
-                userId,
-                waitingMatch.gameType ,
-                waitingMatch.version + 1
-            )
+            val updatedMatch = waitingMatch.join(userId)
             matchRepository.updateMatch(
                 updatedMatch.id,
                 updatedMatch.board,

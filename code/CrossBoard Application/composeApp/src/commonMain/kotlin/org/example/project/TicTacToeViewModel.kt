@@ -1,165 +1,262 @@
 package org.example.project
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import domain.*
 import httpModel.toMultiplayerMatch
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import util.Failure
 import util.Success
 
-class TicTacToeViewModel(private val scope: CoroutineScope, private val client: MatchClient) {
 
-    var currentMatch by mutableStateOf<MultiPlayerMatch?>(null)
-    var userIdInput by mutableStateOf("")
-    var gameTypeInput by mutableStateOf("")
-    var isLoading by mutableStateOf(false)
-    var errorMessage by mutableStateOf<String?>(null)
+data class TicTacToeUiState(
+    val currentMatch: MultiPlayerMatch? = null,
+    val userIdInput: String = "",
+    val gameTypeInput: String = "",
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+){
+    val currentUserId: Int?
+        get() = userIdInput.toIntOrNull()
 
-    val currentUserId = userIdInput.toIntOrNull()
-    val currentUserToken = userIdInput
+    val currentUserToken: String
+        get() = userIdInput
+}
 
-    suspend fun fetchMatchUpdates(matchId: Int): Boolean {
-        when (val result = client.getMatch(matchId)) {
+
+interface Clearable{
+    fun clear()
+}
+
+class TicTacToeViewModel(
+    private val client: MatchClient,
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+): Clearable {
+    private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
+    private val _uiState = MutableStateFlow(TicTacToeUiState())
+    val uiState: StateFlow<TicTacToeUiState> = _uiState.asStateFlow()
+
+    val currentBoard: StateFlow<Board?> = uiState
+        .map { it.currentMatch?.board }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = _uiState.value.currentMatch?.board
+        )
+
+
+    private var pollingJob: Job? = null
+
+    fun updateUserIdInput(input: String){
+        _uiState.update { it.copy(userIdInput = input, errorMessage = null) }
+    }
+
+    fun updateGameTypeInput(input: String){
+        _uiState.update { it.copy(gameTypeInput = input, errorMessage = null) }
+    }
+
+    private suspend fun fetchMatchUpdates(matchId: Int): Boolean{
+        val currentState = _uiState.value
+        when(val result = client.getMatch(matchId)){
             is Success -> {
-                if (result.value.board.state != RUNNING_STATE && currentMatch?.board !is BoardRun) {
+                val fetchedMatch = result.value
+                val gameEndedOnServer = fetchedMatch.board.state != RUNNING_STATE
+                val gameAlreadyEndedInUi = currentState.currentMatch?.board !is BoardRun
+
+                if (gameAlreadyEndedInUi && gameEndedOnServer){
+                    _uiState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
                     return false
                 }
-                currentMatch = result.value.toMultiplayerMatch()
+                _uiState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
+
                 return true
             }
+
             is Failure -> {
-                errorMessage = result.value
+                _uiState.update { it.copy(errorMessage = result.value) }
                 return true
             }
         }
     }
 
-    fun startPolling(matchId: Int) {
-        scope.launch {
-            while (true) {
-                delay(3000)
+    private fun startPolling(matchId: Int) {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while(isActive){
                 if (!fetchMatchUpdates(matchId)) break
+                delay(1500)
             }
         }
+    }
+
+    fun stopPolling(){
+        pollingJob?.cancel()
+        pollingJob = null
     }
 
     fun getMatchByVersion(matchId: Int, version: Int){
-        scope.launch {
-            isLoading = true
-            errorMessage = null
-            when (val result = client.getMatchByVersion(matchId, version)) {
-                is Success -> {
-                    currentMatch = result.value.toMultiplayerMatch()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                when (val result = client.getMatchByVersion(matchId, version)) {
+                    is Success -> {
+                        _uiState.update { it.copy(isLoading = false, currentMatch = result.value.toMultiplayerMatch()) }
+                    }
+                    is Failure -> {
+                        _uiState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                    }
                 }
-                is Failure -> {
-                    errorMessage = result.value
-                }
+            }
+            catch (e: Exception){
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
             }
         }
     }
 
     fun findMatch(){
-        if (currentUserToken == null) {
-            errorMessage = "Please enter a valid user id"
+        val currentState = _uiState.value
+        if (currentState.currentUserToken.isBlank()){
+            _uiState.update { it.copy(errorMessage = "Please enter a valid user Id") }
             return
         }
-        if(gameTypeInput.isBlank()) {
-            errorMessage = "Please enter a game type"
+
+        if (currentState.gameTypeInput.isBlank()){
+            _uiState.update { it.copy(errorMessage = "Please enter a valid gameType") }
             return
         }
-        scope.launch {
-            isLoading = true
-            errorMessage = null
 
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                when(val result = client.enterMatch(currentState.currentUserToken, currentState.gameTypeInput)){
+                    is Success -> {
+                        val match = result.value.toMultiplayerMatch()
+                        _uiState.update { it.copy(isLoading = false, currentMatch = match) }
 
-            when (val result = client.enterMatch(currentUserToken, gameTypeInput)) {
-                is Success -> {
-                    currentMatch = result.value.toMultiplayerMatch()
-                    startPolling(result.value.matchId)
+                        startPolling(result.value.matchId)
+                    }
+
+                    is Failure -> {
+                        _uiState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                    }
                 }
-                is Failure -> {errorMessage = result.value}
             }
-            isLoading = false
+            catch (e: Exception){
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
+            }
         }
     }
 
-    fun makeMove(rowIndex: Int, columnIndex: Int) {
-        val match = currentMatch ?: return
-        val userId = currentUserId ?: return
-        val userToken = currentUserToken ?: return
+
+    fun makeMove(rowIndex: Int, columnIndex: Int){
+        val currentState = _uiState.value
+        val match = currentState.currentMatch ?: return
+        val userId = currentState.currentUserId ?: return
+        val userToken = currentState.currentUserToken ?: return
         val board = match.board
 
         val playerType = match.getPlayerType(userId)
 
-        if (board.turn != playerType) {
-            errorMessage = "Not your turn"
+        if (board.turn != playerType){
+            _uiState.update { it.copy(errorMessage = "Not your turn to play!") }
             return
         }
 
-        val positionIndex = rowIndex * 3 + columnIndex
-        if (positionIndex > board.positions.size) {
-            errorMessage = "Invalid position"
+        val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + columnIndex
+        if (positionIndex >= board.positions.size || positionIndex < 0){
+            _uiState.update { it.copy(errorMessage = "Invalid position Index: $positionIndex") }
             return
         }
-        if(board.positions[positionIndex].player != Player.EMPTY) {
-            errorMessage = "this position is already occupied"
+
+        if (board.positions[positionIndex].player != Player.EMPTY){
+            _uiState.update { it.copy(errorMessage = "This position is occupied!") }
             return
         }
 
         val rowNumber = TicTacToeBoard.BOARD_DIM - rowIndex
         val columnChar = 'a' + columnIndex
 
-        scope.launch {
-            isLoading = true
-            errorMessage = null
-
-            when(val result = client.playMatch(
-                userToken,
-                match.id,
-                match.version,
-                playerType.toString(),
-                rowNumber,
-                columnChar
-            )){
-                is Success -> {
-                    val move = result.value.move.toMove()
-                    if (move == null) {
-                        errorMessage = "There was an error with the move conversion"
-                        return@launch
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                when(val result = client.playMatch(
+                    userToken,
+                    match.id,
+                    match.version,
+                    playerType.toString(),
+                    rowNumber,
+                    columnChar)
+                ){
+                    is Success -> {
+                        val move = result.value.move.toMove()
+                        if (move == null) {
+                            _uiState.update { it.copy(errorMessage = "There was an error in Move deserialization") }
+                        }
+                        else _uiState.update { it.copy(currentMatch = match.play(move)) }
                     }
-                    currentMatch = match.play(move)
-                }
-                is Failure -> {
-                    errorMessage = result.value
+                    is Failure -> {
+                        _uiState.update { it.copy(errorMessage = result.value, isLoading = false) }
+                    }
                 }
             }
-
-            isLoading = false
-
+            catch (e: Exception){
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
+            }
+            finally {
+                if(_uiState.value.isLoading){
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+            }
         }
     }
 
     fun forfeit(){
-        val match = currentMatch ?: return
-        val userId = currentUserId ?: return
-        scope.launch {
-            isLoading = true
-            errorMessage = null
-            when(val result = client.forfeitMatch(currentUserToken, match.id)){
-                is Success -> {
-                    currentMatch = match.forfeit(userId)
-                }
-                is Failure -> {
-                    errorMessage = result.value
+        val currentState = _uiState.value
+        val match = currentState.currentMatch ?: return
+        val userId = currentState.currentUserId ?: return
+        val userToken = currentState.currentUserToken
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                val forfeitedMatch = match.forfeit(userId)
+                _uiState.update { it.copy(currentMatch = forfeitedMatch) }
+
+                when(val result = client.forfeitMatch(userToken, match.id)){
+                    is Success -> {
+                        stopPolling()
+                        _uiState.update { it.copy(isLoading = false, errorMessage = null) }
+                    }
+
+                    is Failure -> {
+                        _uiState.update { it.copy(errorMessage = result.value, isLoading = false, currentMatch = match) }
+                    }
                 }
             }
-            isLoading = false
+            catch (e: Exception){
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message, currentMatch = match) }
+            }
+            finally {
+                if(_uiState.value.isLoading){
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+            }
+
+        }
+    }
+    fun resetMatch() {
+        stopPolling()
+        _uiState.update {
+            it.copy(
+                currentMatch = null,
+                isLoading = false,
+                errorMessage = null
+            )
         }
     }
 
+    override fun clear() {
+        viewModelScope.cancel()
+        stopPolling()
+    }
 }

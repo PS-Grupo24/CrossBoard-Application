@@ -75,6 +75,15 @@ data class MultiPlayerMatch(
         )
     }
 
+    fun join(userId2: Int): MultiPlayerMatch {
+        require(userId2 > 0) { "userId2 must be greater than 0" }
+        require(player2 == null) { "This game is full" }
+        require(userId2 != player1) { "Player2 can't be the same as Player1" }
+        return MultiPlayerMatch(
+            board, id, player1, userId2, gameType, version + 1
+        )
+    }
+
     /**
      * Function forfeit responsible to forfeit the game.
      * @param player the player that is forfeiting.
@@ -90,8 +99,15 @@ data class MultiPlayerMatch(
      * @param userId the player.
      * @return Player the player type.
      */
-    override fun getPlayerType(userId: Int): Player =
-        if (userId == player1) board.player1 else board.player2
+    override fun getPlayerType(userId: Int): Player {
+        require(userId == player1 || userId == player2) {"This user is not a player in this match"}
+        return when(userId){
+            player1 -> board.player1
+            else -> board.player2
+        }
+    }
+
+
 
     override fun equals(other: Any?) = other is MultiPlayerMatch && id == other.id && other.version == version
     override fun hashCode(): Int {
