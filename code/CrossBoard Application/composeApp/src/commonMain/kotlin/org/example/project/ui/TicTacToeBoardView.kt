@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import domain.Board
 import domain.Player
+import domain.TicPosition
 import domain.TicTacToeBoard
 
 @Composable
@@ -28,7 +29,7 @@ fun ticTacToeBoardView(
             ){
                 (0..<TicTacToeBoard.BOARD_DIM).forEach { colIndex ->
                     val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + colIndex
-                    val playerSymbol = when(board.positions[positionIndex].player){
+                    val playerSymbol = when((board.positions[positionIndex] as TicPosition).player){
                         player1Type -> player1Symbol
                         player1Type.other() -> player2Symbol
                         else -> null

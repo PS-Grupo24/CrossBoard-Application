@@ -19,13 +19,18 @@ abstract class TicTacToeBoard
         const val BOARD_DIM = 3
         const val MAX_MOVES = BOARD_DIM * BOARD_DIM
     }
+
+    abstract override val positions: List<TicPosition>
     /**
      * Function get responsible to get the player at a specific square or to verify if it is occupied the square.
      * @param square the square to get the player.
      * @return Player the player at the square.
      */
-    override fun get(square: Square) =
-        positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+    override fun get(square: Square): Player? {
+        return positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+    }
+
+
     override fun equals(other: Any?) =
         other is TicTacToeBoard && other.positions == positions
 
@@ -44,7 +49,7 @@ abstract class TicTacToeBoard
  * @return TicTacToeBoard the Tic Tac Toe board in a running state with the information.
  */
 class TicTacToeBoardRun(
-    override val positions: List<Position>,
+    override val positions: List<TicPosition>,
     override val moves: List<Move>,
     override val turn: Player,
     override val player1: Player,
@@ -61,7 +66,7 @@ class TicTacToeBoardRun(
         require(get(move.square) == Player.EMPTY) {"This position is not empty!"}
         val newPositions = positions.map {
             if (it.square.row.number == move.square.row.number && it.square.column.symbol == move.square.column.symbol)
-                    Position(move.player, move.square)
+                    TicPosition(move.player, move.square)
             else it
         }
 
@@ -88,7 +93,7 @@ class TicTacToeBoardRun(
      * @param move the move that was made.
      * @return Boolean true if there is a winner, false otherwise.
      */
-    private fun verifyWinner(positions: List<Position>, move: Move): Boolean {
+    private fun verifyWinner(positions: List<TicPosition>, move: Move): Boolean {
         require(move is TicTacToeMove){"Wrong type of move!"}
         val playerPositions = positions.filter { it.player == move.player}
         return playerPositions.count{it.square.column.symbol == move.square.column.symbol} == BOARD_DIM
@@ -110,7 +115,7 @@ class TicTacToeBoardRun(
  */
 class TicTacToeBoardWin(
     override val winner: Player,
-    override val positions: List<Position>,
+    override val positions: List<TicPosition>,
     override val moves: List<Move>,
     override val turn: Player,
     override val player1: Player,
@@ -147,7 +152,7 @@ class TicTacToeBoardWin(
  * @return TicTacToeBoard the Tic Tac Toe board in a draw state with the information.
  */
 class TicTacToeBoardDraw(
-    override val positions: List<Position>,
+    override val positions: List<TicPosition>,
     override val moves: List<Move>,
     override val turn: Player,
     override val player1: Player,
@@ -179,12 +184,12 @@ class TicTacToeBoardDraw(
  * Function initialTicTacToePositions responsible to create the initial positions of the Tic Tac Toe board.
  * @return List<Position> the list of initial positions.
  */
-fun initialTicTacToePositions():List<Position> {
-    val positions = mutableListOf<Position>()
+fun initialTicTacToePositions():List<TicPosition> {
+    val positions = mutableListOf<TicPosition>()
     repeat(TicTacToeBoard.BOARD_DIM){ line ->
         repeat(TicTacToeBoard.BOARD_DIM){ col ->
                 positions.add(
-                    Position(
+                    TicPosition(
                     Player.EMPTY,
                         Square(
                             Row.invoke(line, TicTacToeBoard.BOARD_DIM),

@@ -167,7 +167,7 @@ class TicTacToeViewModel(
             return
         }
 
-        if (board.positions[positionIndex].player != Player.EMPTY){
+        if ((board.positions[positionIndex] as TicPosition).player != Player.EMPTY){
             _uiState.update { it.copy(errorMessage = "This position is occupied!") }
             return
         }

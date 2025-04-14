@@ -38,10 +38,11 @@ data class BoardOutput(
 )
 
 fun BoardOutput.toBoard(gameType: String, player1Type: String): Board? {
-    when(gameType) {
-        "tic" -> {
+    val type = gameType.toGameType()
+    when(type) {
+        GameType.TicTacToe -> {
             val pos = positions.map {
-                it.toPosition(TicTacToeBoard.BOARD_DIM) ?: return null
+                it.toPosition(TicTacToeBoard.BOARD_DIM, type) ?: return null
             }
             val mov = moves.map { it.toMove(gameType) ?: return null }
             val tur = turn.toPlayer() ?: return null
