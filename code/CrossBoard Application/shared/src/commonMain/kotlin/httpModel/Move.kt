@@ -5,6 +5,7 @@ import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.reflect.KClass
 
 @Serializable
 sealed interface MoveInput
@@ -21,16 +22,22 @@ data class TicTacToeMoveInput(
     }
 }*/
 
-fun MoveInput.toMove(gametype: GameType) : Move? {
-    when(gametype){
-        TicTacToe -> {
-            this as TicTacToeMoveInput
+fun MoveInput.toMove() : Move? {
+    when(this){
+        is TicTacToeMoveInput -> {
             val player = this.player.toPlayer() ?: return null
             val square = this.square.toSquare(TicTacToeBoard.BOARD_DIM)
 
             return TicTacToeMove(player, square)
         }
         else -> return null
+    }
+}
+
+
+fun getMoveInputClass(gameType: GameType): KClass<TicTacToeMoveInput> {
+    return when(gameType){
+        TicTacToe -> TicTacToeMoveInput::class
     }
 }
 

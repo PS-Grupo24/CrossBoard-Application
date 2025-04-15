@@ -76,7 +76,6 @@ fun BoardOutput.toBoard(gameType: String, player1Type: String): Board? {
 
         }
         else -> {
-            println("Unknown gameType: $gameType")
             return null
         }
     }

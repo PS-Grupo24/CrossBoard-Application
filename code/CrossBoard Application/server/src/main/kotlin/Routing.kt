@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.delay
 import service.MatchService
 import service.UsersService
 import util.*
@@ -148,27 +147,27 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
-
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
 
                     val version = call.parameters["version"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing version"))
 
-                    val match = matchService.getMatchById(matchId)
-                    if(match is Failure) return@runHttp call.respond(HttpStatusCode.NotFound, ErrorMessage("Match not found"))
-
+                    when(val match = matchService.getMatchById(matchId)){
+                        is Failure -> handleFailure(call, match.value)
+                        is Success -> {
+                            if (match.value.version != version) return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Version Mismatch"))
+                        }
+                    }
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
                         is Success -> {
                             when(val match = matchService.getMatchById(matchId)) {
                                 is Failure -> handleFailure(call, match.value)
                                 is Success -> {
-                                    val gametype = match.value.gameType
-                                    val moveInput = call.receive<MoveInput>()
-                                    //val moveInput = parseMoveInput(body, gametype) ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
-
-                                    val move = moveInput.toMove(gametype) ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
+                                    val gameType = match.value.gameType
+                                    val moveInput = receiveMoveInput(call, gameType)
+                                    val move = moveInput.toMove() ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
 
                                     when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
                                         is Success -> call.respond(updatedMatch.value.toPlayedMatch())
@@ -181,6 +180,9 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     }
                 }
             }
+        }
+
+        route("/match/{matchId}/version/{version}"){
             get {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
@@ -189,7 +191,10 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     val version = call.parameters["version"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing version"))
 
-
+                    when(val match = matchService.getMatchByVersion(matchId, version)){
+                        is Success -> call.respond(HttpStatusCode.OK, match.value.toMatchOutput())
+                        is Failure -> handleFailure(call, match.value)
+                    }
                 }
             }
         }
@@ -211,10 +216,14 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
     }
 }
 
-suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
+private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     try {
         block()
     } catch (e: Throwable) {
         call.respond(HttpStatusCode.InternalServerError, ErrorMessage(e.cause?.message ?: e.message ?: "Unknown error"))
     }
+}
+
+private suspend fun receiveMoveInput(call: RoutingCall, gameType: GameType): MoveInput = when(gameType){
+    GameType.TicTacToe -> call.receive<TicTacToeMoveInput>()
 }

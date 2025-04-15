@@ -1,6 +1,7 @@
 package org.example.project
 
 import domain.*
+import httpModel.TicTacToeMoveInput
 import httpModel.toMultiplayerMatch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -178,13 +179,16 @@ class TicTacToeViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
+                val moveInput = TicTacToeMoveInput(
+                    playerType.toString(),
+                    "$rowNumber$columnChar",
+                )
                 when(val result = client.playMatch(
                     userToken,
                     match.id,
                     match.version,
-                    playerType.toString(),
-                    rowNumber,
-                    columnChar)
+                    moveInput
+                    )
                 ){
                     is Success -> {
                         val move = result.value.move.toMove()

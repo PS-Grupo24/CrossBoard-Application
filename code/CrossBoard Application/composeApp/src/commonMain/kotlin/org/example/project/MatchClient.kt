@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
-import org.example.project.utils.clientJson
 import util.Either
 
 private const val baseUrl = "http://127.0.0.1:8080"
@@ -118,19 +117,14 @@ class MatchClient(
         userToken: String,
         matchId: Int,
         version: Int,
-        player:String,
-        row: Int,
-        column: Char
+        moveInput: MoveInput,
     ): Either<String, MatchPlayedOutput>{
-        val moveInput = TicTacToeMoveInput(player, "$row$column")
-        val moveInputString = clientJson.encodeToString(MoveInput.serializer(),moveInput)
-        println("Sending JSON String: $moveInputString")
         val response = try {
             client.post(
                 urlString = "$baseUrl/match/$matchId/version/$version/play",
             ){
                 contentType(ContentType.Application.Json)
-                setBody(moveInputString)
+                setBody(moveInput)
                 header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }

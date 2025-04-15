@@ -19,4 +19,3 @@ fun String.toGameType() : GameType? =
         this == "tic" -> GameType.TicTacToe
         else -> null
     }
-

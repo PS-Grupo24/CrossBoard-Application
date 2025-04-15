@@ -35,7 +35,9 @@ class MatchService(private val matchRepository: MatchRepository) {
         }
 
     fun getMatchByVersion(matchId: Int, version: Int): Either<ApiError, MultiPlayerMatch>{
-        TODO()
+        val m = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
+        if (m.version < version) return Either.Left(ApiError.VERSION_MISMATCH)
+        return Either.Right(m)
     }
 
     fun getMatchByUser(userId: Int): Either<ApiError, MultiPlayerMatch> =

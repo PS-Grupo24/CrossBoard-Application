@@ -20,4 +20,5 @@ dependencies {
     implementation(libs.bundles.ktorServer)
     //testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation("io.ktor:ktor-server-test-host-jvm:3.1.1")
 }
