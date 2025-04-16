@@ -36,14 +36,6 @@ class TicTacToeViewModel(
     private val _uiState = MutableStateFlow(TicTacToeUiState())
     val uiState: StateFlow<TicTacToeUiState> = _uiState.asStateFlow()
 
-    val currentBoard: StateFlow<Board?> = uiState
-        .map { it.currentMatch?.board }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = _uiState.value.currentMatch?.board
-        )
-
 
     private var pollingJob: Job? = null
 
@@ -60,8 +52,8 @@ class TicTacToeViewModel(
         when(val result = client.getMatch(matchId)){
             is Success -> {
                 val fetchedMatch = result.value
-                val gameEndedOnServer = fetchedMatch.board.state != RUNNING_STATE
-                val gameAlreadyEndedInUi = currentState.currentMatch?.board !is BoardRun
+                val gameEndedOnServer = fetchedMatch.state != MatchState.RUNNING.toString()
+                val gameAlreadyEndedInUi = currentState.currentMatch?.state != MatchState.RUNNING
 
                 if (gameAlreadyEndedInUi && gameEndedOnServer){
                     _uiState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
@@ -137,7 +129,7 @@ class TicTacToeViewModel(
                     }
 
                     is Failure -> {
-                        _uiState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                        _uiState.update { it.copy(isLoading = false, errorMessage = result.value, currentMatch = null) }
                     }
                 }
             }
@@ -152,7 +144,7 @@ class TicTacToeViewModel(
         val currentState = _uiState.value
         val match = currentState.currentMatch ?: return
         val userId = currentState.currentUserId ?: return
-        val userToken = currentState.currentUserToken ?: return
+        val userToken = currentState.currentUserToken
         val board = match.board
 
         val playerType = match.getPlayerType(userId)

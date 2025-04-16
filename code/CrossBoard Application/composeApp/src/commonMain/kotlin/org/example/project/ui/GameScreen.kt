@@ -20,7 +20,7 @@ fun GameScreen(
     onPlayAgainClick: () -> Unit
 ) {
     val board = match.board
-    val isGameOver = board !is BoardRun
+    val isGameOver = match.state != MatchState.RUNNING
 
     val player1Symbol = "X"
     val player2Symbol = "O"
@@ -46,6 +46,7 @@ fun GameScreen(
 
         GameStatusAndBoard(
             board = board,
+            match.state,
             player1Type = player1Type,
             player1Symbol = player1Symbol,
             player2Symbol = player2Symbol,
@@ -90,6 +91,7 @@ fun MatchInfoPanel(
 @Composable
 fun GameStatusAndBoard(
     board: Board,
+    state: MatchState,
     player1Type: Player,
     player1Symbol: String,
     player2Symbol: String,
@@ -98,13 +100,13 @@ fun GameStatusAndBoard(
     onCellClick: (row: Int, col: Int) -> Unit
 ) {
     val turnSymbol = if (board.turn == player1Type) player1Symbol else player2Symbol
-    val status = when(board){
-        is BoardRun -> "Turn: $turnSymbol"
-        is BoardWin -> {
-            val winner = if (board.winner == player1Type) player1Symbol else player2Symbol
+    val status = when(state){
+        MatchState.RUNNING -> "Turn: $turnSymbol"
+        MatchState.WIN -> {
+            val winner = if ((board as BoardWin).winner == player1Type) player1Symbol else player2Symbol
             "Winner: $winner"
         }
-        is BoardDraw -> "Draw"
+        MatchState.DRAW -> "Draw"
         else -> "Unknown State"
     }
 

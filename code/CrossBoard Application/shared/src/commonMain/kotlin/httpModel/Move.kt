@@ -1,11 +1,7 @@
 package httpModel
 import domain.*
-import domain.GameType.TicTacToe
-import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlin.reflect.KClass
 
 @Serializable
 sealed interface MoveInput
@@ -16,28 +12,14 @@ data class TicTacToeMoveInput(
     val square: String
 ): MoveInput
 
-/*fun parseMoveInput(body: String, gametype: GameType): MoveInput? {
-    return when(gametype) {
-        TicTacToe -> Json.decodeFromString<TicTacToeMoveInput>(body)
-    }
-}*/
-
-fun MoveInput.toMove() : Move? {
+fun MoveInput.toMove() : Move {
     when(this){
         is TicTacToeMoveInput -> {
-            val player = this.player.toPlayer() ?: return null
-            val square = this.square.toSquare(TicTacToeBoard.BOARD_DIM)
+            val player = player.toPlayer()
+            val square = square.toSquare(TicTacToeBoard.BOARD_DIM)
 
             return TicTacToeMove(player, square)
         }
-        else -> return null
-    }
-}
-
-
-fun getMoveInputClass(gameType: GameType): KClass<TicTacToeMoveInput> {
-    return when(gameType){
-        TicTacToe -> TicTacToeMoveInput::class
     }
 }
 

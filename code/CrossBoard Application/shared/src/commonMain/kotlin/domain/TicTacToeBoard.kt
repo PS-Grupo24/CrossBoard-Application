@@ -21,6 +21,7 @@ abstract class TicTacToeBoard
     }
 
     abstract override val positions: List<TicPosition>
+    abstract override val moves: List<TicTacToeMove>
     /**
      * Function get responsible to get the player at a specific square or to verify if it is occupied the square.
      * @param square the square to get the player.
@@ -36,7 +37,6 @@ abstract class TicTacToeBoard
 
 
     override fun hashCode(): Int = positions.hashCode()
-
 }
 
 /**
@@ -50,10 +50,10 @@ abstract class TicTacToeBoard
  */
 class TicTacToeBoardRun(
     override val positions: List<TicPosition>,
-    override val moves: List<Move>,
+    override val moves: List<TicTacToeMove>,
     override val turn: Player,
     override val player1: Player,
-    override val player2: Player
+    override val player2: Player,
 ) : TicTacToeBoard(), BoardRun {
     /**
      * Function play responsible to play a move on the board.
@@ -116,10 +116,10 @@ class TicTacToeBoardRun(
 class TicTacToeBoardWin(
     override val winner: Player,
     override val positions: List<TicPosition>,
-    override val moves: List<Move>,
+    override val moves: List<TicTacToeMove>,
     override val turn: Player,
     override val player1: Player,
-    override val player2: Player
+    override val player2: Player,
 ) : TicTacToeBoard(), BoardWin{
     /**
      * Function play responsible to play a move on the board.
@@ -153,10 +153,10 @@ class TicTacToeBoardWin(
  */
 class TicTacToeBoardDraw(
     override val positions: List<TicPosition>,
-    override val moves: List<Move>,
+    override val moves: List<TicTacToeMove>,
     override val turn: Player,
     override val player1: Player,
-    override val player2: Player
+    override val player2: Player,
 ) : TicTacToeBoard(), BoardDraw{
 
     /**

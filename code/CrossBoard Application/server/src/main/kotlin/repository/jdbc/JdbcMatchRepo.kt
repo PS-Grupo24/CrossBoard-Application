@@ -1,46 +1,49 @@
 package repository.jdbc
 
+import com.google.gson.Gson
 import repository.interfaces.MatchRepository
 import javax.sql.DataSource
-import com.google.gson.Gson
 import domain.*
 import java.sql.ResultSet
-import java.sql.SQLException
 import java.sql.Statement
 
 class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
 
     override fun addMatch(match: MultiPlayerMatch): Int = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(match.board)
-        val prepared = connection.prepareStatement("INSERT INTO match (board, player1, player2, gametype, version) VALUES (CAST(? AS jsonb), ?, null, ?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
-            setString(1, serializedBoard)
-            setInt(2, match.player1)
-            setString(3, match.gameType.name)
-            setInt(4, match.version)
+        val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
+            setInt(1, match.id)
+            setString(2, serializedBoard)
+            setInt(3, match.player1)
+            setString(4, match.matchType.toString())
+            setInt(5, match.version)
+            setString(6, match.state.toString())
             executeUpdate()
         }
-        getIdStatement(prepared).toInt()
+        return@transaction getIdStatement(prepared).toInt()
     }
 
     override fun getRunningMatchByUser(userId:Int): MultiPlayerMatch? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT * FROM match WHERE player1 = ? OR player2 = ?").apply {
+        val prepared = connection.prepareStatement("SELECT * FROM match WHERE (player1 = ? OR player2 = ?) AND state = ?").apply {
             setInt(1, userId)
             setInt(2, userId)
+            setString(3, MatchState.RUNNING.toString())
         }
 
         prepared.executeQuery().use { rs ->
-            while(rs.next()) {
-                val board = Gson().fromJson(rs.getString("board"), Board::class.java)
-                if(board is BoardRun) {
+            if(rs.next()) {
+                val gameType = rs.getString("match_type").toMatchType()
+                val state = rs.getString("state").toMatchState()
+                val board = getBoard(gameType, state, rs.getString("board"))
                      return@use MultiPlayerMatch(
                         board,
                         rs.getInt("id"),
+                         state,
                         rs.getInt("player1"),
                         rs.getInt("player2"),
-                        rs.getString("gametype").toGameType() ?: throw SQLException("Invalid game type"),
+                        gameType,
                         rs.getInt("version")
                     )
-                }
             }
             return@use null
         }
@@ -52,13 +55,13 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
 
         prepared.executeQuery().use { rs ->
-            if(rs.next()) multiplayerMatchResult(rs) else null
+            return@transaction if(rs.next()) multiplayerMatchResult(rs) else null
         }
     }
 
-    override fun getWaitingMatch(gameType: GameType): MultiPlayerMatch? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT * FROM match WHERE player2 IS NULL AND gametype = ?").apply {
-            setString(1, gameType.name)
+    override fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch? = transaction(jdbc) { connection ->
+        val prepared = connection.prepareStatement("SELECT * FROM match WHERE player2 IS NULL AND match_type = ? LIMIT 1").apply {
+            setString(1, matchType.toString())
         }
 
         prepared.executeQuery().use { rs ->
@@ -66,34 +69,58 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
     }
 
-    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType, version: Int): MultiPlayerMatch = transaction(jdbc) { connection ->
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(board)
-        val prepared = connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), player1 = ?, player2 = ?, gametype = ?, version = ? WHERE id = ?").apply {
+        connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), state = ? ,player1 = ?, player2 = ?, match_type = ?, version = ? WHERE id = ?").apply {
             setString(1, serializedBoard)
-            setInt(2, player1)
-            setInt(3, player2 ?: 0)
-            setString(4, gameType.name)
-            setInt(5, version)
-            setInt(6, matchId)
+            setString(2, state.toString())
+            setInt(3, player1)
+            setInt(4, player2 ?: 0)
+            //if (player2 == null) setNull(4) else setInt(4, player2)
+            setString(5, matchType.toString())
+            setInt(6, version)
+            setInt(7, matchId)
             executeUpdate()
         }
 
-        MultiPlayerMatch(
+        return@transaction MultiPlayerMatch(
             board,
             matchId,
+            state,
             player1,
             player2,
-            gameType,
+            matchType,
             version
         )
     }
 }
 
-private fun multiplayerMatchResult(rs: ResultSet) = MultiPlayerMatch(
-    Gson().fromJson(rs.getString("board"), Board::class.java),
-    rs.getInt("id"),
-    rs.getInt("player1"),
-    rs.getInt("player2"),
-    rs.getString("gametype").toGameType() ?: throw SQLException("Invalid game type"),
-    rs.getInt("version")
-)
+private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
+    val matchType = rs.getString("match_type").toMatchType()
+    val state = rs.getString("state").toMatchState()
+    val board = getBoard(matchType, state, rs.getString("board"))
+    val p2Value = rs.getInt("player2")
+    val player2 = if (p2Value == 0) null else p2Value
+    return MultiPlayerMatch(
+        board,
+        rs.getInt("id"),
+        state,
+        rs.getInt("player1"),
+        player2,
+        matchType,
+        rs.getInt("version")
+    )
+}
+
+
+private fun getBoard(matchType: MatchType, state: MatchState, serializedBoard: String): Board {
+    when(matchType) {
+        MatchType.TicTacToe -> {
+            return when(state){
+                MatchState.RUNNING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
+                MatchState.DRAW -> Gson().fromJson(serializedBoard, TicTacToeBoardDraw::class.java)
+                MatchState.WIN -> Gson().fromJson(serializedBoard, TicTacToeBoardWin::class.java)
+            }
+        }
+    }
+}

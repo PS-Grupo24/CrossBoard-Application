@@ -80,7 +80,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to join a match.
-        route("/match/{gametype}"){
+        route("/match/{matchtype}"){
             post {
                 runHttp(call){
 
@@ -89,12 +89,11 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
                         is Success -> {
-                            val gametypeInput = call.parameters["gametype"]
+                            val matchTypeInput = call.parameters["matchtype"]
                                 ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Missing game type"))
 
-                            val gameType = gametypeInput.toGameType()
-                                ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Unknown GameType"))
-                            when(val createdMatch = matchService.enterMatch(user.value.id, gameType)){
+                            val matchType = matchTypeInput.toMatchType()
+                            when(val createdMatch = matchService.enterMatch(user.value.id, matchType)){
                                 is Success -> call.respond(createdMatch.value.toMatchOutput())
                                 is Failure -> handleFailure(call, createdMatch.value)
                             }
@@ -165,9 +164,9 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                             when(val match = matchService.getMatchById(matchId)) {
                                 is Failure -> handleFailure(call, match.value)
                                 is Success -> {
-                                    val gameType = match.value.gameType
-                                    val moveInput = receiveMoveInput(call, gameType)
-                                    val move = moveInput.toMove() ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid move input"))
+                                    val matchType = match.value.matchType
+                                    val moveInput = receiveMoveInput(call, matchType)
+                                    val move = moveInput.toMove()
 
                                     when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
                                         is Success -> call.respond(updatedMatch.value.toPlayedMatch())
@@ -224,6 +223,6 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     }
 }
 
-private suspend fun receiveMoveInput(call: RoutingCall, gameType: GameType): MoveInput = when(gameType){
-    GameType.TicTacToe -> call.receive<TicTacToeMoveInput>()
+private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput = when(matchType){
+    MatchType.TicTacToe -> call.receive<TicTacToeMoveInput>()
 }

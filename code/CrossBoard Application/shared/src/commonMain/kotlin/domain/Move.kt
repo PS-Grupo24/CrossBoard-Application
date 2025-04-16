@@ -23,18 +23,18 @@ fun moveToString(move: Move): String {
     }
 }
 
-fun String.toMove(gameType: String): Move? {
-    when(gameType) {
-        "tic" -> {
+fun String.toMove(matchType: MatchType): Move {
+    when(matchType) {
+        MatchType.TicTacToe -> {
             val values = split(",")
-            return TicTacToeMove(values[0].toPlayer() ?: return null, values[1].toSquare(TicTacToeBoard.BOARD_DIM))
+            return TicTacToeMove(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
         }
-        else -> return null
+        else -> throw IllegalArgumentException("Invalid type $matchType")
     }
 }
 
-fun MoveOutput.toMove(): Move? {
+fun MoveOutput.toMove(): Move {
     return when (this) {
-        is TicTacToeMoveOutput -> TicTacToeMove(player.toPlayer() ?: return null, square.toSquare(TicTacToeBoard.BOARD_DIM))
+        is TicTacToeMoveOutput -> TicTacToeMove(player.toPlayer(), square.toSquare(TicTacToeBoard.BOARD_DIM))
     }
 }

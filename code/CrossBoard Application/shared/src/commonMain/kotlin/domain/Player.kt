@@ -3,12 +3,11 @@ package domain
 
 /**
  * enum class "Player" represents the Player in the application of the game.
- * @property char represents the char used to identify the type of player.
  */
-enum class Player(val char: Char) {
-    WHITE('w'),
-    BLACK('b'),
-    EMPTY('e');
+enum class Player {
+    WHITE,
+    BLACK,
+    EMPTY;
 
     /**
      * Function "other" used to obtain the opposite type of player.
@@ -36,11 +35,11 @@ enum class Player(val char: Char) {
     }
 }
 
-fun String.toPlayer() : Player? {
+fun String.toPlayer() : Player {
     return when(this){
         "BLACK" -> Player.BLACK
         "WHITE" -> Player.WHITE
         "EMPTY" -> Player.EMPTY
-        else -> null
+        else -> throw IllegalArgumentException("Unknown player $this")
     }
 }

@@ -16,10 +16,9 @@ data class TicPosition(val player: Player, override val square: Square) : Positi
     }
 }
 
-fun String.toPosition(boardDim: Int, gameType: GameType): TicPosition? {
+fun String.toPosition(boardDim: Int, matchType: MatchType): Position {
     val values = split(",")
-    return when(gameType){
-        GameType.TicTacToe ->  TicPosition(values[0].toPlayer() ?: return null, values[1].toSquare(boardDim))
+    return when(matchType){
+        MatchType.TicTacToe ->  TicPosition(values[0].toPlayer(), values[1].toSquare(boardDim))
     }
-
 }

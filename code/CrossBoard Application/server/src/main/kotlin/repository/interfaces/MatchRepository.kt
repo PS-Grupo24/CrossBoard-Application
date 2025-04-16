@@ -1,7 +1,8 @@
 package repository.interfaces
 
 import domain.Board
-import domain.GameType
+import domain.MatchState
+import domain.MatchType
 import domain.MultiPlayerMatch
 
 /**
@@ -15,7 +16,7 @@ interface MatchRepository {
     //Function responsible to get the match by its id.
     fun getMatchById(matchId:Int): MultiPlayerMatch?
     //Function responsible to get the waiting match.
-    fun getWaitingMatch(gameType: GameType): MultiPlayerMatch?
+    fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch?
     //Function responsible to update the match information.
-    fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType, version: Int): MultiPlayerMatch
+    fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch
 }

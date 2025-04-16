@@ -3,13 +3,11 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.postgresql.ds.PGSimpleDataSource
 import repository.jdbc.JdbcMatchRepo
-import repository.jdbc.JdbcRepo
 import repository.jdbc.JdbcUserRepo
 import service.MatchService
 import service.UsersService
 
 const val URL = "URL_PS"
-const val PORT = "PORT"
 
 
 

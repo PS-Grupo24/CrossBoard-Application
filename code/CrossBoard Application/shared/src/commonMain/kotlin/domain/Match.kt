@@ -12,6 +12,7 @@ import kotlin.random.Random
 interface Match {
     val id: Int
     val board: Board
+    val state: MatchState
     fun getPlayerType(userId: Int): Player
 }
 
@@ -21,39 +22,42 @@ interface Match {
  * @param id the id of the match.
  * @param player1 the first player.
  * @param player2 the second player.
- * @param gameType the type of the match.
+ * @param matchType the type of the match.
  * @return Match the match that was created as a multiplayer game.
  */
 data class MultiPlayerMatch(
     override val board: Board,
     override val id: Int,
+    override val state: MatchState,
     val player1: Int,
     val player2: Int? = null,
-    val gameType: GameType,
-    val version: Int
+    val matchType: MatchType,
+    val version: Int,
 ): Match {
     companion object{
         /**
          * Function startGame responsible to start a game.
          * @param player1 the first player.
-         * @param gameType the type of the game.
+         * @param matchType the type of the game.
          * @return Game the game that was created.
          */
-        fun startGame(player1: Int, gameType: GameType): MultiPlayerMatch = when(gameType){
-            GameType.TicTacToe -> {
+        fun startGame(player1: Int, matchType: MatchType): MultiPlayerMatch = when(matchType){
+            MatchType.TicTacToe -> {
                 val p1 = Player.random()
+                val board = TicTacToeBoardRun(
+                    initialTicTacToePositions(),
+                    emptyList(),
+                    Player.random(),
+                    p1,
+                    p1.other(),
+                )
                 MultiPlayerMatch(
-                    TicTacToeBoardRun(
-                        initialTicTacToePositions(),
-                        emptyList(),
-                        Player.random(),
-                        p1,
-                        p1.other()
-                        ),
+                    board,
                     Random.nextInt(from = 1, Int.MAX_VALUE),
+                    getMatchStateFromBoard(board),
                     player1,
                     null,
-                    gameType,
+                    matchType,
                     1
                 )
             }
@@ -65,12 +69,14 @@ data class MultiPlayerMatch(
      * @return MultiPlayerGame the game after the move was played.
      */
     fun play(move: Move): MultiPlayerMatch {
+        val newBoard = board.play(move)
         return MultiPlayerMatch(
-            board.play(move),
+            newBoard,
             id,
+            getMatchStateFromBoard(newBoard),
             player1,
             player2,
-            gameType,
+            matchType,
             version + 1
         )
     }
@@ -80,7 +86,7 @@ data class MultiPlayerMatch(
         require(player2 == null) { "This game is full" }
         require(userId2 != player1) { "Player2 can't be the same as Player1" }
         return MultiPlayerMatch(
-            board, id, player1, userId2, gameType, version + 1
+            board, id, state, player1, userId2, matchType, version + 1
         )
     }
 
@@ -91,7 +97,8 @@ data class MultiPlayerMatch(
      */
     fun forfeit(player: Int): MultiPlayerMatch {
         val playerType = getPlayerType(player)
-        return MultiPlayerMatch(board.forfeit(playerType), id,player1, player2,gameType, version + 1)
+        val newBoard = board.forfeit(playerType)
+        return MultiPlayerMatch(newBoard, id, getMatchStateFromBoard(newBoard), player1, player2,matchType, version + 1)
     }
 
     /**
@@ -115,18 +122,7 @@ data class MultiPlayerMatch(
     }
 }
 
-/**
- * Class "SinglePlayerGame" represents a single player game.
- * @param board the board of the game.
- * @param user the player.
- * @param difficulty the difficulty of the game.
- * @return Game the game that was created as a single player game.
- */
-class SinglePlayerMatch(override val board: Board, override val id: Int, val user: UInt, difficulty: Difficulty):
-    Match {
-    override fun getPlayerType(userId: Int): Player = board.player1
 
-}
 
 fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
     val winner = if (board is BoardWin) board.winner.toString() else null
@@ -145,11 +141,30 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
             board.turn.toString(),
             board.positions.map { it.toString() },
             board.moves.map { moveToString(it) },
-            getBoardState(board)
         ),
-        gameType.toString(),
-        version
+        matchType.toString(),
+        version,
+        state.toString(),
     )
 }
 
 fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(), this.version)
+
+/**
+ * Class "SinglePlayerGame" represents a single player game.
+ * @param board the board of the game.
+ * @param user the player.
+ * @param difficulty the difficulty of the game.
+ * @return Game the game that was created as a single player game.
+ */
+class SinglePlayerMatch(
+    override val board: Board,
+    override val id: Int,
+    override val state: MatchState,
+    val user: UInt,
+    difficulty: Difficulty
+):
+    Match {
+    override fun getPlayerType(userId: Int): Player = board.player1
+
+}

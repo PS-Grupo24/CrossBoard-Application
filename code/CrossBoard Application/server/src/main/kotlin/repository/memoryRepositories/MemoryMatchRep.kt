@@ -1,10 +1,7 @@
 package repository.memoryRepositories
 
-import domain.BoardRun
-import domain.GameType
-import domain.MultiPlayerMatch
+import domain.*
 import repository.interfaces.MatchRepository
-import domain.Board
 
 /**
  * Class "MemoryMatchRep" represents the memory repository of the match.
@@ -41,11 +38,11 @@ class MemoryMatchRep: MatchRepository {
 
     /**
      * Function "getWaitingMatch" responsible to get the waiting match.
-     * @param gameType the type of the game.
+     * @param matchType the type of the game.
      * @return MultiPlayerMatch? the waiting match if found, null otherwise.
      */
-    override fun getWaitingMatch(gameType: GameType): MultiPlayerMatch? {
-        return matches.find { match -> match.player2 == null && match.gameType == gameType }
+    override fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch? {
+        return matches.find { match -> match.player2 == null && match.matchType == matchType }
     }
 
     /**
@@ -54,12 +51,12 @@ class MemoryMatchRep: MatchRepository {
      * @param board the board of the match.
      * @param player1 the first player.
      * @param player2 the second player.
-     * @param gameType the type of the game.
+     * @param matchType the type of the game.
      */
-    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, gameType: GameType, version: Int): MultiPlayerMatch {
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch {
         val m = getMatchById(matchId)
         matches.remove(m)
-        val match = MultiPlayerMatch(board, matchId, player1, player2, gameType, version)
+        val match = MultiPlayerMatch(board, matchId, state, player1, player2, matchType, version)
         matches.add(match)
         return match
     }

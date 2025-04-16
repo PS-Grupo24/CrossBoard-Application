@@ -1,7 +1,7 @@
 import domain.Player
 import domain.TicTacToeBoardRun
 import domain.initialTicTacToePositions
-import domain.GameType
+import domain.MatchType
 import domain.MultiPlayerMatch
 
 import kotlin.test.Test
@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 class MatchTests {
 
     @Test fun gameTypeTests() {
-        val gametype = GameType.TicTacToe
+        val gametype = MatchType.TicTacToe
 
         assertEquals("TicTacToe", gametype.name)
     }
@@ -25,11 +25,11 @@ class MatchTests {
             player,
             player.other()
         )
-        val newMatch = MultiPlayerMatch.startGame(1, GameType.TicTacToe)
+        val newMatch = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
 
         assertEquals(board, newMatch.board)
         assertEquals(1, newMatch.player1)
         assertEquals(null, newMatch.player2)
-        assertEquals(GameType.TicTacToe, newMatch.gameType)
+        assertEquals(MatchType.TicTacToe, newMatch.matchType)
     }
 }
