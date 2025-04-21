@@ -10,11 +10,11 @@ import org.example.project.utils.createHttpClient
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val host = getHost()
         setContent {
             App(
                 client = remember {
-                    ApiClient(createHttpClient(OkHttp.create()))
+                    ApiClient(createHttpClient(OkHttp.create()), host)
                 }
             )
         }

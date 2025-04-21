@@ -9,14 +9,14 @@ import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
 import util.Either
 
-private const val baseUrl = "http://127.0.0.1:8080"
-
 class ApiClient(
-    private val client: HttpClient
+    private val client: HttpClient,
+    host: Host
 ) {
-
+    private val baseUrl = host.hostname
     suspend fun login(username: String, password: String): Either<String, UserLoginOutput>{
         val response = try {
+            println(baseUrl)
             client.post("$baseUrl/user/login") {
                 contentType(ContentType.Application.Json)
                 setBody(UserLoginInput(username, password))

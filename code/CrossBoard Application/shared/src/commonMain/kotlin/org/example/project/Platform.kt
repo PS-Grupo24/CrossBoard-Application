@@ -5,3 +5,9 @@ interface Platform {
 }
 
 expect fun getPlatform(): Platform
+
+interface Host{
+    val hostname: String
+}
+
+expect fun getHost(): Host

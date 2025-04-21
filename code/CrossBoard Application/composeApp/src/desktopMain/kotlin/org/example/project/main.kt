@@ -11,9 +11,10 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "CrossBoard Application",
     ) {
+        val host = getHost()
         App(
             client = remember {
-                ApiClient(createHttpClient(OkHttp.create()))
+                ApiClient(createHttpClient(OkHttp.create()), host)
             }
         )
     }

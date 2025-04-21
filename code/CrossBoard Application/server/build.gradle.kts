@@ -13,10 +13,11 @@ application {
 }
 
 dependencies {
-    implementation("org.jdbi:jdbi3-core:3.32.0")
-    implementation("org.jdbi:jdbi3-kotlin:3.28.0")
-    implementation("org.jdbi:jdbi3-postgres:3.32.0")
-    implementation("org.postgresql:postgresql:42.5.0")
+    implementation(libs.jdbi3.core)
+    implementation(libs.jdbi3.kotlin)
+    implementation(libs.jdbi3.postgres)
+    implementation(libs.postgresql)
+    //noinspection UseTomlInstead
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(projects.shared)
     implementation(libs.logback)
