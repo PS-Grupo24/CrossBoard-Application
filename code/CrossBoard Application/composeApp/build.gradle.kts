@@ -85,7 +85,9 @@ kotlin {
 android {
     namespace = "org.example.project"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
-
+    buildFeatures{
+        compose = true
+    }
     defaultConfig {
         applicationId = "org.example.project"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -110,6 +112,9 @@ android {
 }
 
 dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.ui.text.android)
     implementation(libs.androidx.foundation.android)
