@@ -11,9 +11,57 @@ import util.Either
 
 private const val baseUrl = "http://127.0.0.1:8080"
 
-class MatchClient(
+class ApiClient(
     private val client: HttpClient
 ) {
+
+    suspend fun login(username: String, password: String): Either<String, UserLoginOutput>{
+        val response = try {
+            client.post("$baseUrl/user/login") {
+                contentType(ContentType.Application.Json)
+                setBody(UserLoginInput(username, password))
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception){
+            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            val logged = response.body<UserLoginOutput>()
+            Either.Right(logged)
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
+
+    suspend fun register(username: String, email: String, password: String): Either<String, UserCreationOutput>{
+        val response = try {
+            client.post("$baseUrl/user") {
+                contentType(ContentType.Application.Json)
+                setBody(UserCreationInput(username, email, password))
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception){
+            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            val logged = response.body<UserCreationOutput>()
+            Either.Right(logged)
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
 
     suspend fun getMatchByVersion(matchId: Int, version: Int): Either<String, MatchOutput> {
         val response = try {

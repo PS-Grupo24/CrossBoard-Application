@@ -1,8 +1,12 @@
 package repository.memoryRepositories
 
 import domain.*
+import httpModel.UserCreationOutput
+import httpModel.UserLoginOutput
 import httpModel.UserProfileOutput
 import repository.interfaces.UserRepository
+import repository.interfaces.generateTokenValue
+import repository.interfaces.hashPassword
 
 /**
  * Class "MemoryUserRep" represents the memory repository of the user.
@@ -10,7 +14,7 @@ import repository.interfaces.UserRepository
  */
 class MemoryUserRep : UserRepository {
     //Value storing the list of users of the app.
-    private val users = mutableListOf<User>(
+    private val users = mutableListOf(
         User(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!"), "1"),
         User(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!"), "2"),
         User(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"), "3"),
@@ -98,16 +102,24 @@ class MemoryUserRep : UserRepository {
         username: Username,
         email: Email,
         password: Password
-    ): UserProfileOutput {
+    ): UserCreationOutput {
         val lastId = if(users.isEmpty()) 0 else users.maxOf { it.id }
 
         val newUser = User(lastId + 1, username, email, password, generateTokenValue())
         users.add(newUser)
-        return UserProfileOutput(newUser.id, newUser.username.value, newUser.email.value, newUser.token)
+        return UserCreationOutput(newUser.id, newUser.token)
     }
 
     override fun getUserProfileByToken(token: String): UserProfileOutput? {
         val u = users.find { it.token == token } ?: return null
         return UserProfileOutput(u.id, u.username.value, u.email.value, u.token)
+    }
+
+    override fun login(username: Username, password: Password): UserLoginOutput? {
+        val hashPassword = hashPassword(password.value)
+        val user = users.find { it.username == username }!!
+
+        if (user.password.value == hashPassword) return UserLoginOutput(user.id, user.token)
+        return null
     }
 }

@@ -13,7 +13,7 @@ fun main() = application {
     ) {
         App(
             client = remember {
-                MatchClient(createHttpClient(OkHttp.create()))
+                ApiClient(createHttpClient(OkHttp.create()))
             }
         )
     }

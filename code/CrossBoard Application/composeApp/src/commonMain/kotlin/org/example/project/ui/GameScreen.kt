@@ -12,7 +12,7 @@ import domain.*
 @Composable
 fun GameScreen(
     match: MultiPlayerMatch,
-    currentUserId: Int,
+    currentUserId: Int?,
     onCellClick: (row: Int, col: Int) -> Unit,
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
@@ -36,7 +36,7 @@ fun GameScreen(
     ) {
         MatchInfoPanel(
             matchId = match.id,
-            currentUserId = currentUserId,
+            currentUserId = currentUserId?: 0,
             player1Id = match.player1,
             player2Id = match.player2,
             player1Symbol = player1Symbol,

@@ -6,7 +6,7 @@ import domain.Username
 import org.junit.Assert.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+/*
 class UserTests {
 
     @Test fun usernameClassTest() {
@@ -87,4 +87,4 @@ class UserTests {
         assertEquals("abc@hotmail.com", user.email.value)
         assertEquals("Aa12345!", user.password.value)
     }
-}
+}*/

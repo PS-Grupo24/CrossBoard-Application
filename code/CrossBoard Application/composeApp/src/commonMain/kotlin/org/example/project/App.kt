@@ -7,6 +7,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(client: MatchClient) {
+fun App(client: ApiClient) {
     ticTacToeApp(client)
 }

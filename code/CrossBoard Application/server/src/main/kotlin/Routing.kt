@@ -19,6 +19,19 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         route("/") {
             get { call.respond("Hello World!") }
         }
+
+        route("/user/login"){
+            post {
+                runHttp(call){
+                    val loginInfo = call.receive<UserLoginInput>()
+
+                    when(val user = usersService.login(Username(loginInfo.username.trim()), Password(loginInfo.password))) {
+                        is Success -> call.respond(user.value)
+                        is Failure -> handleFailure(call, user.value)
+                    }
+                }
+            }
+        }
         route("/user") {
             get {
                 runHttp(call) {
@@ -69,8 +82,8 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     val user = call.receive<UserCreationInput>()
                     when(
                         val createdUser = usersService.createUser(
-                        Username(user.username),
-                        Email(user.email),
+                        Username(user.username.trim()),
+                        Email(user.email.trim()),
                         Password(user.password))
                     ){
                         is Success -> call.respond(createdUser.value)
@@ -80,16 +93,17 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //Route to join a match.
-        route("/match/{matchtype}"){
+        route("/match/{match_type}"){
             post {
                 runHttp(call){
 
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
+
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
                         is Success -> {
-                            val matchTypeInput = call.parameters["matchtype"]
+                            val matchTypeInput = call.parameters["match_type"]
                                 ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Missing game type"))
 
                             val matchType = matchTypeInput.toMatchType()
@@ -211,6 +225,7 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
         ApiError.USER_NOT_IN_THIS_MATCH -> call.respond(HttpStatusCode.Unauthorized, ErrorMessage("User does not belong in this match"))
         ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, ErrorMessage("This user is not the specified player type in the match"))
         ApiError.VERSION_MISMATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Version mismatch"))
+        ApiError.WRONG_PASSWORD -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Wrong password"))
         else -> call.respond(HttpStatusCode.InternalServerError, ErrorMessage("Unexpected error"))
     }
 }

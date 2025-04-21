@@ -72,9 +72,3 @@ data class User(
         require(id > 0) {"Id must not be greater than 0."}
     }
 }
-
-@OptIn(ExperimentalEncodingApi::class)
-fun generateTokenValue(tokenSizeInBytes: Int = 32): String {
-    val byteArray = Random.nextBytes(tokenSizeInBytes)
-    return Base64.encode(byteArray)
-}

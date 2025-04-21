@@ -4,7 +4,14 @@ import domain.Email
 import domain.Password
 import domain.User
 import domain.Username
+import httpModel.UserCreationOutput
+import httpModel.UserLoginInput
+import httpModel.UserLoginOutput
 import httpModel.UserProfileOutput
+import util.ApiError
+import util.Either
+import java.security.MessageDigest
+import java.util.*
 
 /**
  * Interface UserRepository represents the repository for the user.
@@ -23,7 +30,19 @@ interface UserRepository {
     //Function responsible to get the user full details.
     fun getUserFullDetails(userId: Int): User?
     //Function responsible to add the user to the list of users.
-    fun addUser(username: Username, email: Email, password: Password): UserProfileOutput
-
+    fun addUser(username: Username, email: Email, password: Password): UserCreationOutput
+    //Function responsible to get user details given a token.
     fun getUserProfileByToken(token: String): UserProfileOutput?
+    //Function responsible to login a user.
+    fun login(username: Username, password: Password):UserLoginOutput?
+}
+
+fun hashPassword(password: String): String {
+    val md = MessageDigest.getInstance("SHA-256")
+    val bytes = md.digest(password.toByteArray())
+    return Base64.getEncoder().encodeToString(bytes)
+}
+
+fun generateTokenValue(): String {
+    return UUID.randomUUID().toString()
 }

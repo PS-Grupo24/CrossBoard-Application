@@ -1,14 +1,16 @@
 package repository.jdbc
 
 import domain.*
+import httpModel.UserCreationOutput
+import httpModel.UserLoginOutput
 import httpModel.UserProfileOutput
 import repository.interfaces.UserRepository
-import java.security.MessageDigest
+import repository.interfaces.generateTokenValue
+import repository.interfaces.hashPassword
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
-import java.util.*
 import javax.sql.DataSource
 
 class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
@@ -91,7 +93,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
         }
     }
 
-    override fun addUser(username: Username, email: Email, password: Password): UserProfileOutput = transaction(jdbc) { connection ->
+    override fun addUser(username: Username, email: Email, password: Password): UserCreationOutput = transaction(jdbc) { connection ->
         val token = generateTokenValue()
         val hashPassword = hashPassword(password.value)
 
@@ -102,7 +104,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
             setString(4, hashPassword)
             executeUpdate()
         }
-        UserProfileOutput(getIdStatement(prepared).toInt(), username.value, email.value, token)
+        UserCreationOutput(getIdStatement(prepared).toInt(), token)
     }
 
     override fun getUserProfileByToken(token: String): UserProfileOutput? = transaction(jdbc) { connection ->
@@ -112,6 +114,27 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
         prepared.executeQuery().use { rs ->
             if(rs.next()) userProfileOutputResult(rs) else null
+        }
+    }
+
+    override fun login(username: Username, password: Password): UserLoginOutput? = transaction(jdbc){ connection ->
+        val hashPassword = hashPassword(password.value)
+        val prepared = connection.prepareStatement("SELECT password, token, id FROM USERS WHERE username = ?").apply {
+            setString(1, username.value)
+        }
+
+        prepared.executeQuery().use { rs ->
+            if (rs.next()){
+                val actualPassword = rs.getString("password")
+                if (hashPassword == actualPassword){
+                     return@transaction UserLoginOutput(
+                        rs.getInt("id"),
+                        rs.getString("token")
+                    )
+                }
+
+            }
+            return@transaction null
         }
     }
 }
@@ -133,12 +156,6 @@ private fun userResult(rs: ResultSet): User {
         Password(rs.getString("password")),
         rs.getString("token")
     )
-}
-
-private fun hashPassword(password: String): String {
-    val md = MessageDigest.getInstance("SHA-256")
-    val bytes = md.digest(password.toByteArray())
-    return Base64.getEncoder().encodeToString(bytes)
 }
 
 fun getIdStatement(prepared: PreparedStatement): UInt = if(prepared.generatedKeys.next())

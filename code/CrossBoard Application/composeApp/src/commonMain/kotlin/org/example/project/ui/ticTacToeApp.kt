@@ -1,52 +1,78 @@
 package org.example.project.ui
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.Button
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import org.example.project.MatchClient
-import org.example.project.TicTacToeViewModel
-
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import org.example.project.ApiClient
+import org.example.project.viewModel.AuthViewModel
+import org.example.project.viewModel.TicTacToeViewModel
 @Composable
-fun ticTacToeApp(client: MatchClient){
-    val appState = remember { TicTacToeViewModel(client) }
-
+fun ticTacToeApp(client: ApiClient){
+    val authViewModel = remember { AuthViewModel(client) }
+    val gameViewModel = remember { TicTacToeViewModel(client) }
     DisposableEffect(Unit) {
         onDispose {
-            appState.clear()
+            authViewModel.clear()
+            gameViewModel.clear()
         }
     }
 
-    val uiState by appState.uiState.collectAsState()
-    val matchExists = uiState.currentMatch != null
+    val authState by authViewModel.authState.collectAsState()
+    val matchState by gameViewModel.matchState.collectAsState()
 
-    AnimatedContent(targetState = matchExists, label = "ScreenTransition"){ isMatchDisplayed ->
-        if (!isMatchDisplayed){
-            FindMatchScreen(
-                uiState.userIdInput,
-                gameType = uiState.gameTypeInput,
-                isLoading = uiState.isLoading,
-                errorMessage = uiState.errorMessage,
+    if (authState.isAuthenticated) {
 
-                onUserIdChange = appState::updateUserIdInput,
-                onGameTypeChange = appState::updateGameTypeInput,
-                onFindMatchClick = appState::findMatch,
+        val userToken = authState.userToken
+        val currentUserId = authState.currentUser?.id
 
-
+        if (userToken != null && currentUserId != null){
+            LoggedInContent(
+                matchState = matchState,
+                onGameTypeChange = gameViewModel::updateGameTypeInput,
+                onFindMatch = {
+                    gameViewModel.findMatch(userToken)
+                },
+                onMakeMove = { row, col ->
+                    gameViewModel.makeMove(currentUserId, userToken, row, col)
+                },
+                onForfeit = {
+                    gameViewModel.forfeit(currentUserId, userToken)
+                },
+                onResetMatch = gameViewModel::resetMatch,
+                onLogout = authViewModel::logout,
+                currentUserId = currentUserId
             )
         }
         else{
-            val currentMatch = uiState.currentMatch
-            if (currentMatch != null){
-                GameScreen(
-                    match = currentMatch,
-                    isLoading = uiState.isLoading,
-                    errorMessage = uiState.errorMessage,
-                    currentUserId = uiState.currentUserId ?: 1,
-                    onCellClick = appState::makeMove,
-                    onForfeitClick = appState::forfeit,
-                    onPlayAgainClick = appState::resetMatch,
-                )
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: Authentication state inconsistent. Please logout.")
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { authViewModel.logout() }) { Text("Logout") }
             }
-
         }
+
+    }
+    else{
+        AuthenticationScreen(
+            authState = authState,
+
+            onLoginUsernameChange = authViewModel::updateLoginUsername,
+            onLoginPasswordChange = authViewModel::updateLoginPassword,
+
+            onRegisterEmailChange = authViewModel::updateRegisterEmail,
+            onRegisterPasswordChange = authViewModel::updateRegisterPassword,
+            onRegisterUsernameChange = authViewModel::updateRegisterUsername,
+
+            onLoginClick = authViewModel::login,
+            onRegisterClick = authViewModel::register,
+            onSwitchScreen = authViewModel::showLoginScreen
+            )
     }
 }
