@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.jdbi3.kotlin)
     implementation(libs.jdbi3.postgres)
     implementation(libs.postgresql)
+
     //noinspection UseTomlInstead
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(projects.shared)
@@ -24,7 +25,9 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.bundles.ktorServer)
+    implementation(libs.ktor.server.cors)
+    implementation("io.ktor:ktor-server-cors:3.1.1")
     //testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation("io.ktor:ktor-server-test-host-jvm:3.1.1")
+    //testImplementation("io.ktor:ktor-server-test-host-jvm:3.1.1")
 }

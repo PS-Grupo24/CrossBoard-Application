@@ -5,6 +5,9 @@ class WasmPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = WasmPlatform()
-actual fun getHost(): Host {
-    TODO("Not yet implemented")
+
+class JsHost: Host {
+    override val hostname: String
+        get() = "http://127.0.0.1:8000"
 }
+actual fun getHost(): Host = JsHost()

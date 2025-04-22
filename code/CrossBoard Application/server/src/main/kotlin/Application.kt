@@ -12,7 +12,7 @@ const val URL = "URL_PS"
 
 
 fun main() {
-    val port = 8080
+    val port = 8000
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
@@ -28,10 +28,7 @@ fun Application.module() {
     val userService = UsersService(JdbcUserRepo(jdbc))
     val matchService = MatchService(JdbcMatchRepo(jdbc))
 
-    //val userRep = MemoryUserRep()
-    //val userService = UsersService(userRep)
-    //val matchRep = MemoryMatchRep()
-    //val matchService = MatchService(matchRep)
+    configureCors()
     configureSerialization()
     configureRouting(userService, matchService)
 }
