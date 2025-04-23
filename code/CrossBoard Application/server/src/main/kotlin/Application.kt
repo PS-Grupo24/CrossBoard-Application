@@ -8,11 +8,10 @@ import service.MatchService
 import service.UsersService
 
 const val URL = "URL_PS"
-
-
+const val PORT = "PS_PORT"
 
 fun main() {
-    val port = 8000
+    val port = System.getenv(PORT)?.toInt() ?: 8080
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
@@ -21,8 +20,6 @@ fun Application.module() {
     val url = System.getenv(URL)
     val jdbc = PGSimpleDataSource().apply {
         setURL(url)
-        user = "postgres"
-        password = "12345"
     }
 
     val userService = UsersService(JdbcUserRepo(jdbc))
