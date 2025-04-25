@@ -1,10 +1,6 @@
 package domain
 
-
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.jvm.JvmInline
-import kotlin.random.Random
 
 /**
  * Inline class "Username" represents the username of a user.
@@ -55,18 +51,30 @@ value class Password(val value: String){
 }
 
 /**
+ * Inline class "Token" represents the token of a user.
+ * @param value the token value.
+ */
+@JvmInline
+value class Token(val value: String){
+    init {
+        require(value.isNotBlank()) {"Token must not be blank."}
+    }
+}
+
+/**
  * Data class "User" represents a user of the application.
  * @param id the id of the user.
  * @param username the username of the user.
  * @param email the email of the user.
  * @param password the password of the user.
+ * @param token the token of the user.
  */
 data class User(
     val id:Int,
     val username: Username,
     val email: Email,
     val password: Password,
-    val token: String
+    val token: Token
 ){
     init {
         require(id > 0) {"Id must not be greater than 0."}

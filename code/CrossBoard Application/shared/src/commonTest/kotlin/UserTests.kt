@@ -1,21 +1,17 @@
-
-import domain.Email
-import domain.Password
-import domain.User
-import domain.Username
-import org.junit.Assert.assertThrows
+import domain.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-/*
+import kotlin.test.assertFailsWith
+
 class UserTests {
 
     @Test fun usernameClassTest() {
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Username("")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Username("AB")
         }
 
@@ -26,15 +22,15 @@ class UserTests {
 
     @Test fun emailClassTests() {
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Email("")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Email("abc.com")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Email("abc@hotmail")
         }
 
@@ -45,27 +41,27 @@ class UserTests {
 
     @Test fun passwordClassTest() {
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("aA1!")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("aaaaaa1!")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("AAAAAA1!")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("AaaaaaA!")
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertFailsWith<IllegalArgumentException> {
             Password("Aaaaaaa1")
         }
 
@@ -74,17 +70,29 @@ class UserTests {
         assertEquals("Aa12345!", password.value)
     }
 
-    @Test fun userClassTest() {
+    @Test fun tokenClassTest() {
 
-        assertThrows(IllegalArgumentException::class.java) {
-            User(0, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
+        assertFailsWith<IllegalArgumentException> {
+            Token("")
         }
 
-        val user = User(1, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"))
+        val token = Token("test")
+
+        assertEquals("test", token.value)
+    }
+
+    @Test fun userClassTest() {
+
+        assertFailsWith<IllegalArgumentException> {
+            User(0, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"), Token("test"))
+        }
+
+        val user = User(1, Username("ABC"), Email("abc@hotmail.com"), Password("Aa12345!"), Token("test"))
 
         assertEquals(1, user.id)
         assertEquals("ABC", user.username.value)
         assertEquals("abc@hotmail.com", user.email.value)
         assertEquals("Aa12345!", user.password.value)
+        assertEquals("test", user.token.value)
     }
-}*/
+}

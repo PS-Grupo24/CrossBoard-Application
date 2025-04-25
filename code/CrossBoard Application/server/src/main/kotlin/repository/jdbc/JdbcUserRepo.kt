@@ -154,7 +154,7 @@ private fun userResult(rs: ResultSet): User {
         Username(rs.getString("username")),
         Email(rs.getString("email")),
         Password(rs.getString("password")),
-        rs.getString("token")
+        Token(rs.getString("token"))
     )
 }
 
