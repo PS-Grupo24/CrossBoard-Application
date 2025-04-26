@@ -4,6 +4,9 @@ import crossBoard.domain.Board
 import crossBoard.domain.MatchState
 import crossBoard.domain.MatchType
 import crossBoard.domain.MultiPlayerMatch
+import crossBoard.httpModel.MatchCancelOutput
+import crossBoard.util.ApiError
+import crossBoard.util.Either
 
 /**
  * Interface "MatchRepository" represents the repository of the match.
@@ -19,4 +22,6 @@ interface MatchRepository {
     fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch?
     //Function responsible to update the match information.
     fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch
+    //Function responsible to remove a waiting match
+    fun cancelSearch(userId: Int, matchId: Int): MatchCancelOutput
 }

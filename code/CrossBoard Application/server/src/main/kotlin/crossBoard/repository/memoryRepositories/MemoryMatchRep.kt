@@ -1,6 +1,7 @@
 package crossBoard.repository.memoryRepositories
 
 import crossBoard.domain.*
+import crossBoard.httpModel.MatchCancelOutput
 import crossBoard.repository.interfaces.MatchRepository
 
 /**
@@ -59,5 +60,13 @@ class MemoryMatchRep: MatchRepository {
         val match = MultiPlayerMatch(board, matchId, state, player1, player2, matchType, version)
         matches.add(match)
         return match
+    }
+
+    override fun cancelSearch(userId: Int, matchId: Int): MatchCancelOutput {
+        matches.removeIf { it.id == matchId }
+        return MatchCancelOutput(
+            userId,
+            matchId
+        )
     }
 }

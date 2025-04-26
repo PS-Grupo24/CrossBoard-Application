@@ -1,36 +1,15 @@
 package crossBoard.viewModel
 
-import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import crossBoard.ApiClient
+import crossBoard.model.AuthState
+import crossBoard.model.LoggedUser
 import crossBoard.util.Failure
 import crossBoard.util.Success
-
-
-@Immutable
-data class AuthState(
-    val userToken: String? = null,
-    val currentUser: LoggedUser? = null,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val isLoginScreenVisible: Boolean = true,
-
-
-    val loginUsernameInput: String = "",
-    val loginPasswordInput: String = "",
-    val registerUsernameInput: String = "",
-    val registerEmailInput: String = "",
-    val registerPasswordInput: String = ""
-) {
-    val isAuthenticated: Boolean get() = userToken != null
-}
-
-data class LoggedUser(val id:Int, val token: String)
-
 
 class AuthViewModel(
     private val client: ApiClient,

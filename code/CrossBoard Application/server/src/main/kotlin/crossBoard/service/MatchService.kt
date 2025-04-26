@@ -1,8 +1,10 @@
 package crossBoard.service
 
+import crossBoard.domain.MatchState
 import crossBoard.domain.Move
 import crossBoard.domain.MatchType
 import crossBoard.domain.MultiPlayerMatch
+import crossBoard.httpModel.MatchCancelOutput
 import crossBoard.repository.interfaces.MatchRepository
 import crossBoard.util.ApiError
 import crossBoard.util.Either
@@ -91,6 +93,15 @@ class MatchService(private val matchRepository: MatchRepository) {
             forfeitedMatch.state
         )
         return Either.Right(forfeitedMatch)
+    }
+
+    fun cancelSearch(userId:Int, matchId: Int): Either<ApiError, MatchCancelOutput> {
+        val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
+        if (match.player1 != userId && match.player2 != userId) return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
+        if (match.state != MatchState.WAITING) return Either.Left(ApiError.MATCH_NOT_IN_WAITING_STATE)
+
+
+        return Either.Right(matchRepository.cancelSearch(userId, matchId))
     }
 
 }

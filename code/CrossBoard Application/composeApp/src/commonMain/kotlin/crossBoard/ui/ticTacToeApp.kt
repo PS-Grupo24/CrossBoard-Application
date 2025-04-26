@@ -12,20 +12,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import crossBoard.ApiClient
 import crossBoard.viewModel.AuthViewModel
+import crossBoard.viewModel.NavigationViewModel
 import crossBoard.viewModel.TicTacToeViewModel
+import crossBoard.viewModel.UserInfoViewModel
+
 @Composable
 fun ticTacToeApp(client: ApiClient){
     val authViewModel = remember { AuthViewModel(client) }
     val gameViewModel = remember { TicTacToeViewModel(client) }
+    val navViewModel = remember { NavigationViewModel() }
+    val userViewModel = remember { UserInfoViewModel(client) }
     DisposableEffect(Unit) {
         onDispose {
             authViewModel.clear()
             gameViewModel.clear()
+            navViewModel.clear()
+            userViewModel.clear()
         }
     }
 
     val authState by authViewModel.authState.collectAsState()
-    val matchState by gameViewModel.matchState.collectAsState()
+    val matchUiState by gameViewModel.matchState.collectAsState()
+    val navState by navViewModel.navigationState.collectAsState()
+    val userInfoState by userViewModel.user.collectAsState()
 
     if (authState.isAuthenticated) {
 
@@ -34,9 +43,18 @@ fun ticTacToeApp(client: ApiClient){
 
         if (userToken != null && currentUserId != null){
             LoggedInContent(
-                matchState = matchState,
-                currentUserId = currentUserId,
+                matchUiState = matchUiState,
+                authState = authState,
+                navigationState = navState,
+                userInfoState = userInfoState,
 
+                onGetUserInfo = {
+                    userViewModel.getUser(currentUserId)
+                },
+
+                onNavigateToFindMatch = navViewModel::goToGameFlow,
+                onNavigateToProfile = navViewModel::goToProfile,
+                onNavigateToMainMenu = navViewModel::goToMainMenu,
                 onGameTypeChange = gameViewModel::updateGameTypeInput,
                 onFindMatch = {
                     gameViewModel.findMatch(userToken)
@@ -49,7 +67,9 @@ fun ticTacToeApp(client: ApiClient){
                 },
                 onResetMatch = gameViewModel::resetMatch,
                 onLogout = authViewModel::logout,
-
+                onCancelSearch = {
+                    gameViewModel.cancelSearch(userToken)
+                }
 
             )
         }

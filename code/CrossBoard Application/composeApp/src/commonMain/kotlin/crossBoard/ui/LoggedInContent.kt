@@ -1,50 +1,93 @@
 package crossBoard.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import crossBoard.viewModel.MatchUiState
+import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import crossBoard.model.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LoggedInContent(
-    matchState: MatchUiState,
+    navigationState: NavigationState,
+    matchUiState: MatchUiState,
+    authState: AuthState,
+    userInfoState: UserInfoState,
+
+    onGetUserInfo: () -> Unit,
+
+    onNavigateToFindMatch: () -> Unit,
+    onNavigateToProfile: () -> Unit,
+    onNavigateToMainMenu: () -> Unit,
+
     onGameTypeChange: (String) -> Unit,
     onFindMatch: () -> Unit,
+    onCancelSearch: () -> Unit,
     onMakeMove: (row: Int, column: Int) -> Unit,
     onForfeit: () -> Unit,
     onResetMatch: () -> Unit,
     onLogout: () -> Unit,
-    currentUserId: Int?,
 ){
-    val matchExists = matchState.currentMatch != null
+    val currentUser = authState.currentUser
 
-    AnimatedContent(targetState = matchExists, label = "ScreenTransition"){ isMatchDisplayed ->
-        if (!isMatchDisplayed){
-            FindMatchScreen(
-                selectedGameTypeValue = matchState.gameTypeInput,
-                isLoading = matchState.isLoading,
-                errorMessage = matchState.errorMessage,
-                onGameTypeChange = onGameTypeChange,
-                onFindMatchClick = onFindMatch,
-                )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Welcome!") },
+                navigationIcon = if (navigationState.currentScreen != MainScreen.MainMenu) {
+                    { IconButton(onClick = onNavigateToMainMenu) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } }
+                } else null,
+                actions = { /* ... Logout Button ... */ }
+            )
         }
-        else{
-            val currentMatch = matchState.currentMatch
-            if (currentMatch != null){
-                GameScreen(
-                    match = currentMatch,
-                    player1Username = matchState.player1Username,
-                    player2Username = matchState.player2Username,
-                    isLoading = matchState.isLoading,
-                    errorMessage = matchState.errorMessage,
-                    currentUserId = currentUserId,
-                    onCellClick = onMakeMove,
-                    onForfeitClick = onForfeit,
-                    onPlayAgainClick = onResetMatch,
-                )
+    ) { paddingValues ->
+        AnimatedContent(
+            targetState = navigationState.currentScreen,
+            label = "LoggedInScreenFlow",
+        ){
+            currentScreen ->
+            Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                when(currentScreen){
+                    MainScreen.MainMenu -> {
+                        MainMenuScreen(
+                            onFindMatchClicked = onNavigateToFindMatch,
+                            onProfileClicked = onNavigateToProfile,
+                            onLogoutClicked = onLogout,
+                        )
+                    }
+                    MainScreen.Profile -> {
+                        onGetUserInfo()
+                        ProfileScreen(
+                            userInfoState
+                        )
+                    }
+                    MainScreen.GameFlow -> {
+                        val currentMatch = matchUiState.currentMatch
+                        if (currentMatch == null)
+                            FindMatchScreen(
+                                selectedGameTypeValue = matchUiState.gameTypeInput,
+                                isLoading = matchUiState.isLoading,
+                                errorMessage = matchUiState.errorMessage,
+                                onGameTypeChange = onGameTypeChange,
+                                onFindMatchClick = onFindMatch
+                            )
+                        else
+                            GameFlowScreen(
+                                matchUiState = matchUiState,
+                                currentUserId = authState.currentUser?.id,
+                                onCancelSearch = onCancelSearch,
+                                onMakeMove = onMakeMove,
+                                onForfeit = onForfeit,
+                                onResetMatch = onResetMatch,
+                            )
+                    }
+                }
             }
-
         }
+
     }
 }

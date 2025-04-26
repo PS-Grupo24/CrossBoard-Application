@@ -31,4 +31,9 @@ fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
 @Serializable
 data class MatchPlayedOutput(val move: MoveOutput, val version: Int)
 
+@Serializable
+data class MatchCancelOutput(
+    val playerId:Int,
+    val matchId: Int
+)
 

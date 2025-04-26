@@ -33,7 +33,7 @@ fun GameScreen(
     onPlayAgainClick: () -> Unit
 ) {
     val board = match.board
-    val isGameOver = match.state != MatchState.RUNNING
+    val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
 
     val player1Symbol = "X"
     val player2Symbol = "O"
@@ -116,6 +116,7 @@ fun GameStatusAndBoard(
             "Winner: $winner"
         }
         MatchState.DRAW -> "Draw"
+        MatchState.WAITING -> "Waiting for Opponent"
         else -> "Unknown State"
     }
 
@@ -204,7 +205,7 @@ fun GameActions(
             } else {
                 Button(
                     onClick = { showConfirmDialog = true },
-                    enabled = !isLoading,
+                    enabled = !isLoading ,
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error),
                     modifier = Modifier.align(Alignment.Center)
                 ) {

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import crossBoard.viewModel.AuthState
+import crossBoard.model.AuthState
 
 @Composable
 fun AuthenticationScreen(

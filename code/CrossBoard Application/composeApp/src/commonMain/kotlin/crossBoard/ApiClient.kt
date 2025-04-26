@@ -215,4 +215,31 @@ class ApiClient(
             Either.Left(error.message)
         }
     }
+
+    suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancelOutput> {
+        val response = try {
+            client.post(
+                urlString = "$baseUrl/match/$matchId/cancel",
+            ){
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
+            }
+        }
+        catch (e: SerializationException) {
+            return Either.Left(e.message ?: "Serialization exception")
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            val move = response.body<MatchCancelOutput>()
+            Either.Right(move)
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+
+    }
 }

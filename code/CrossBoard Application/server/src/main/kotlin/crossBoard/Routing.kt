@@ -229,6 +229,33 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
+
+        route("/match/{matchId}/cancel"){
+            post {
+                runHttp(call){
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
+
+                    val matchId = call.parameters["matchId"]?.toIntOrNull()
+                        ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
+
+                    when(val userId = usersService.getUserByToken(userToken)){
+                        is Success -> {
+                            when(val match = matchService.cancelSearch(userId.value.id, matchId)){
+                                is Success -> {
+                                    call.respond(match.value)
+                                }
+                                is Failure -> handleFailure(call, match.value)
+
+                            }
+                        }
+                        is Failure -> handleFailure(call, userId.value)
+                    }
+
+                }
+            }
+
+        }
     }
 }
 
@@ -244,6 +271,7 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
         ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER -> call.respond(HttpStatusCode.BadRequest, ErrorMessage("This user is not the specified player type in the match"))
         ApiError.VERSION_MISMATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Version mismatch"))
         ApiError.WRONG_PASSWORD -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Wrong password"))
+        ApiError.MATCH_NOT_IN_WAITING_STATE -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Match not in waiting state"))
         else -> call.respond(HttpStatusCode.InternalServerError, ErrorMessage("Unexpected error"))
     }
 }

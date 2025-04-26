@@ -3,8 +3,10 @@ package crossBoard.domain
 const val RUNNING_MATCH = "RUNNING"
 const val DRAW_MATCH = "DRAW"
 const val WIN_MATCH = "WIN"
+const val WAITING_MATCH = "WAITING"
 
 enum class MatchState(val value: String) {
+    WAITING(WAITING_MATCH),
     RUNNING(RUNNING_MATCH),
     DRAW(DRAW_MATCH),
     WIN(WIN_MATCH);
@@ -14,6 +16,7 @@ enum class MatchState(val value: String) {
 
 fun String.toMatchState(): MatchState {
     return when(this){
+        WAITING_MATCH -> MatchState.WAITING
         RUNNING_MATCH -> MatchState.RUNNING
         DRAW_MATCH -> MatchState.DRAW
         WIN_MATCH -> MatchState.WIN

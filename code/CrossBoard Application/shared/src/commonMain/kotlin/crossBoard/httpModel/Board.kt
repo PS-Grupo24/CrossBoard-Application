@@ -35,6 +35,15 @@ fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): 
                         player2
                     )
                 }
+                MatchState.WAITING -> {
+                    TicTacToeBoardRun(
+                        pos,
+                        mov,
+                        tur,
+                        player1,
+                        player2
+                    )
+                }
                 MatchState.WIN -> TicTacToeBoardWin(
                     winner?.toPlayer() ?: throw IllegalArgumentException("Winner must not be null"),
                     pos,

@@ -5,19 +5,10 @@ import crossBoard.httpModel.toMultiplayerMatch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import crossBoard.ApiClient
+import crossBoard.model.MatchUiState
 import crossBoard.domain.*
 import crossBoard.util.Failure
 import crossBoard.util.Success
-
-
-data class MatchUiState(
-    val currentMatch: MultiPlayerMatch? = null,
-    val player1Username: String = "",
-    val player2Username: String = "",
-    val gameTypeInput: String = "",
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-)
 
 
 interface Clearable{
@@ -34,7 +25,6 @@ class TicTacToeViewModel(
 
 
     private var pollingJob: Job? = null
-
     fun updateGameTypeInput(input: String){
         _matchState.update { it.copy(gameTypeInput = input, errorMessage = null) }
     }
@@ -44,8 +34,10 @@ class TicTacToeViewModel(
         when(val result = client.getMatch(matchId)){
             is Success -> {
                 val fetchedMatch = result.value
-                val gameEndedOnServer = fetchedMatch.state != MatchState.RUNNING.toString()
-                val gameAlreadyEndedInUi = currentState.currentMatch?.state != MatchState.RUNNING
+                val gameEndedOnServer =
+                    fetchedMatch.state == MatchState.WIN.toString() || fetchedMatch.state == MatchState.DRAW.toString()
+                val gameAlreadyEndedInUi =
+                    currentState.currentMatch?.state == MatchState.WIN || currentState.currentMatch?.state == MatchState.DRAW
 
                 if (gameAlreadyEndedInUi && gameEndedOnServer){
                     _matchState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
@@ -133,7 +125,29 @@ class TicTacToeViewModel(
         }
     }
 
+    fun cancelSearch(userToken: String){
+        val currentState = _matchState.value
+        val match = currentState.currentMatch ?: return
+        if (match.state != MatchState.WAITING) return
 
+        viewModelScope.launch {
+            _matchState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                when(val result = client.cancelSearch(userToken, match.id)){
+                    is Success -> {
+                        resetMatch()
+                    }
+                    is Failure -> {
+                        _matchState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                    }
+                }
+            }
+            catch (e: Exception){
+                _matchState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
+            }
+        }
+    }
     fun makeMove(userId:Int, userToken: String, rowIndex: Int, columnIndex: Int){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return

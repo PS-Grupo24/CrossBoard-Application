@@ -54,7 +54,7 @@ data class MultiPlayerMatch(
                 MultiPlayerMatch(
                     board,
                     Random.nextInt(from = 1, Int.MAX_VALUE),
-                    getMatchStateFromBoard(board),
+                    MatchState.WAITING,
                     player1,
                     null,
                     matchType,
@@ -86,7 +86,7 @@ data class MultiPlayerMatch(
         require(player2 == null) { "This game is full" }
         require(userId2 != player1) { "Player2 can't be the same as Player1" }
         return MultiPlayerMatch(
-            board, id, state, player1, userId2, matchType, version + 1
+            board, id, MatchState.RUNNING, player1, userId2, matchType, version + 1
         )
     }
 

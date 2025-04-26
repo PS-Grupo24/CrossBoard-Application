@@ -2,6 +2,7 @@ package crossBoard.repository.jdbc
 
 import com.google.gson.Gson
 import crossBoard.domain.*
+import crossBoard.httpModel.MatchCancelOutput
 import crossBoard.repository.interfaces.MatchRepository
 import javax.sql.DataSource
 import java.sql.ResultSet
@@ -24,10 +25,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
     }
 
     override fun getRunningMatchByUser(userId:Int): MultiPlayerMatch? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT * FROM match WHERE (player1 = ? OR player2 = ?) AND state = ?").apply {
+        val prepared = connection.prepareStatement("SELECT * FROM match WHERE (player1 = ? OR player2 = ?) AND (state = ? OR state = ?)").apply {
             setInt(1, userId)
             setInt(2, userId)
             setString(3, MatchState.RUNNING.toString())
+            setString(4, MatchState.WAITING.toString())
         }
 
         prepared.executeQuery().use { rs ->
@@ -93,6 +95,17 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
             version
         )
     }
+
+    override fun cancelSearch(userId: Int, matchId:Int): MatchCancelOutput = transaction(jdbc){ connection ->
+        connection.prepareStatement("DELETE FROM match WHERE id = ?").apply {
+            setInt(1, matchId)
+            executeUpdate()
+        }
+
+        return@transaction MatchCancelOutput(
+            userId, matchId
+        )
+    }
 }
 
 private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
@@ -117,6 +130,7 @@ private fun getBoard(matchType: MatchType, state: MatchState, serializedBoard: S
     when(matchType) {
         MatchType.TicTacToe -> {
             return when(state){
+                MatchState.WAITING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
                 MatchState.RUNNING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
                 MatchState.DRAW -> Gson().fromJson(serializedBoard, TicTacToeBoardDraw::class.java)
                 MatchState.WIN -> Gson().fromJson(serializedBoard, TicTacToeBoardWin::class.java)
