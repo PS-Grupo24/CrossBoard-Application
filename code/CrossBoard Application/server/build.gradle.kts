@@ -5,10 +5,9 @@ plugins {
     application
 }
 
-group = "org.example.project"
 version = "1.0.0"
 application {
-    mainClass.set("org.example.project.ApplicationKt")
+    mainClass.set("crossBoard.ApplicationKt")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
 }
 

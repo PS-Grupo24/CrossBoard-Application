@@ -83,13 +83,13 @@ kotlin {
 }
 
 android {
-    namespace = "org.example.project"
+    namespace = "crossBoard"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     buildFeatures{
         compose = true
     }
     defaultConfig {
-        applicationId = "org.example.project"
+        applicationId = "crossBoard"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -125,11 +125,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "org.example.project.MainKt"
+        mainClass = "crossBoard.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.example.project"
+            packageName = "crossBoard"
             packageVersion = "1.0.0"
         }
     }

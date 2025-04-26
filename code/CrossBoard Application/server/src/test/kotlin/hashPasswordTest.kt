@@ -1,5 +1,5 @@
 import junit.framework.TestCase.assertEquals
-import repository.interfaces.hashPassword
+import crossBoard.repository.interfaces.hashPassword
 import kotlin.test.Test
 
 class hashPasswordTest {

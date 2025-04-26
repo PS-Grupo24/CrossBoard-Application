@@ -56,7 +56,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.example.project.shared"
+    namespace = "crossBoard.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
