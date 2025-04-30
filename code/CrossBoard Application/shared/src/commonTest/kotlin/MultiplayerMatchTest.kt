@@ -1,5 +1,5 @@
-import crossBoard.domain.MultiPlayerMatch
-import crossBoard.domain.toMatchType
+import com.crossBoard.domain.MultiPlayerMatch
+import com.crossBoard.domain.toMatchType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

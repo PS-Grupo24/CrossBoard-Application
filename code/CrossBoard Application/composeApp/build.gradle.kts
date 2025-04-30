@@ -60,6 +60,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.ui.tooling.preview)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -70,6 +71,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(libs.bundles.ktorClient)
+            implementation (libs.slf4j.nop)
+            implementation(libs.lifecycle.viewmodel.compose)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)
@@ -83,13 +86,13 @@ kotlin {
 }
 
 android {
-    namespace = "crossBoard"
+    namespace = "com.crossBoard"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
-    buildFeatures{
+    buildFeatures {
         compose = true
     }
     defaultConfig {
-        applicationId = "crossBoard"
+        applicationId = "com.crossBoard"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -112,8 +115,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.compose.material3)
-    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
+    val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
     implementation(libs.androidx.compose.material)
@@ -121,16 +123,16 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.ui.android)
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.ui.tooling)
 }
 
 compose.desktop {
     application {
-        mainClass = "crossBoard.MainKt"
+        mainClass = ".com.crossBoard.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "crossBoard"
+            packageName = "com.crossBoard"
             packageVersion = "1.0.0"
         }
     }

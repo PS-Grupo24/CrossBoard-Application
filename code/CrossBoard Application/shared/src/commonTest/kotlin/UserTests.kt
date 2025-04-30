@@ -1,4 +1,8 @@
-import crossBoard.domain.*
+import com.crossBoard.domain.Email
+import com.crossBoard.domain.Password
+import com.crossBoard.domain.Token
+import com.crossBoard.domain.User
+import com.crossBoard.domain.Username
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

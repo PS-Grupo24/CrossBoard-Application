@@ -1,5 +1,5 @@
 
-import crossBoard.domain.Column
+import com.crossBoard.domain.Column
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

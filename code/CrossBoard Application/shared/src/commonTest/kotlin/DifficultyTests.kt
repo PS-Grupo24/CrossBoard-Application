@@ -1,5 +1,5 @@
 
-import crossBoard.domain.Difficulty
+import com.crossBoard.domain.Difficulty
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -7,7 +7,7 @@ plugins {
 
 version = "1.0.0"
 application {
-    mainClass.set("crossBoard.ApplicationKt")
+    mainClass.set("com.crossBoard.ApplicationKt")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
 }
 

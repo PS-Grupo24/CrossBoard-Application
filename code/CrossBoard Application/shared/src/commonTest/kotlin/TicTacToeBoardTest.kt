@@ -1,4 +1,4 @@
-import crossBoard.domain.initialTicTacToePositions
+import com.crossBoard.domain.initialTicTacToePositions
 import kotlin.test.Test
 
 class TicTacToeBoardTest {

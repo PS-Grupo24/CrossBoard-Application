@@ -1,8 +1,8 @@
-import crossBoard.domain.Player
-import crossBoard.domain.TicTacToeBoardRun
-import crossBoard.domain.initialTicTacToePositions
-import crossBoard.domain.MatchType
-import crossBoard.domain.MultiPlayerMatch
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.TicTacToeBoardRun
+import com.crossBoard.domain.initialTicTacToePositions
+import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.MultiPlayerMatch
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
