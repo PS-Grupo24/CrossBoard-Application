@@ -11,14 +11,18 @@ import com.crossBoard.model.AuthState
 import com.crossBoard.model.LoggedUser
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
+import com.russhwolf.settings.Settings
 
 class AuthViewModel(
     private val client: ApiClient,
+    private val settings: Settings,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : Clearable, ViewModel() {
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _authState = MutableStateFlow(AuthState())
+    private val tokenSettingsString = "userToken"
+    private val idSettingsString = "userID"
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun updateLoginUsername(input: String) {
@@ -40,9 +44,18 @@ class AuthViewModel(
         _authState.update { it.copy(registerPasswordInput = input, errorMessage = null) }
     }
 
+    fun maintainSession(maintain: Boolean) {
+        _authState.update {
+            it.copy(
+                maintainSession = maintain
+            )
+        }
+    }
+
     fun showLoginScreen(show: Boolean) {
         _authState.update {
             it.copy(
+                maintainSession = false,
                 isLoginScreenVisible = show,
                 errorMessage = null,
             )
@@ -71,6 +84,10 @@ class AuthViewModel(
                         loginPasswordInput = "",
                         loginUsernameInput = ""
                     ) }
+                    if (_authState.value.maintainSession) {
+                        settings.putString(tokenSettingsString, result.value.token)
+                        settings.putInt(idSettingsString, result.value.id)
+                    }
                 }
                 is Failure -> {
                     _authState.update {
@@ -112,6 +129,10 @@ class AuthViewModel(
                         registerPasswordInput = "",
                         registerUsernameInput = ""
                     ) }
+                    if (_authState.value.maintainSession) {
+                        settings.putString(tokenSettingsString, result.value.token)
+                        settings.putInt(idSettingsString, result.value.id)
+                    }
                 }
                 is Failure -> {
                     _authState.update { it.copy(isLoading = false, errorMessage = result.value) }
@@ -122,6 +143,16 @@ class AuthViewModel(
 
     fun logout(){
         _authState.value = AuthState()
+        settings.remove(tokenSettingsString)
+        settings.remove(idSettingsString)
+    }
+
+    fun checkSession(){
+        val token = settings.getStringOrNull(tokenSettingsString)
+        val id = settings.getIntOrNull(idSettingsString)
+        if (token != null && id != null) {
+            _authState.update{ it.copy(userToken = token, currentUser = LoggedUser(id, token),isLoading = false, errorMessage = null) }
+        }
     }
 
     override fun clear() {

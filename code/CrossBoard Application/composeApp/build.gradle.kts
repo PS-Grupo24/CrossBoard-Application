@@ -73,6 +73,7 @@ kotlin {
             implementation(libs.bundles.ktorClient)
             implementation (libs.slf4j.nop)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.multiplatform.settings.v130)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)

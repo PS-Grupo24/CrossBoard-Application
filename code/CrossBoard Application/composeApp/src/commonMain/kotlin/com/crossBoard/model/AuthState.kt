@@ -9,7 +9,7 @@ data class AuthState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isLoginScreenVisible: Boolean = true,
-
+    val maintainSession: Boolean = false,
 
     val loginUsernameInput: String = "",
     val loginPasswordInput: String = "",

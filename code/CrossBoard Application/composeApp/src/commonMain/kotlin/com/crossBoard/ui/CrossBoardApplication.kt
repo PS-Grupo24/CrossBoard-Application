@@ -14,10 +14,11 @@ import com.crossBoard.ApiClient
 import com.crossBoard.ui.screens.AuthenticationScreen
 import com.crossBoard.ui.viewModel.AuthViewModel
 import com.crossBoard.ui.viewModel.UserInfoViewModel
+import com.russhwolf.settings.Settings
 
 @Composable
-fun CrossBoardApplication(client: ApiClient){
-    val authViewModel = remember { AuthViewModel(client) }
+fun CrossBoardApplication(client: ApiClient, settings: Settings) {
+    val authViewModel = remember { AuthViewModel(client, settings) }
     val userViewModel = remember { UserInfoViewModel(client) }
     DisposableEffect(Unit) {
         onDispose {
@@ -25,12 +26,10 @@ fun CrossBoardApplication(client: ApiClient){
             userViewModel.clear()
         }
     }
-
+    authViewModel.checkSession()
     val authState by authViewModel.authState.collectAsState()
     val userInfoState by userViewModel.user.collectAsState()
-
     if (authState.isAuthenticated) {
-
         val userToken = authState.userToken
         val currentUserId = authState.currentUser?.id
 
@@ -49,7 +48,7 @@ fun CrossBoardApplication(client: ApiClient){
         }
         else{
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: Authentication state inconsistent. Please logout.")
+                Text("Error: Authentication Failed. Please logout.")
                 Spacer(Modifier.height(20.dp))
                 Button(onClick = { authViewModel.logout() }) { Text("Logout") }
             }
@@ -68,7 +67,8 @@ fun CrossBoardApplication(client: ApiClient){
 
             onLoginClick = authViewModel::login,
             onRegisterClick = authViewModel::register,
-            onSwitchScreen = authViewModel::showLoginScreen
+            onSwitchScreen = authViewModel::showLoginScreen,
+            onMaintainSession = authViewModel::maintainSession,
             )
     }
 }

@@ -12,10 +12,12 @@ fun main() = application {
         title = "CrossBoard Application",
     ) {
         val host = getHost()
+        val settings = getSettings()
         App(
             client = remember {
                 ApiClient(createHttpClient(OkHttp.create()), host)
-            }
+            },
+            settings
         )
     }
 }

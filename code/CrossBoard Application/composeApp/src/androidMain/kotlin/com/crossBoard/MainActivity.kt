@@ -10,12 +10,15 @@ import com.crossBoard.utils.createHttpClient
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidAppContext.initialize(this)
         val host = getHost()
+        val settings = getSettings()
         setContent {
             App(
                 client = remember {
                     ApiClient(createHttpClient(OkHttp.create()), host)
-                }
+                },
+                settings
             )
         }
     }

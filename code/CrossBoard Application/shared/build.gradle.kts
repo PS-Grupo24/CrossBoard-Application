@@ -16,11 +16,9 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    
     jvm()
     
     @OptIn(ExperimentalWasmDsl::class)
@@ -44,6 +42,7 @@ kotlin {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
             implementation(libs.bundles.ktorClient)
+            implementation(libs.multiplatform.settings.v130)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

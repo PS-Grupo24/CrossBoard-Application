@@ -10,9 +10,13 @@ import com.crossBoard.utils.createHttpClient
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val host = getHost()
+    val settings = getSettings()
     ComposeViewport(document.body!!) {
-        App(client = remember {
-            ApiClient(createHttpClient(JsClient().create()), host)
-        })
+        App(
+            client = remember {
+                ApiClient(createHttpClient(JsClient().create()), host)
+            },
+            settings
+        )
     }
 }

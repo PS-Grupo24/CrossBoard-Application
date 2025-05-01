@@ -27,7 +27,8 @@ fun AuthenticationScreen(
     onRegisterPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
-    onSwitchScreen: (showLogin: Boolean) -> Unit
+    onSwitchScreen: (showLogin: Boolean) -> Unit,
+    onMaintainSession: (Boolean) -> Unit
 ){
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(
         unfocusedBorderColor = CustomColor.LightBrown.value,
@@ -52,100 +53,26 @@ fun AuthenticationScreen(
         Spacer(Modifier.height(24.dp))
 
         if (authState.isLoginScreenVisible) {
-            OutlinedTextField(
-                value = authState.loginUsernameInput,
-                onValueChange = onLoginUsernameChange,
-                label = { Text("Username") },
-                isError = authState.errorMessage != null,
-                singleLine = true,
-                colors = textFieldColors,
+            LoginScreen(
+                authState,
+                onLoginUsernameChange,
+                textFieldColors,
+                onLoginPasswordChange,
+                onLoginClick,
+                onSwitchScreen,
+                onMaintainSession
             )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = authState.loginPasswordInput,
-                onValueChange = onLoginPasswordChange,
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                isError = authState.errorMessage != null,
-                singleLine = true,
-                colors = textFieldColors
-            )
-            Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = onLoginClick,
-                enabled = !authState.isLoading,
-                colors = ButtonDefaults.textButtonColors(backgroundColor = Color(0xFFB57B5C)))
-            {
-                Text("Login", color = Color.White)
-            }
-            TextButton(onClick = { onSwitchScreen(false) }, enabled = !authState.isLoading) {
-                Text("Don't have an account? Register", color = CustomColor.DarkBrown.value)
-            }
-
         } else {
-
-            OutlinedTextField(
-                value = authState.registerUsernameInput,
-                onValueChange = onRegisterUsernameChange,
-                label = { Text("Username") },
-                isError = authState.errorMessage != null,
-                singleLine = true,
-                colors = textFieldColors,
+            RegisterScreen(
+                authState,
+                onRegisterUsernameChange,
+                onRegisterPasswordChange,
+                onRegisterEmailChange,
+                textFieldColors,
+                onRegisterClick,
+                onSwitchScreen,
+                onMaintainSession
             )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = authState.registerEmailInput,
-                onValueChange = onRegisterEmailChange,
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                isError = authState.errorMessage != null,
-                singleLine = true,
-                colors = textFieldColors,
-            )
-            Spacer(Modifier.height(8.dp))
-
-
-            OutlinedTextField(
-                value = authState.registerPasswordInput,
-                onValueChange = onRegisterPasswordChange,
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                isError = authState.errorMessage != null,
-                singleLine = true,
-                colors = textFieldColors,
-            )
-
-
-            if (!authState.isLoginScreenVisible && authState.registerPasswordInput.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth(0.8f)) {
-
-                    val password = authState.registerPasswordInput
-                    val hasMinLength = remember(password) { password.length >= 8 }
-                    val hasUppercase = remember(password) { password.contains(Regex("[A-Z]")) }
-                    val hasLowercase = remember(password) { password.contains(Regex("[a-z]")) }
-                    val hasNumber = remember(password) { password.contains(Regex("[0-9]")) }
-                    val hasSpecial = remember(password) { password.contains(Regex("[!@#\$%^&*]")) }
-
-                    PasswordRequirement(text = "At least 8 characters", isMet = hasMinLength)
-                    PasswordRequirement(text = "At least one uppercase letter", isMet = hasUppercase)
-                    PasswordRequirement(text = "At least one lowercase letter", isMet = hasLowercase)
-                    PasswordRequirement(text = "At least one number", isMet = hasNumber)
-                    PasswordRequirement(text = "At least one special character (!@#\$%^&*)", isMet = hasSpecial)
-                }
-            }
-
-
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = onRegisterClick, enabled = !authState.isLoading, colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)) {
-                Text("Register", color = Color.White)
-            }
-            TextButton(onClick = { onSwitchScreen(true) }, enabled = !authState.isLoading) {
-                Text("Already have an account? Login", color = CustomColor.DarkBrown.value)
-            }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -170,16 +97,3 @@ fun AuthenticationScreen(
     }
 }
 
-@Composable
-fun PasswordRequirement(
-    text: String,
-    isMet: Boolean
-) {
-    Text(
-        text = "• $text",
-        color = if (isMet) CustomColor.DarkBrown.value
-        else Color.Red,
-        style = MaterialTheme.typography.caption,
-        fontSize = 12.sp
-    )
-}

@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.crossBoard.model.UserInfoState
+import com.crossBoard.utils.CustomColor
 
 @Composable
 fun ProfileScreen(
@@ -19,10 +20,13 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Profile", style = MaterialTheme.typography.h4)
-        Spacer(Modifier.height(32.dp))
-        Text("User ID: ${user.id}", style = MaterialTheme.typography.body1)
-        Text("Username: ${user.username}", style = MaterialTheme.typography.body1)
-        Text("Email: ${user.email}", style = MaterialTheme.typography.body1)
+        Text("User ID", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
+        Text("${user.id}", style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        Spacer(Modifier.height(16.dp))
+        Text("Username", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
+        Text(user.username, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        Spacer(Modifier.height(16.dp))
+        Text("Email", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
+        Text(user.email, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
     }
 }

@@ -2,21 +2,22 @@
 
 package com.crossBoard
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.crossBoard.ui.screens.FindMatchScreen
 import androidx.compose.ui.tooling.preview.Preview
+import com.crossBoard.model.AuthState
 import com.crossBoard.model.UserInfoState
 import com.crossBoard.ui.MainMenu
-import com.crossBoard.ui.screens.MainMenuScreen
-import com.crossBoard.ui.screens.WaitingScreen
+import com.crossBoard.ui.screens.*
 import com.crossBoard.ui.viewModel.MatchViewModel
 import com.crossBoard.utils.createHttpClient
 import io.ktor.client.engine.okhttp.*
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(showBackground = true)
 @Composable
 fun PreviewFindMatchScreenPreview() {
@@ -49,4 +50,33 @@ fun MainMenuPreview() {
 @Composable
 fun PreviewWaitingMatchScreen() {
     WaitingScreen(errorMessage = null, onCancelClick = {}, )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewProfileScreen() {
+    ProfileScreen(
+        UserInfoState(
+            90387409,
+            "Alice",
+            "Alice@example.com",
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewLoginScreen() {
+    AuthenticationScreen(
+        AuthState(),
+        onLoginPasswordChange = {},
+        onLoginClick = {},
+        onLoginUsernameChange = {},
+        onSwitchScreen = {},
+        onRegisterEmailChange = {},
+        onRegisterClick = {},
+        onRegisterUsernameChange = {},
+        onRegisterPasswordChange = {},
+        onMaintainSession = {}
+    )
 }

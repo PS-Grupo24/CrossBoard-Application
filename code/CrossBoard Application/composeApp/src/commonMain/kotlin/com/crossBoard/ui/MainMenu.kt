@@ -33,13 +33,15 @@ fun MainMenu(
 ){
     val vm = remember { MainMenuViewModel() }
     val mainMenuState  by vm.mainMenuState.collectAsState()
+    vm.setTobBarMessage("Welcome, ${userInfoState.username}!")
+
     DisposableEffect(Unit){
         onDispose {
             vm.clear()
         }
     }
+
     var showConfirmDialog by remember { mutableStateOf(false) }
-    vm.setTobBarMessage("Welcome, ${userInfoState.username}!")
     if (showConfirmDialog) {
         MyAlertDialog(
             {showConfirmDialog = false},
@@ -62,8 +64,8 @@ fun MainMenu(
                         text = mainMenuState.topBarMessage, color = Color.White
                     )
                         },
-                navigationIcon = if (mainMenuState.currentMainScreen != MainScreen.MainMenu && mainMenuState.currentSubScreen != SubScreen.Match )
-                {
+                navigationIcon =
+                    if (mainMenuState.currentMainScreen != MainScreen.MainMenu && mainMenuState.currentSubScreen != SubScreen.Match ) {
                     {
                         IconButton(
                             onClick = {
