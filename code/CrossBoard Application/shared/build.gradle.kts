@@ -48,6 +48,10 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.serialization.json)
         }
+        wasmJsMain.dependencies {
+            implementation(libs.kotlinx.browser)
+        }
+
     }
     sourceSets.commonTest.dependencies {
         implementation(kotlin("test"))
