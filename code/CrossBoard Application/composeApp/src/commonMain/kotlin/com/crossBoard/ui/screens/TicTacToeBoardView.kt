@@ -36,6 +36,8 @@ fun ticTacToeBoardView(
                     }
 
                     Cell(
+                        rowIndex = rowIndex,
+                        colIndex = colIndex,
                         playerSymbol = playerSymbol,
                         onClick = { onCellClick(rowIndex, colIndex) },
                         enabled = enabled && playerSymbol == null,

@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.Board
@@ -12,17 +13,8 @@ import com.crossBoard.domain.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.Player
-
-data class PlayerInfo(
-    val id: Int?,
-    val username: String,
-    val symbol: String,
-
-){
-    override fun toString(): String {
-        return "$username->($symbol)"
-    }
-}
+import com.crossBoard.model.PlayerInfo
+import com.crossBoard.utils.CustomColor
 
 @Composable
 fun GameScreen(
@@ -89,15 +81,15 @@ fun MatchInfoPanel(
 ){
     val me = if (currentUserId == user1Info.id) "Me: $user1Info" else "Me: $user2Info"
     val opponent = if (currentUserId == user1Info.id) "Opponent: $user2Info" else "Opponent: $user1Info"
-    Text("Match ID: $matchId", style = MaterialTheme.typography.h6)
+    Text("Match ID: $matchId", style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
     Spacer(Modifier.height(8.dp))
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(me, style = MaterialTheme.typography.body1)
+        Text(me, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
         val opponentText = if (user2Info.id == null) "Waiting..." else opponent
-        Text(opponentText, style = MaterialTheme.typography.body1)
+        Text(opponentText, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
     }
 }
 
@@ -124,7 +116,7 @@ fun GameStatusAndBoard(
         else -> "Unknown State"
     }
 
-    Text(status, style = MaterialTheme.typography.h5)
+    Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
     Spacer(Modifier.height(16.dp))
     ticTacToeBoardView(
         board = board,
@@ -184,9 +176,10 @@ fun GameActions(
 
                 Button(
                     onClick = onPlayAgainClick,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.DarkBrown.value)
                 ) {
-                    Text("Play Again")
+                    Text("Play Again", color = Color.White)
                 }
             } else {
                 Button(
