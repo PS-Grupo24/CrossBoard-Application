@@ -34,7 +34,6 @@ class UserInfoViewModel(
 
         }
     }
-
     override fun clear() {
         viewModelScope.cancel()
     }

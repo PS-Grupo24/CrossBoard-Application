@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 
 class MainMenuViewModel(
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-): Clearable, ViewModel() {
+): Clearable {
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _mainMenuState = MutableStateFlow(MainMenuState(topBarMessage = "Welcome!"))
     val mainMenuState: StateFlow<MainMenuState> = _mainMenuState.asStateFlow()
@@ -51,6 +51,5 @@ class MainMenuViewModel(
     }
     override fun clear() {
         viewModelScope.cancel()
-        println("NavigationViewModel cleared.")
     }
 }

@@ -17,7 +17,7 @@ class AuthViewModel(
     private val client: ApiClient,
     private val settings: Settings,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main
-) : Clearable, ViewModel() {
+) : Clearable{
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _authState = MutableStateFlow(AuthState())
@@ -159,7 +159,5 @@ class AuthViewModel(
         viewModelScope.cancel()
     }
 
-    override fun onCleared() {
-        viewModelScope.cancel()
-    }
+
 }

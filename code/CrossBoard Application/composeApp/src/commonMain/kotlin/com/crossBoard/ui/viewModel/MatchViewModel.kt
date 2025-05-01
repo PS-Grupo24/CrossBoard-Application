@@ -6,11 +6,7 @@ import com.crossBoard.httpModel.toMultiplayerMatch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
-import com.crossBoard.domain.MatchState
-import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicPosition
-import com.crossBoard.domain.TicTacToeBoard
-import com.crossBoard.domain.toMove
+import com.crossBoard.domain.*
 import com.crossBoard.model.MatchUiState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
@@ -147,21 +143,7 @@ class MatchViewModel(
         if (match.state != MatchState.WAITING) return
 
         viewModelScope.launch {
-            _matchState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            try {
-                when(val result = client.cancelSearch(userToken, match.id)){
-                    is Success -> {
-                        resetMatch()
-                    }
-                    is Failure -> {
-                        _matchState.update { it.copy(isLoading = false, errorMessage = result.value) }
-                    }
-                }
-            }
-            catch (e: Exception){
-                _matchState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
-            }
+            doCancelSearch(match.id)
         }
     }
     fun makeMove(rowIndex: Int, columnIndex: Int){
@@ -233,32 +215,7 @@ class MatchViewModel(
         val match = currentState.currentMatch ?: return
 
         viewModelScope.launch {
-            _matchState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            try {
-                val forfeitedMatch = match.forfeit(currentUserId)
-                _matchState.update { it.copy(currentMatch = forfeitedMatch) }
-
-                when(val result = client.forfeitMatch(userToken, match.id)){
-                    is Success -> {
-                        stopPolling()
-                        _matchState.update { it.copy(isLoading = false, errorMessage = null) }
-                    }
-
-                    is Failure -> {
-                        _matchState.update { it.copy(errorMessage = result.value, isLoading = false, currentMatch = match) }
-                    }
-                }
-            }
-            catch (e: Exception){
-                _matchState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message, currentMatch = match) }
-            }
-            finally {
-                if(_matchState.value.isLoading){
-                    _matchState.update { it.copy(isLoading = false) }
-                }
-            }
-
+            doForfeit(match)
         }
     }
     fun resetMatch() {
@@ -308,11 +265,60 @@ class MatchViewModel(
         }
     }
 
-    override fun clear() {
-        if (_matchState.value.currentMatch?.state == MatchState.WAITING) cancelSearch()
-        if (_matchState.value.currentMatch?.state == MatchState.RUNNING) forfeit()
-        stopPolling()
-        viewModelScope.cancel()
+    private suspend fun doCancelSearch(matchId: Int){
+        _matchState.update { it.copy(isLoading = true, errorMessage = null) }
 
+        try {
+            when(val result = client.cancelSearch(userToken,matchId)){
+                is Success -> {
+                    resetMatch()
+                }
+                is Failure -> {
+                    _matchState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                }
+            }
+        }
+        catch (e: Exception){
+            _matchState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
+        }
+    }
+
+    private suspend fun doForfeit(match: MultiPlayerMatch){
+        _matchState.update { it.copy(isLoading = true, errorMessage = null) }
+
+        try {
+            val forfeitedMatch = match.forfeit(currentUserId)
+            _matchState.update { it.copy(currentMatch = forfeitedMatch) }
+
+            when(val result = client.forfeitMatch(userToken, match.id)){
+                is Success -> {
+                    stopPolling()
+                    _matchState.update { it.copy(isLoading = false, errorMessage = null) }
+                }
+
+                is Failure -> {
+                    _matchState.update { it.copy(errorMessage = result.value, isLoading = false, currentMatch = match) }
+                }
+            }
+        }
+        catch (e: Exception){
+            _matchState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message, currentMatch = match) }
+        }
+        finally {
+            if(_matchState.value.isLoading){
+                _matchState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    override fun clear() {
+        val match = _matchState.value.currentMatch
+        val state = match?.state
+
+        CoroutineScope(Dispatchers.Default).launch {
+            if (match != null && state == MatchState.WAITING ) doCancelSearch(match.id)
+            if (state == MatchState.RUNNING) doForfeit(match)
+            viewModelScope.cancel()
+        }
     }
 }
