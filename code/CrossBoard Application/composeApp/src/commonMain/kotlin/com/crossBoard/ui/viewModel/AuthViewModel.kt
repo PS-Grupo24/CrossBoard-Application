@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.crossBoard.ApiClient
+import com.crossBoard.domain.*
 import com.crossBoard.model.AuthState
-import com.crossBoard.model.LoggedUser
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
 import com.russhwolf.settings.Settings
@@ -22,6 +22,9 @@ class AuthViewModel(
     private val _authState = MutableStateFlow(AuthState())
     private val tokenSettingsString = "userToken"
     private val idSettingsString = "userID"
+    private val nameSettingsString = "userUsername"
+    private val emailSettingsString = "userEmail"
+    private val passwordSettingsString = "userPassword"
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun updateLoginUsername(input: String) {
@@ -71,22 +74,32 @@ class AuthViewModel(
 
         viewModelScope.launch {
             _authState.update { it.copy(isLoading = true, errorMessage = null) }
+            val username = currentState.loginUsernameInput.trim()
+            val password = currentState.loginPasswordInput
             when(val result = client.login(
-                currentState.loginUsernameInput.trim(),
-                currentState.loginPasswordInput,
+                username, password
             )){
                 is Success -> {
                     _authState.update { it.copy(
                         isLoading = false,
-                        userToken = result.value.token,
-                        currentUser = LoggedUser(result.value.id, result.value.token),
+                        user = User(
+                            result.value.id,
+                            Username(username),
+                            Email(result.value.email),
+                            Password(password),
+                            Token(result.value.token)
+                        ),
                         loginPasswordInput = "",
                         loginUsernameInput = ""
                     ) }
-                    if (_authState.value.maintainSession) {
-                        settings.putString(tokenSettingsString, result.value.token)
-                        settings.putInt(idSettingsString, result.value.id)
-                    }
+                    if (_authState.value.maintainSession) storeSettings(
+                        settings,
+                        result.value.id,
+                        username,
+                        result.value.email,
+                        password,
+                        result.value.token
+                    )
                 }
                 is Failure -> {
                     _authState.update {
@@ -112,26 +125,37 @@ class AuthViewModel(
 
         viewModelScope.launch {
             _authState.update { it.copy(isLoading = true, errorMessage = null) }
+            val username = currentState.loginUsernameInput.trim()
+            val email = currentState.registerEmailInput.trim()
+            val password = currentState.registerPasswordInput
             when(val result = client.register(
-                currentState.registerUsernameInput.trim(),
-                currentState.registerEmailInput.trim(),
-                currentState.registerPasswordInput,
+                username, email, password
             )){
                 is Success -> {
                     _authState.update { it.copy(
                         isLoading = false,
-                        userToken = result.value.token,
-                        currentUser = LoggedUser(result.value.id, result.value.token),
+                        user = User(
+                            result.value.id,
+                            Username(username),
+                            Email(email),
+                            Password(password),
+                            Token(result.value.token)
+
+                        ),
                         loginUsernameInput = currentState.loginUsernameInput,
 
                         registerEmailInput = "",
                         registerPasswordInput = "",
                         registerUsernameInput = ""
                     ) }
-                    if (_authState.value.maintainSession) {
-                        settings.putString(tokenSettingsString, result.value.token)
-                        settings.putInt(idSettingsString, result.value.id)
-                    }
+                    if (_authState.value.maintainSession) storeSettings(
+                        settings,
+                        result.value.id,
+                        username,
+                        email,
+                        password,
+                        result.value.token
+                    )
                 }
                 is Failure -> {
                     _authState.update { it.copy(isLoading = false, errorMessage = result.value) }
@@ -144,18 +168,32 @@ class AuthViewModel(
         _authState.value = AuthState()
         settings.remove(tokenSettingsString)
         settings.remove(idSettingsString)
+        settings.remove(nameSettingsString)
+        settings.remove(emailSettingsString)
+        settings.remove(passwordSettingsString)
     }
 
     fun checkSession(){
         val token = settings.getStringOrNull(tokenSettingsString)
         val id = settings.getIntOrNull(idSettingsString)
-        if (token != null && id != null) {
-            _authState.update{ it.copy(userToken = token, currentUser = LoggedUser(id, token),isLoading = false, errorMessage = null) }
+        val email = settings.getStringOrNull(emailSettingsString)
+        val password = settings.getStringOrNull(passwordSettingsString)
+        val username = settings.getStringOrNull(nameSettingsString)
+        if (token != null && id != null && email != null && password != null && username != null) {
+            _authState.update{ it.copy(user = User(id, Username(username), Email(email), Password(password), Token(token)),isLoading = false, errorMessage = null) }
         }
     }
 
     override fun clear() {
         viewModelScope.cancel()
+    }
+
+    private fun storeSettings(settings: Settings, id: Int, username: String, email: String, password: String, token: String) {
+        settings.putInt(idSettingsString, id)
+        settings.putString(nameSettingsString, username)
+        settings.putString(passwordSettingsString, password)
+        settings.putString(tokenSettingsString, token)
+        settings.putString(emailSettingsString, email)
     }
 
 

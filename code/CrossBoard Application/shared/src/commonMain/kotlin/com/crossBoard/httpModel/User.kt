@@ -70,5 +70,6 @@ data class UserLoginInput(
 @Serializable
 data class UserLoginOutput(
     val id:Int,
-    val token: String
+    val token: String,
+    val email: String
 )

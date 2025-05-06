@@ -1,11 +1,11 @@
 package com.crossBoard.model
 
 import androidx.compose.runtime.Immutable
+import com.crossBoard.domain.User
 
 @Immutable
 data class AuthState(
-    val userToken: String? = null,
-    val currentUser: LoggedUser? = null,
+    val user: User? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isLoginScreenVisible: Boolean = true,
@@ -17,5 +17,5 @@ data class AuthState(
     val registerEmailInput: String = "",
     val registerPasswordInput: String = ""
 ) {
-    val isAuthenticated: Boolean get() = userToken != null
+    val isAuthenticated: Boolean get() = user != null
 }

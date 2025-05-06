@@ -123,7 +123,7 @@ class MemoryUserRep : UserRepository {
         val hashPassword = hashPassword(password.value)
         val user = users.find { it.username == username }!!
 
-        if (user.password.value == hashPassword) return UserLoginOutput(user.id, user.token.value)
+        if (user.password.value == hashPassword) return UserLoginOutput(user.id, user.token.value, user.email.value)
         return null
     }
 }

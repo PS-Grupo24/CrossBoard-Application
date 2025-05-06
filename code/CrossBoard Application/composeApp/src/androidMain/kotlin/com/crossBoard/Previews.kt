@@ -8,9 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicTacToeBoardRun
-import com.crossBoard.domain.initialTicTacToePositions
+import com.crossBoard.domain.*
 import com.crossBoard.model.AuthState
 import com.crossBoard.model.UserInfoState
 import com.crossBoard.ui.MainMenu
@@ -41,11 +39,8 @@ fun MainMenuScreenPreview() {
 fun MainMenuPreview() {
     val client = ApiClient(createHttpClient(OkHttp.create()), getHost())
     MainMenu(client,
-        "ops",
-        1,
-        UserInfoState(1, "String", "String", false, null),
-        {},
-        {}
+        User(1, Username("Ruben"), Email("Ruben@gmail.com"), Password("Ruben"), Token("123")),
+        { }
     )
 }
 
@@ -53,18 +48,6 @@ fun MainMenuPreview() {
 @Composable
 fun PreviewWaitingMatchScreen() {
     WaitingScreen(errorMessage = null, onCancelClick = {}, )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfileScreen() {
-    ProfileScreen(
-        UserInfoState(
-            90387409,
-            "Alice",
-            "Alice@example.com",
-        )
-    )
 }
 
 @Preview(showBackground = true)

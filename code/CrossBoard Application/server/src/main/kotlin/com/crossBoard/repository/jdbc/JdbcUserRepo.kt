@@ -123,7 +123,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
     override fun login(username: Username, password: Password): UserLoginOutput? = transaction(jdbc){ connection ->
         val hashPassword = hashPassword(password.value)
-        val prepared = connection.prepareStatement("SELECT password, token, id FROM USERS WHERE username = ?").apply {
+        val prepared = connection.prepareStatement("SELECT password, token, id, email FROM USERS WHERE username = ?").apply {
             setString(1, username.value)
         }
 
@@ -133,7 +133,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
                 if (hashPassword == actualPassword){
                      return@transaction UserLoginOutput(
                         rs.getInt("id"),
-                        rs.getString("token")
+                        rs.getString("token"), rs.getString("email"),
                     )
                 }
 

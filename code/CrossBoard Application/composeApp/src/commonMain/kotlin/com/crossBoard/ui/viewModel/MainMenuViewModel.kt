@@ -1,6 +1,5 @@
 package com.crossBoard.ui.viewModel
 
-import androidx.lifecycle.ViewModel
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.MainMenuState
 import com.crossBoard.model.SubScreen

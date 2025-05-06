@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.crossBoard.ApiClient
+import com.crossBoard.domain.User
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.SubScreen
 import com.crossBoard.model.UserInfoState
@@ -25,15 +26,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun MainMenu(
     client: ApiClient,
-    userToken: String,
-    currentUserId: Int,
-    userInfoState: UserInfoState,
-    onGetUserInfo: () -> Unit,
+    user: User,
     onLogout: () -> Unit,
 ){
     val vm = remember { MainMenuViewModel() }
     val mainMenuState  by vm.mainMenuState.collectAsState()
-    vm.setTobBarMessage("Welcome, ${userInfoState.username}!")
+    vm.setTobBarMessage("Welcome, ${user.username}!")
 
     DisposableEffect(Unit){
         onDispose {
@@ -69,7 +67,7 @@ fun MainMenu(
                     {
                         IconButton(
                             onClick = {
-                                vm.goToMainMenu(userInfoState.username)
+                                vm.goToMainMenu(user.username.value)
                             }
                         )
                         {
@@ -82,7 +80,7 @@ fun MainMenu(
                     if (mainMenuState.currentSubScreen != SubScreen.Match){
                         Button(
                             onClick = {
-                                vm.goToProfile(userInfoState.username)
+                                vm.goToProfile(user.username.value)
                             },
                             colors = ButtonDefaults.buttonColors(CustomColor.LightBrown.value)
                         ) {
@@ -111,9 +109,8 @@ fun MainMenu(
                         )
                     }
                     MainScreen.Profile -> {
-                        onGetUserInfo()
                         ProfileScreen(
-                            userInfoState
+                            user
                         )
                     }
                     MainScreen.GameFlow -> {
@@ -121,8 +118,8 @@ fun MainMenu(
                             onFindMatch = vm::goToFindMatch,
                             onMatch = vm::goToMatch,
                             client = client,
-                            userToken = userToken,
-                            currentUserId = currentUserId,
+                            userToken = user.token.value,
+                            currentUserId = user.id,
                         )
 
                     }
