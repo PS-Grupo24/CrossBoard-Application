@@ -26,7 +26,7 @@ fun Application.module() {
 
     val userService = UsersService(JdbcUserRepo(jdbc))
     val matchService = MatchService(JdbcMatchRepo(jdbc))
-
+    configureWebSocket(matchService, userService)
     configureCors()
     configureSerialization()
     configureRouting(userService, matchService)

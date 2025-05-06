@@ -1,5 +1,6 @@
 package com.crossBoard.ui.viewModel
 
+import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.MainMenuState
 import com.crossBoard.model.SubScreen

@@ -118,11 +118,25 @@ data class MultiPlayerMatch(
         }
     }
 
-
-
     override fun equals(other: Any?) = other is MultiPlayerMatch && id == other.id && other.version == version
     override fun hashCode(): Int {
         return id.hashCode() + version.hashCode()
+    }
+
+    fun isMyTurn(userId: Int): Boolean {
+        require(userId > 0) { "userId must be greater than 0" }
+        require(userId == player1 || userId == player2) { "User is not in match" }
+        val myType = if (userId == player1) board.player1 else board.player2
+
+        return board.turn == myType
+    }
+
+    fun otherPlayer(userId: Int): Int {
+        require(userId > 0) { "userId must be greater than 0" }
+        require(userId == player1 || userId == player2) { "User is not in match" }
+        require(player2 != null) { "Player2 can't be null" }
+
+        return if (userId == player2) player1 else player2
     }
 }
 

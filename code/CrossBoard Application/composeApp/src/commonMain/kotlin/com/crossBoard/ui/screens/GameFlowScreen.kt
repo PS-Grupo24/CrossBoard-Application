@@ -31,7 +31,8 @@ fun GameFlowScreen(
                 errorMessage = matchUiState.errorMessage,
                 onCellClick = onMakeMove,
                 onForfeitClick = onForfeit,
-                onPlayAgainClick = onResetMatch
+                onPlayAgainClick = onResetMatch,
+                timeLeft = matchUiState.timeLeftSeconds
             )
     }
 }

@@ -9,4 +9,7 @@ data class MatchUiState(
     val gameTypeInput: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val webSocketErrorMessage: String? = null,
+    val incomingWebSocketErrorMessage: List<String> = emptyList(),
+    val timeLeftSeconds: Int? = null,
 )

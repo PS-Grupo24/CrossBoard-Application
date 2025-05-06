@@ -1,6 +1,7 @@
 package com.crossBoard.ui.viewModel
 
 import com.crossBoard.ApiClient
+import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.UserInfoState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success

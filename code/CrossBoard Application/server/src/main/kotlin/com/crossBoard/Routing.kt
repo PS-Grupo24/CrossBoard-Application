@@ -251,9 +251,9 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
 
-                    when(val userId = usersService.getUserByToken(userToken)){
+                    when(val user = usersService.getUserByToken(userToken)){
                         is Success -> {
-                            when(val match = matchService.cancelSearch(userId.value.id, matchId)){
+                            when(val match = matchService.cancelSearch(user.value.id, matchId)){
                                 is Success -> {
                                     call.respond(match.value)
                                 }
@@ -261,7 +261,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
                             }
                         }
-                        is Failure -> handleFailure(call, userId.value)
+                        is Failure -> handleFailure(call, user.value)
                     }
 
                 }

@@ -1,63 +1,119 @@
 package com.crossBoard.ui.viewModel
 
-import androidx.lifecycle.ViewModel
 import com.crossBoard.httpModel.TicTacToeMoveInput
 import com.crossBoard.httpModel.toMultiplayerMatch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MatchUiState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
+import io.ktor.websocket.*
 
-
-interface Clearable{
-    fun clear()
-}
 
 class MatchViewModel(
     private val client: ApiClient,
     private val userToken: String,
     private val currentUserId: Int,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-): Clearable, ViewModel() {
+): Clearable {
 
-    /*
-    companion object{
-        fun factory(client: ApiClient, userToken: String, currentUserId: Int) = viewModelFactory {
-            initializer {
-                MatchViewModel(client, userToken, currentUserId)
-            }
-        }
-    }*/
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _matchState = MutableStateFlow(MatchUiState())
     val matchState: StateFlow<MatchUiState> = _matchState.asStateFlow()
 
 
     private var pollingJob: Job? = null
+    private var timerJob: Job? = null
+
+    private fun startTurnTimer(durationSeconds: Int) {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            var timeLeft = durationSeconds
+            while (timeLeft >= 0) {
+                _matchState.update { it.copy(timeLeftSeconds = timeLeft) }
+                delay(1000)
+                timeLeft--
+            }
+        }
+    }
+
+    private fun stopTurnTimer() {
+        timerJob?.cancel()
+        _matchState.update { it.copy(timeLeftSeconds = 0) }
+    }
+
+    fun connectToWebsocket() {
+        viewModelScope.launch {
+            client.connectGameWebSocket(currentUserId, userToken)
+                .collect { frame -> handleWebSocketMessage(frame) }
+        }
+    }
+
+    private fun handleWebSocketMessage(frame: Frame){
+        if (frame is Frame.Text){
+            val message = frame.readText()
+            _matchState.update{
+                it.copy(incomingWebSocketErrorMessage = it.incomingWebSocketErrorMessage + message)
+            }
+        }
+    }
+
+    private fun sendMessageToWebSocket(message: String){
+        viewModelScope.launch {
+            try {
+                val frame = Frame.Text(message)
+                client.sendGameWebSocketMessage(frame)
+            }
+            catch (e: Exception){
+                _matchState.update { it.copy(errorMessage = e.message) }
+            }
+        }
+    }
+
+    private fun disconnectFromWebSocket(){
+        viewModelScope.launch {
+            client.disconnectGameWebSocket()
+        }
+    }
+
+
     fun updateGameTypeInput(input: String){
         _matchState.update { it.copy(gameTypeInput = input, errorMessage = null) }
     }
 
     private suspend fun fetchMatchUpdates(matchId: Int): Boolean{
-        val currentState = _matchState.value
+        val currentMatch = _matchState.value
         when(val result = client.getMatch(matchId)){
             is Success -> {
-                val fetchedMatch = result.value
+                val fetchedMatch = result.value.toMultiplayerMatch()
                 val gameEndedOnServer =
-                    fetchedMatch.state == MatchState.WIN.toString() || fetchedMatch.state == MatchState.DRAW.toString()
+                    fetchedMatch?.state == MatchState.WIN || fetchedMatch?.state == MatchState.DRAW
                 val gameAlreadyEndedInUi =
-                    currentState.currentMatch?.state == MatchState.WIN || currentState.currentMatch?.state == MatchState.DRAW
+                    currentMatch.currentMatch?.state == MatchState.WIN || currentMatch.currentMatch?.state == MatchState.DRAW
 
                 if (gameAlreadyEndedInUi && gameEndedOnServer){
-                    _matchState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
+                    _matchState.update { it.copy(currentMatch = fetchedMatch) }
+                    stopPolling()
+                    stopTurnTimer()
                     return false
                 }
-                if (currentState.currentMatch?.player2 == null && fetchedMatch.player2.userId != null)
-                    getPlayersUsernames(null, fetchedMatch.player2.userId)
-                _matchState.update { it.copy(currentMatch = fetchedMatch.toMultiplayerMatch()) }
+
+                if(
+                    fetchedMatch?.version != currentMatch.currentMatch?.version
+                    && !gameAlreadyEndedInUi
+                    && !gameEndedOnServer
+                ) startTurnTimer(30)
+
+                if (currentMatch.currentMatch?.player2 == null && fetchedMatch?.player2 != null)
+                    getPlayersUsernames(null, fetchedMatch.player2)
+
+                _matchState.update { it.copy(currentMatch = fetchedMatch) }
+
+                if(currentMatch.currentMatch?.state == MatchState.WAITING && fetchedMatch?.state == MatchState.RUNNING)
+                    startTurnTimer(30)
 
                 return true
             }
@@ -122,8 +178,10 @@ class MatchViewModel(
                     is Success -> {
                         val match = result.value.toMultiplayerMatch()
                         _matchState.update { it.copy(isLoading = false, currentMatch = match) }
+                        if (match?.state == MatchState.RUNNING) { startTurnTimer(30)}
                         getPlayersUsernames(match?.player1, match?.player2)
                         startPolling(result.value.matchId)
+                        connectToWebsocket()
                     }
 
                     is Failure -> {
@@ -188,11 +246,14 @@ class MatchViewModel(
                     match.id,
                     match.version,
                     moveInput
-                    )
+                )
                 ){
                     is Success -> {
                         val move = result.value.move.toMove()
                         _matchState.update { it.copy(currentMatch = match.play(move)) }
+                        startTurnTimer(30)
+                        val webSocketMessage = "Player ${playerType.name} made a move at position $rowNumber$columnChar"
+                        sendMessageToWebSocket(webSocketMessage)
                     }
                     is Failure -> {
                         _matchState.update { it.copy(errorMessage = result.value, isLoading = false) }
@@ -227,6 +288,7 @@ class MatchViewModel(
                 errorMessage = null
             )
         }
+        disconnectFromWebSocket()
     }
 
     private fun getPlayersUsernames(player1Id:Int?, player2Id: Int?){
@@ -292,7 +354,10 @@ class MatchViewModel(
 
             when(val result = client.forfeitMatch(userToken, match.id)){
                 is Success -> {
+                    val webSocketMessage = "User $currentUserId has forfeited the game"
+                    sendMessageToWebSocket(webSocketMessage)
                     stopPolling()
+                    stopTurnTimer()
                     _matchState.update { it.copy(isLoading = false, errorMessage = null) }
                 }
 
@@ -318,7 +383,7 @@ class MatchViewModel(
         CoroutineScope(Dispatchers.Default).launch {
             if (match != null && state == MatchState.WAITING ) doCancelSearch(match.id)
             if (state == MatchState.RUNNING) doForfeit(match)
-            viewModelScope.cancel()
         }
+        viewModelScope.cancel()
     }
 }

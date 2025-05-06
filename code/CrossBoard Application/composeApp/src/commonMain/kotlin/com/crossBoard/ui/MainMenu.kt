@@ -14,7 +14,6 @@ import com.crossBoard.ApiClient
 import com.crossBoard.domain.User
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.SubScreen
-import com.crossBoard.model.UserInfoState
 import com.crossBoard.ui.screens.MainMenuScreen
 import com.crossBoard.ui.screens.MyAlertDialog
 import com.crossBoard.ui.screens.ProfileScreen
@@ -31,7 +30,7 @@ fun MainMenu(
 ){
     val vm = remember { MainMenuViewModel() }
     val mainMenuState  by vm.mainMenuState.collectAsState()
-    vm.setTobBarMessage("Welcome, ${user.username}!")
+    vm.setTobBarMessage("Welcome, ${user.username.value}!")
 
     DisposableEffect(Unit){
         onDispose {

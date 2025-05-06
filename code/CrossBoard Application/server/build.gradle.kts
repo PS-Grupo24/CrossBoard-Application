@@ -25,7 +25,7 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.bundles.ktorServer)
     implementation(libs.ktor.server.cors)
-    implementation("io.ktor:ktor-server-cors:3.1.1")
+    implementation(libs.ktor.server.websockets)
     //testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
     //testImplementation("io.ktor:ktor-server-test-host-jvm:3.1.1")

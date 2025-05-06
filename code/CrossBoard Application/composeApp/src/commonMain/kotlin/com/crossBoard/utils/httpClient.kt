@@ -21,11 +21,6 @@ fun createHttpClient(engine: HttpClientEngine): HttpClient {
 
         install(Logging) {
             level = LogLevel.ALL
-            logger = object : Logger {
-                override fun log(message: String) {
-                    println("KTOR HTTP LOG: $message")
-                }
-            }
         }
     }
 }

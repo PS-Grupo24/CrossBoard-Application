@@ -10,6 +10,7 @@ import com.crossBoard.httpModel.UserLoginInput
 import com.crossBoard.httpModel.UserLoginOutput
 import com.crossBoard.httpModel.UserProfileOutput
 import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.interfaces.Clearable
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -17,12 +18,29 @@ import io.ktor.http.*
 import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
 import com.crossBoard.util.Either
+import io.ktor.client.plugins.websocket.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ApiClient(
     private val client: HttpClient,
-    host: Host
-) {
+    host: Host,
+    private val apiScope: CoroutineScope = CoroutineScope(SupervisorJob())
+): Clearable {
     private val baseUrl = host.hostname
+
+    private var gameWebSocketSession: DefaultWebSocketSession? = null
+    private val wsMutex = Mutex()
+
+    private val _incomingMessages = MutableSharedFlow<Frame>(
+        replay = 0,
+        extraBufferCapacity = 64
+    )
+    val incomingMessages: SharedFlow<Frame> = _incomingMessages.asSharedFlow()
+
     suspend fun login(username: String, password: String): Either<String, UserLoginOutput> {
         val response = try {
             println(baseUrl)
@@ -250,5 +268,78 @@ class ApiClient(
             Either.Left(error.message)
         }
 
+    }
+
+    fun connectGameWebSocket(userId:Int, userToken: String): Flow<Frame>{
+        if (gameWebSocketSession?.isActive == true){
+            return incomingMessages
+        }
+
+        apiScope.launch {
+            try {
+                client.webSocket(
+                    method = HttpMethod.Get,
+                    host = baseUrl,
+                    path = "/match-ws",
+                    request = { header(HttpHeaders.Authorization, "Bearer $userToken") },
+                ){
+                    wsMutex.withLock { gameWebSocketSession = this}
+
+                    for (frame in incoming) {
+                        _incomingMessages.emit(frame)
+                    }
+                }
+            }
+            catch (e: Exception) {
+                //_connectionStatusFlow.value = ConnectionStatus.Error(e.message)
+            }
+        }
+
+        return incomingMessages
+            .onStart { println("WS Flow: Collector started incoming messages flow for user")}
+            .onEach { frame -> println("WS Flow: Emitted frame from flow: ${frame::class.simpleName}") }
+            .onCompletion { cause -> println("WS Flow: Collector completed on incoming messages flow for user $userId. Cause: $cause") }
+            .catch { cause -> println("WS Flow: Collector caught exception downstream: ${cause.message}") }
+    }
+
+    suspend fun sendGameWebSocketMessage(frame: Frame) {
+        wsMutex.withLock {
+            val session = gameWebSocketSession
+            if (session?.isActive == true) {
+                try {
+                    session.send(frame)
+                    println("WS Send: Sent frame: ${frame::class.simpleName}")
+                }
+                catch (e: Exception){
+                    println("WS Send: Failed to send frame: ${e.message}")
+                    throw e
+                }
+            }
+        }
+    }
+
+    suspend fun disconnectGameWebSocket(){
+        wsMutex.withLock {
+            val session = gameWebSocketSession
+
+            if (session?.isActive == true) {
+                try {
+                    session.close(CloseReason(CloseReason.Codes.NORMAL, "Client disconnected"))
+                    println("WS Disconnect: Sent close frame.")
+                }
+                catch (e: Exception){
+                    println("WS Disconnect: Failed to send close frame: ${e.message}")
+                }
+                finally {
+                    gameWebSocketSession = null
+                }
+            } else {
+                println("WS Disconnect: No active session to disconnect.")
+            }
+        }
+    }
+
+    override fun clear() {
+        apiScope.cancel()
     }
 }

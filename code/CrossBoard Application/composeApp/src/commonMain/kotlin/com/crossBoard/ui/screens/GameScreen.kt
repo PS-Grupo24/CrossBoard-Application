@@ -26,7 +26,8 @@ fun GameScreen(
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
-    onPlayAgainClick: () -> Unit
+    onPlayAgainClick: () -> Unit,
+    timeLeft: Int?
 ) {
     val board = match.board
     val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
@@ -47,9 +48,9 @@ fun GameScreen(
             matchId = match.id,
             currentUserId = currentUserId?: 0,
             PlayerInfo(match.player1, player1Username, player1Symbol),
-            PlayerInfo(match.player2, player2Username, player2Symbol)
+            PlayerInfo(match.player2, player2Username, player2Symbol),
+            timeLeft = timeLeft,
         )
-
 
         GameStatusAndBoard(
             board = board,
@@ -78,6 +79,7 @@ fun MatchInfoPanel(
     currentUserId: Int,
     user1Info: PlayerInfo,
     user2Info: PlayerInfo,
+    timeLeft: Int?
 ){
     val me = if (currentUserId == user1Info.id) "Me: $user1Info" else "Me: $user2Info"
     val opponent = if (currentUserId == user1Info.id) "Opponent: $user2Info" else "Opponent: $user1Info"
@@ -88,6 +90,11 @@ fun MatchInfoPanel(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(me, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+
+        if (timeLeft != null) {
+            Text("$timeLeft", style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        }
+
         val opponentText = if (user2Info.id == null) "Waiting..." else opponent
         Text(opponentText, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
     }
@@ -146,7 +153,7 @@ fun GameActions(
             onConfirm = {
                 showConfirmDialog = false
                 onForfeitClick()
-                        },
+            },
             confirmText = "Yes, Forfeit",
             onDismiss = {showConfirmDialog = false},
             dismissText = "Cancel",

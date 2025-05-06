@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.AuthState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
@@ -16,7 +17,7 @@ class AuthViewModel(
     private val client: ApiClient,
     private val settings: Settings,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main
-) : Clearable{
+) : Clearable {
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _authState = MutableStateFlow(AuthState())
@@ -118,7 +119,7 @@ class AuthViewModel(
             currentState.registerUsernameInput.isBlank()
             || currentState.registerEmailInput.isBlank()
             || currentState.registerPasswordInput.isBlank()
-            ){
+        ){
             _authState.update { it.copy(errorMessage = "All fields are required.") }
             return
         }
