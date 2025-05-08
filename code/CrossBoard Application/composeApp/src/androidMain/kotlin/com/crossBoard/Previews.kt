@@ -31,10 +31,10 @@ fun PreviewFindMatchScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun MainMenuScreenPreview() {
-    MainMenuScreen({})
+    MainMenuScreen({}, {})
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun MainMenuPreview() {
     val client = ApiClient(createHttpClient(OkHttp.create()), getHost())
@@ -82,5 +82,22 @@ fun PreviewTicBoard(){
         player1Symbol = "X",
         player2Symbol = "O",
         player1Type = Player.WHITE,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewGameScreen() {
+    GameScreen(
+        MultiPlayerMatch.startGame(1, MatchType.TicTacToe).join(2),
+        1,
+        "Ruben",
+        "Luis",
+        {row, col -> },
+        {},
+        false,
+        null,
+        {},
+        30
     )
 }

@@ -14,6 +14,7 @@ create table match (
                         match_type VARCHAR(64) not null,
                         version int not null,
                         state varchar(20) not null,
+                        winner int,
     FOREIGN KEY (player1) References users(id),
     FOREIGN KEY (player2) References users(id)
 );

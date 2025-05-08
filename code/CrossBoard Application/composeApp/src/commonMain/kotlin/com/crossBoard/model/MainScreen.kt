@@ -3,5 +3,6 @@ package com.crossBoard.model
 enum class MainScreen    {
     MainMenu,
     GameFlow,
-    Profile
+    Profile,
+    Statistics
 }

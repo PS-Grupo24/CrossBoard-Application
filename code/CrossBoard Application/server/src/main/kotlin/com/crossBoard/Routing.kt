@@ -48,6 +48,22 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
+
+        route("/user/statistics"){
+            get {
+                runHttp(call){
+                    val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
+
+                    when(val user = usersService.getUserByToken(userToken)) {
+                        is Success -> {
+                            call.respond(matchService.getStatistics(user.value.id))
+                        }
+                        is Failure -> handleFailure(call, user.value)
+                    }
+                }
+            }
+        }
         route("/user") {
             get {
                 runHttp(call) {
@@ -266,7 +282,6 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
                 }
             }
-
         }
     }
 }

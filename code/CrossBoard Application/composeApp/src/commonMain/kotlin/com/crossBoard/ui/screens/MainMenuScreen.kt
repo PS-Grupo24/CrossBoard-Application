@@ -13,6 +13,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun MainMenuScreen(
     onFindMatchClicked: () -> Unit,
+    onCheckStatsClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -29,7 +30,15 @@ fun MainMenuScreen(
             modifier = Modifier.fillMaxWidth(0.7f),
             colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
         ) {
-            Text("Find Match", color = Color.White)
+            Text("Multiplayer Match", color = Color.White)
+        }
+        Spacer(Modifier.height(4.dp))
+        Button(
+            onClick = onCheckStatsClicked,
+            modifier = Modifier.fillMaxWidth(0.7f),
+            colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
+        ){
+            Text("Check Statistics", color = Color.White)
         }
     }
 }
@@ -37,5 +46,5 @@ fun MainMenuScreen(
 @Preview
 @Composable
 fun previewMenuScreen(){
-    MainMenuScreen({})
+    MainMenuScreen({}, {})
 }

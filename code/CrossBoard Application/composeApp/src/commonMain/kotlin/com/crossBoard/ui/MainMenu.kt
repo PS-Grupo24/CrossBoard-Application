@@ -105,6 +105,7 @@ fun MainMenu(
                     MainScreen.MainMenu -> {
                         MainMenuScreen(
                             onFindMatchClicked = { vm.goToGameFlow("Multiplayer Match") },
+                            onCheckStatsClicked = {vm.goToStatistics("Match History")}
                         )
                     }
                     MainScreen.Profile -> {
@@ -120,7 +121,12 @@ fun MainMenu(
                             userToken = user.token.value,
                             currentUserId = user.id,
                         )
-
+                    }
+                    MainScreen.Statistics -> {
+                        Statistics(
+                            user,
+                            client
+                        )
                     }
                 }
             }

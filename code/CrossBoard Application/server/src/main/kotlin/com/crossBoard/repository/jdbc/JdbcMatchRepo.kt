@@ -11,6 +11,7 @@ import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import com.google.gson.Gson
 import com.crossBoard.httpModel.MatchCancelOutput
+import com.crossBoard.httpModel.MatchStatsOutput
 import com.crossBoard.repository.interfaces.MatchRepository
 import javax.sql.DataSource
 import java.sql.ResultSet
@@ -20,7 +21,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
 
     override fun addMatch(match: MultiPlayerMatch): Int = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(match.board)
-        val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
+        val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state, winner) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?, null)", Statement.RETURN_GENERATED_KEYS).apply {
             setInt(1, match.id)
             setString(2, serializedBoard)
             setInt(3, match.player1)
@@ -45,17 +46,22 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
                 val gameType = rs.getString("match_type").toMatchType()
                 val state = rs.getString("state").toMatchState()
                 val board = getBoard(gameType, state, rs.getString("board"))
-                     return@use MultiPlayerMatch(
+                val plyr2Value = rs.getInt("player2")
+                val player2 = if (plyr2Value == 0) null else plyr2Value
+                val winnerValue = rs.getInt("winner")
+                val winner = if (winnerValue == 0) null else winnerValue
+                     return@transaction MultiPlayerMatch(
                         board,
                         rs.getInt("id"),
                          state,
                         rs.getInt("player1"),
-                        rs.getInt("player2"),
+                        player2,
                         gameType,
-                        rs.getInt("version")
+                        rs.getInt("version"),
+                         winner
                     )
             }
-            return@use null
+            return@transaction null
         }
     }
 
@@ -79,17 +85,17 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
     }
 
-    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch = transaction(jdbc) { connection ->
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState, winner: Int?): MultiPlayerMatch = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(board)
-        connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), state = ? ,player1 = ?, player2 = ?, match_type = ?, version = ? WHERE id = ?").apply {
+        connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), state = ? ,player1 = ?, player2 = ?, match_type = ?, version = ?, winner = ? WHERE id = ?").apply {
             setString(1, serializedBoard)
             setString(2, state.toString())
             setInt(3, player1)
             setInt(4, player2 ?: 0)
-            //if (player2 == null) setNull(4) else setInt(4, player2)
             setString(5, matchType.toString())
             setInt(6, version)
-            setInt(7, matchId)
+            setInt(7, winner?:0)
+            setInt(8, matchId)
             executeUpdate()
         }
 
@@ -100,7 +106,8 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
             player1,
             player2,
             matchType,
-            version
+            version,
+            winner
         )
     }
 
@@ -114,6 +121,38 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
             userId, matchId
         )
     }
+
+    override fun getStatistics(userId: Int): List<MatchStatsOutput> = transaction(jdbc){connection ->
+        val statsList = mutableListOf<MatchStatsOutput>()
+        for (matchType in MatchType.entries) {
+            val matches = mutableListOf<MultiPlayerMatch>()
+            val prepared = connection.prepareStatement("SELECT * FROM match WHERE match_type = ? AND (player1 = ? OR player2 = ?)").apply {
+                setString(1, matchType.value)
+                setInt(2, userId)
+                setInt(3, userId)
+            }
+
+            prepared.executeQuery().use{ rs ->
+                while(rs.next()){
+                    val match = multiplayerMatchResult(rs)
+                    matches.add(match)
+                }
+            }
+            val totalMatches = matches.size
+            val totalWins = matches.count{it.winner == userId}
+            val totalDraws = matches.count{it.state == MatchState.DRAW}
+            val stat = MatchStatsOutput(
+                matchType.name,
+                totalMatches,
+                totalWins,
+                totalDraws,
+                totalMatches - totalWins - totalDraws,
+                totalWins.toDouble()/totalMatches.toDouble()
+            )
+            statsList.add(stat)
+        }
+        return@transaction statsList.toList()
+    }
 }
 
 private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
@@ -122,6 +161,8 @@ private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
     val board = getBoard(matchType, state, rs.getString("board"))
     val p2Value = rs.getInt("player2")
     val player2 = if (p2Value == 0) null else p2Value
+    val winnerValue = rs.getInt("winner")
+    val winner = if (winnerValue == 0) null else winnerValue
     return MultiPlayerMatch(
         board,
         rs.getInt("id"),
@@ -129,7 +170,8 @@ private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
         rs.getInt("player1"),
         player2,
         matchType,
-        rs.getInt("version")
+        rs.getInt("version"),
+        winner
     )
 }
 

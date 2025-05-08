@@ -6,6 +6,7 @@ import io.ktor.server.netty.*
 import org.postgresql.ds.PGSimpleDataSource
 import com.crossBoard.repository.jdbc.JdbcMatchRepo
 import com.crossBoard.repository.jdbc.JdbcUserRepo
+import com.crossBoard.repository.memoryRepositories.MemoryMatchRep
 import com.crossBoard.service.MatchService
 import com.crossBoard.service.UsersService
 

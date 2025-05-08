@@ -5,6 +5,7 @@ import com.crossBoard.domain.Move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.httpModel.MatchCancelOutput
+import com.crossBoard.httpModel.MatchStatsOutput
 import com.crossBoard.repository.interfaces.MatchRepository
 import com.crossBoard.triggerAutoForfeit
 import com.crossBoard.util.ApiError
@@ -29,7 +30,8 @@ class MatchService(private val matchRepository: MatchRepository) {
                 updatedMatch.player2,
                 updatedMatch.matchType,
                 updatedMatch.version,
-                updatedMatch.state
+                updatedMatch.state,
+                updatedMatch.winner,
             )
             if (updatedMatch.isMyTurn(userId)) startTurnTimer(updatedMatch.id, userId)
             else startTurnTimer(
@@ -86,7 +88,8 @@ class MatchService(private val matchRepository: MatchRepository) {
             updatedMatch.player2,
             updatedMatch.matchType,
             updatedMatch.version,
-            updatedMatch.state
+            updatedMatch.state,
+            updatedMatch.winner,
         )
         if (updatedMatch.state == MatchState.RUNNING) startTurnTimer(updatedMatch.id, updatedMatch.otherPlayer(userId))
         else cancelTurnTimer(updatedMatch.id)
@@ -108,7 +111,8 @@ class MatchService(private val matchRepository: MatchRepository) {
             forfeitedMatch.player2,
             forfeitedMatch.matchType,
             forfeitedMatch.version,
-            forfeitedMatch.state
+            forfeitedMatch.state,
+            forfeitedMatch.winner,
         )
         return Either.Right(forfeitedMatch)
     }
@@ -126,6 +130,10 @@ class MatchService(private val matchRepository: MatchRepository) {
         val match = matchRepository.getRunningMatchByUser(userId)
             ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         return Either.Right(match)
+    }
+
+    fun getStatistics(userId: Int): List<MatchStatsOutput>{
+        return matchRepository.getStatistics(userId)
     }
 
     private fun startTurnTimer(matchId: Int, userId:Int) {

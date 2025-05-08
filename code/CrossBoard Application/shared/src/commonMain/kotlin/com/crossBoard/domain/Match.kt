@@ -27,6 +27,7 @@ interface Match {
  * @param player1 the first player.
  * @param player2 the second player.
  * @param matchType the type of the match.
+ * @param winner the winner of the match.
  * @return Match the match that was created as a multiplayer game.
  */
 data class MultiPlayerMatch(
@@ -37,6 +38,7 @@ data class MultiPlayerMatch(
     val player2: Int? = null,
     val matchType: MatchType,
     val version: Int,
+    val winner: Int? = null,
 ): Match {
     companion object{
         /**
@@ -62,7 +64,8 @@ data class MultiPlayerMatch(
                     player1,
                     null,
                     matchType,
-                    1
+                    1,
+                    null
                 )
             }
         }
@@ -74,6 +77,9 @@ data class MultiPlayerMatch(
      */
     fun play(move: Move): MultiPlayerMatch {
         val newBoard = board.play(move)
+        val winnerType = if (newBoard is BoardWin) newBoard.winner else null
+        val player1Type = getPlayerType(player1)
+        val winner = if (winnerType == player1Type) player1 else if (winnerType == player1Type.other()) player2 else null
         return MultiPlayerMatch(
             newBoard,
             id,
@@ -81,7 +87,8 @@ data class MultiPlayerMatch(
             player1,
             player2,
             matchType,
-            version + 1
+            version + 1,
+            winner = winner,
         )
     }
 
@@ -90,7 +97,7 @@ data class MultiPlayerMatch(
         require(player2 == null) { "This game is full" }
         require(userId2 != player1) { "Player2 can't be the same as Player1" }
         return MultiPlayerMatch(
-            board, id, MatchState.RUNNING, player1, userId2, matchType, version + 1
+            board, id, MatchState.RUNNING, player1, userId2, matchType, version + 1, null
         )
     }
 
@@ -102,7 +109,16 @@ data class MultiPlayerMatch(
     fun forfeit(player: Int): MultiPlayerMatch {
         val playerType = getPlayerType(player)
         val newBoard = board.forfeit(playerType)
-        return MultiPlayerMatch(newBoard, id, getMatchStateFromBoard(newBoard), player1, player2,matchType, version + 1)
+        return MultiPlayerMatch(
+            newBoard,
+            id,
+            getMatchStateFromBoard(newBoard),
+            player1,
+            player2,
+            matchType,
+            version + 1,
+            winner = if(player == player1) player2 else player1
+        )
     }
 
     /**
@@ -143,7 +159,17 @@ data class MultiPlayerMatch(
 
 
 fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
-    val winner = if (board is BoardWin) board.winner.toString() else null
+    val winner = if (board is BoardWin) board.winner else null
+    val winnerId = when(state){
+        MatchState.WIN -> {
+            val player1Type = getPlayerType(player1)
+            if(winner == player1Type)
+                player1
+            else
+                player2
+        }
+        else -> null
+    }
     return MatchOutput(
         id,
         PlayerOutput(
@@ -155,7 +181,7 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
             getPlayerType(player1).other().toString()
         ),
         BoardOutput(
-            winner,
+            winner.toString(),
             board.turn.toString(),
             board.positions.map { it.toString() },
             board.moves.map { moveToString(it) },
@@ -163,6 +189,7 @@ fun MultiPlayerMatch.toMatchOutput() : MatchOutput {
         matchType.toString(),
         version,
         state.toString(),
+        winnerId
     )
 }
 
@@ -184,5 +211,4 @@ class SinglePlayerMatch(
 ):
     Match {
     override fun getPlayerType(userId: Int): Player = board.player1
-
 }

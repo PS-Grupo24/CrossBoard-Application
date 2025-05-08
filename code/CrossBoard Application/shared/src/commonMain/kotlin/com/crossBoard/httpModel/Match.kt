@@ -13,7 +13,8 @@ data class MatchOutput(
     val board: BoardOutput,
     val gameType: String,
     val version: Int,
-    val state: String
+    val state: String,
+    val winner: Int? = null,
 )
 
 fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
@@ -24,7 +25,8 @@ fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
         player1.userId ?: return null,
         player2.userId,
         gameType.toMatchType(),
-        version
+        version,
+        winner
     )
 }
 

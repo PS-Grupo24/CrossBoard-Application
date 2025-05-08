@@ -4,6 +4,7 @@ import com.crossBoard.httpModel.ErrorMessage
 import com.crossBoard.httpModel.MatchCancelOutput
 import com.crossBoard.httpModel.MatchOutput
 import com.crossBoard.httpModel.MatchPlayedOutput
+import com.crossBoard.httpModel.MatchStatsOutput
 import com.crossBoard.httpModel.UserCreationInput
 import com.crossBoard.httpModel.UserCreationOutput
 import com.crossBoard.httpModel.UserLoginInput
@@ -339,6 +340,28 @@ class ApiClient(
         }
     }
 
+    suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStatsOutput>>{
+        val response = try {
+            client.get("$baseUrl/user/statistics"){
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception) {
+            return Either.Left(e.message ?: "Something went wrong")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            Either.Right(response.body<List<MatchStatsOutput>>())
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
     override fun clear() {
         apiScope.cancel()
     }

@@ -2,10 +2,12 @@ package com.crossBoard.repository.memoryRepositories
 
 import com.crossBoard.domain.Board
 import com.crossBoard.domain.BoardRun
+import com.crossBoard.domain.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.httpModel.MatchCancelOutput
+import com.crossBoard.httpModel.MatchStatsOutput
 import com.crossBoard.repository.interfaces.MatchRepository
 
 /**
@@ -58,10 +60,10 @@ class MemoryMatchRep: MatchRepository {
      * @param player2 the second player.
      * @param matchType the type of the game.
      */
-    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState): MultiPlayerMatch {
+    override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState, winner: Int?): MultiPlayerMatch {
         val m = getMatchById(matchId)
         matches.remove(m)
-        val match = MultiPlayerMatch(board, matchId, state, player1, player2, matchType, version)
+        val match = MultiPlayerMatch(board, matchId, state, player1, player2, matchType, version, winner)
         matches.add(match)
         return match
     }
@@ -72,5 +74,29 @@ class MemoryMatchRep: MatchRepository {
             userId,
             matchId
         )
+    }
+
+    override fun getStatistics(userId: Int): List<MatchStatsOutput> {
+        val statsList = mutableListOf<MatchStatsOutput>()
+        for (matchType in MatchType.entries) {
+            val matchList = matches.filter {
+                it.matchType == matchType &&
+                        (it.player1 == userId || it.player2 == userId)
+            }
+            val matchCount = matchList.size
+            val drawCount = matchList.count { it.state == MatchState.DRAW }
+            val winCount = matchList.count { it.state == MatchState.WIN && (it.board as BoardWin).winner == it.getPlayerType(userId) }
+            val lossCount = matchCount - drawCount - winCount
+            val stats = MatchStatsOutput(
+                matchType.name,
+                matchCount,
+                winCount,
+                drawCount,
+                lossCount,
+                winCount.toDouble() / matchCount.toDouble(),
+            )
+            statsList.add(stats)
+        }
+        return statsList.toList()
     }
 }
