@@ -2,7 +2,6 @@ import com.crossBoard.domain.*
 import com.crossBoard.httpModel.TicTacToeMoveOutput
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertSame
 
 class MoveTests {
     @Test fun moveToStringWithSucesss() {
