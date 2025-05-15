@@ -1,8 +1,7 @@
 package com.crossBoard.domain
 
-
 /**
- * enum class "Player" represents the Player in the application of the game.
+ * Enum class "Player" represents the Player in the application of the game.
  */
 enum class Player {
     WHITE,
@@ -13,7 +12,7 @@ enum class Player {
      * Function "other" used to obtain the opposite type of player.
      * @return Player, the opposite player or empty.
      */
-    fun other() = when(this){
+    fun other() = when(this) {
         EMPTY -> EMPTY
         BLACK -> WHITE
         WHITE -> BLACK
@@ -26,20 +25,24 @@ enum class Player {
         fun random() = listOf(BLACK, WHITE).random()
     }
 
-    override fun toString(): String {
-        return when(this){
+    /**
+     * Function "toString" used to obtain the String representation of the player.
+     * @return String, the String representation of the player.
+     */
+    override fun toString(): String = when(this) {
             WHITE -> "WHITE"
             BLACK -> "BLACK"
             EMPTY -> "EMPTY"
-        }
     }
 }
 
-fun String.toPlayer() : Player {
-    return when(this){
+/**
+ * Function to convert a String to a Player.
+ * @return Player the Player corresponding to the String.
+ */
+fun String.toPlayer() : Player = when(this) {
         "BLACK" -> Player.BLACK
         "WHITE" -> Player.WHITE
         "EMPTY" -> Player.EMPTY
         else -> throw IllegalArgumentException("Unknown player $this")
-    }
 }

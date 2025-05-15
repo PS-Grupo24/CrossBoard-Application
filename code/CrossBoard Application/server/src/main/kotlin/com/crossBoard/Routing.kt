@@ -102,8 +102,6 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                             }
                         }
                     }
-
-
                 }
             }
             //Route to create a user
