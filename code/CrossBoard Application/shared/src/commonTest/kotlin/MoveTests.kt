@@ -24,5 +24,4 @@ class MoveTests {
 
         assertEquals(move, moveOutput.toMove())
     }
-
 }
