@@ -2,7 +2,6 @@
 
 package com.crossBoard
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,10 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.crossBoard.domain.*
 import com.crossBoard.model.AuthState
-import com.crossBoard.model.UserInfoState
 import com.crossBoard.ui.MainMenu
 import com.crossBoard.ui.screens.*
-import com.crossBoard.ui.viewModel.MatchViewModel
+import com.crossBoard.ui.viewModel.MultiplayerMatchViewModel
 import com.crossBoard.utils.createHttpClient
 import io.ktor.client.engine.okhttp.*
 
@@ -23,7 +21,7 @@ import io.ktor.client.engine.okhttp.*
 @Composable
 fun PreviewFindMatchScreenPreview() {
     val client = ApiClient(createHttpClient(OkHttp.create()), getHost())
-    val vm = remember { MatchViewModel(client, "ops", 1) }
+    val vm = remember { MultiplayerMatchViewModel(client, "ops", 1) }
     val matchUiState by vm.matchState.collectAsState()
     FindMatchScreen(matchUiState.gameTypeInput,vm::updateGameTypeInput, vm::findMatch, matchUiState.isLoading, matchUiState.errorMessage)
 }

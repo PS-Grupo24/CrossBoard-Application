@@ -5,8 +5,7 @@ import androidx.compose.runtime.*
 import com.crossBoard.ApiClient
 import com.crossBoard.ui.screens.FindMatchScreen
 import com.crossBoard.ui.screens.GameFlowScreen
-import com.crossBoard.ui.viewModel.MatchViewModel
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.crossBoard.ui.viewModel.MultiplayerMatchViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -17,7 +16,7 @@ fun GameFlow(
     onFindMatch: () -> Unit,
     onMatch: () -> Unit,
 ){
-    val vm = remember { MatchViewModel(client, userToken, currentUserId) }
+    val vm = remember { MultiplayerMatchViewModel(client, userToken, currentUserId) }
     val matchUiState by vm.matchState.collectAsState()
     DisposableEffect(Unit){
         onDispose {
@@ -38,7 +37,7 @@ fun GameFlow(
     else{
         onMatch()
         GameFlowScreen(
-            matchUiState = matchUiState,
+            multiplayerMatchUiState = matchUiState,
             currentUserId = currentUserId,
             onCancelSearch = vm::cancelSearch,
             onMakeMove = { row, column -> vm.makeMove(row, column) },

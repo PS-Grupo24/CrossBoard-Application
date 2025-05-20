@@ -43,7 +43,10 @@ class MainMenuViewModel(
         navigateTo(MainScreen.Statistics)
     }
 
-    fun goToSettings(topBarMessage: String? = null) {}
+    fun goToSinglePlayer(topBarMessage: String? = null) {
+        if (topBarMessage != null) setTobBarMessage(topBarMessage)
+        navigateTo(MainScreen.SinglePlayer)
+    }
 
     fun goToGameFlow(topBarMessage: String? = null) {
         if (topBarMessage != null) setTobBarMessage(topBarMessage)

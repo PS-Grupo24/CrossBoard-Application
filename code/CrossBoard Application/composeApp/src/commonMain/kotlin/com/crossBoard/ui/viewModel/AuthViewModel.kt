@@ -64,104 +64,109 @@ class AuthViewModel(
             )
         }
     }
-    fun login(){
-        val currentState = _authState.value
-        if (currentState.isLoading) return
 
-        if (currentState.loginUsernameInput.isBlank() || currentState.loginPasswordInput.isBlank()) {
-            _authState.update { it.copy(errorMessage = "Username and Password cannot be empty") }
-            return
+    fun playMatch(value: Boolean){
+        _authState.update {
+            it.copy(isLoading = false, errorMessage = null, playMatch = value)
         }
+    }
 
-        viewModelScope.launch {
-            _authState.update { it.copy(isLoading = true, errorMessage = null) }
-            val username = currentState.loginUsernameInput.trim()
-            val password = currentState.loginPasswordInput
-            when(val result = client.login(
-                username, password
-            )){
-                is Success -> {
-                    _authState.update { it.copy(
-                        isLoading = false,
-                        user = User(
+    fun login(){
+        try {
+            val currentState = _authState.value
+            if (currentState.isLoading) return
+
+            val username = Username(currentState.loginUsernameInput.trim())
+            val password = Password(currentState.loginPasswordInput)
+
+            viewModelScope.launch {
+                _authState.update { it.copy(isLoading = true, errorMessage = null) }
+                when(val result = client.login(
+                    username.value, password.value
+                )){
+                    is Success -> {
+                        _authState.update { it.copy(
+                            isLoading = false,
+                            user = User(
+                                result.value.id,
+                                username,
+                                Email(result.value.email),
+                                password,
+                                Token(result.value.token)
+                            ),
+                            loginPasswordInput = "",
+                            loginUsernameInput = ""
+                        ) }
+                        if (_authState.value.maintainSession) storeSettings(
+                            settings,
                             result.value.id,
-                            Username(username),
-                            Email(result.value.email),
-                            Password(password),
-                            Token(result.value.token)
-                        ),
-                        loginPasswordInput = "",
-                        loginUsernameInput = ""
-                    ) }
-                    if (_authState.value.maintainSession) storeSettings(
-                        settings,
-                        result.value.id,
-                        username,
-                        result.value.email,
-                        password,
-                        result.value.token
-                    )
-                }
-                is Failure -> {
-                    _authState.update {
-                        it.copy(isLoading = false, errorMessage = result.value)
+                            username.value,
+                            result.value.email,
+                            password.value,
+                            result.value.token
+                        )
+                    }
+                    is Failure -> {
+                        _authState.update {
+                            it.copy(isLoading = false, errorMessage = result.value)
+                        }
                     }
                 }
             }
         }
+        catch (e: Exception){
+            _authState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
+        }
     }
 
     fun register() {
-        val currentState = _authState.value
-        if (currentState.isLoading) return
+        try {
+            val currentState = _authState.value
+            if (currentState.isLoading) return
 
-        if (
-            currentState.registerUsernameInput.isBlank()
-            || currentState.registerEmailInput.isBlank()
-            || currentState.registerPasswordInput.isBlank()
-        ){
-            _authState.update { it.copy(errorMessage = "All fields are required.") }
-            return
-        }
+            val username = Username(currentState.registerUsernameInput.trim())
+            val email = Email(currentState.registerEmailInput.trim())
+            val password = Password(currentState.registerPasswordInput)
 
-        viewModelScope.launch {
-            _authState.update { it.copy(isLoading = true, errorMessage = null) }
-            val username = currentState.loginUsernameInput.trim()
-            val email = currentState.registerEmailInput.trim()
-            val password = currentState.registerPasswordInput
-            when(val result = client.register(
-                username, email, password
-            )){
-                is Success -> {
-                    _authState.update { it.copy(
-                        isLoading = false,
-                        user = User(
+            viewModelScope.launch {
+                _authState.update { it.copy(isLoading = true, errorMessage = null) }
+                when(val result = client.register(
+                    username.value, email.value, password.value
+                )){
+                    is Success -> {
+                        _authState.update { it.copy(
+                            isLoading = false,
+                            user = User(
+                                result.value.id,
+                                username,
+                                email,
+                                password,
+                                Token(result.value.token)
+
+                            ),
+                            loginUsernameInput = currentState.loginUsernameInput,
+
+                            registerEmailInput = "",
+                            registerPasswordInput = "",
+                            registerUsernameInput = ""
+                        ) }
+                        if (_authState.value.maintainSession) storeSettings(
+                            settings,
                             result.value.id,
-                            Username(username),
-                            Email(email),
-                            Password(password),
-                            Token(result.value.token)
-
-                        ),
-                        loginUsernameInput = currentState.loginUsernameInput,
-
-                        registerEmailInput = "",
-                        registerPasswordInput = "",
-                        registerUsernameInput = ""
-                    ) }
-                    if (_authState.value.maintainSession) storeSettings(
-                        settings,
-                        result.value.id,
-                        username,
-                        email,
-                        password,
-                        result.value.token
-                    )
-                }
-                is Failure -> {
-                    _authState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                            username.value,
+                            email.value,
+                            password.value,
+                            result.value.token
+                        )
+                    }
+                    is Failure -> {
+                        _authState.update { it.copy(isLoading = false, errorMessage = result.value) }
+                    }
                 }
             }
+        }
+        catch (e: Exception){
+            _authState.update { it.copy(isLoading = false, errorMessage = e.message ?: e.cause?.message) }
         }
     }
 

@@ -46,19 +46,29 @@ fun CrossBoardApplication(client: ApiClient, settings: Settings) {
 
     }
     else{
-        AuthenticationScreen(
-            authState = authState,
-            onLoginUsernameChange = authViewModel::updateLoginUsername,
-            onLoginPasswordChange = authViewModel::updateLoginPassword,
 
-            onRegisterEmailChange = authViewModel::updateRegisterEmail,
-            onRegisterPasswordChange = authViewModel::updateRegisterPassword,
-            onRegisterUsernameChange = authViewModel::updateRegisterUsername,
-
-            onLoginClick = authViewModel::login,
-            onRegisterClick = authViewModel::register,
-            onSwitchScreen = authViewModel::showLoginScreen,
-            onMaintainSession = authViewModel::maintainSession,
+        if (authState.playMatch) {
+            SinglePlayerMatch(
+                null,
+                ongoBack = { authViewModel.playMatch(false) }
             )
+        }
+        else{
+            AuthenticationScreen(
+                authState = authState,
+                onLoginUsernameChange = authViewModel::updateLoginUsername,
+                onLoginPasswordChange = authViewModel::updateLoginPassword,
+
+                onRegisterEmailChange = authViewModel::updateRegisterEmail,
+                onRegisterPasswordChange = authViewModel::updateRegisterPassword,
+                onRegisterUsernameChange = authViewModel::updateRegisterUsername,
+
+                onLoginClick = authViewModel::login,
+                onRegisterClick = authViewModel::register,
+                onSwitchScreen = authViewModel::showLoginScreen,
+                onMaintainSession = authViewModel::maintainSession,
+                onPlayMatch = authViewModel::playMatch
+            )
+        }
     }
 }

@@ -75,7 +75,7 @@ fun GameScreen(
 
 @Composable
 fun MatchInfoPanel(
-    matchId: Int,
+    matchId: Int?,
     currentUserId: Int,
     user1Info: PlayerInfo,
     user2Info: PlayerInfo,
@@ -83,8 +83,11 @@ fun MatchInfoPanel(
 ){
     val me = if (currentUserId == user1Info.id) "Me: $user1Info" else "Me: $user2Info"
     val opponent = if (currentUserId == user1Info.id) "Opponent: $user2Info" else "Opponent: $user1Info"
-    Text("Match ID: $matchId", style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
-    Spacer(Modifier.height(8.dp))
+    if(matchId != null){
+        Text("Match ID: $matchId", style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
+        Spacer(Modifier.height(8.dp))
+    }
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.fillMaxWidth()

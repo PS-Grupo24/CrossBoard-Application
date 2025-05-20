@@ -28,7 +28,8 @@ fun AuthenticationScreen(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onSwitchScreen: (showLogin: Boolean) -> Unit,
-    onMaintainSession: (Boolean) -> Unit
+    onMaintainSession: (Boolean) -> Unit,
+    onPlayMatch: (play: Boolean) -> Unit,
 ){
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(
         unfocusedBorderColor = CustomColor.LightBrown.value,
@@ -73,6 +74,13 @@ fun AuthenticationScreen(
                 onSwitchScreen,
                 onMaintainSession
             )
+        }
+
+        Button(
+            onClick = {onPlayMatch(true)},
+            colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
+        ){
+            Text("Play a match", color = Color.White)
         }
 
         Spacer(Modifier.height(16.dp))

@@ -12,6 +12,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MainMenuScreen(
+    onSinglePlayerClicked: () -> Unit,
     onFindMatchClicked: () -> Unit,
     onCheckStatsClicked: () -> Unit
 ) {
@@ -25,6 +26,14 @@ fun MainMenuScreen(
 
         Text("Main Menu", style = MaterialTheme.typography.h4, color = CustomColor.DarkBrown.value)
         Spacer(Modifier.height(32.dp))
+        Button(
+            onSinglePlayerClicked,
+            modifier = Modifier.fillMaxWidth(0.7f),
+            colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
+        ){
+            Text("Single Player", color = Color.White)
+        }
+        Spacer(Modifier.height(4.dp))
         Button(
             onClick = onFindMatchClicked,
             modifier = Modifier.fillMaxWidth(0.7f),
@@ -46,5 +55,5 @@ fun MainMenuScreen(
 @Preview
 @Composable
 fun previewMenuScreen(){
-    MainMenuScreen({}, {})
+    MainMenuScreen({}, {},{})
 }

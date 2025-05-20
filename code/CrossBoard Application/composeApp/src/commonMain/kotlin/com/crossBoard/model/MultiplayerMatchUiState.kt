@@ -2,7 +2,7 @@ package com.crossBoard.model
 
 import com.crossBoard.domain.MultiPlayerMatch
 
-data class MatchUiState(
+data class MultiplayerMatchUiState(
     val currentMatch: MultiPlayerMatch? = null,
     val player1Username: String = "",
     val player2Username: String = "",

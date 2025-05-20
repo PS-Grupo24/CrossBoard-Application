@@ -4,5 +4,6 @@ enum class MainScreen    {
     MainMenu,
     GameFlow,
     Profile,
-    Statistics
+    Statistics,
+    SinglePlayer,
 }

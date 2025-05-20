@@ -20,7 +20,8 @@ fun FindMatchScreen(
     onGameTypeChange: (String) -> Unit,
     onFindMatchClick: () -> Unit,
     isLoading: Boolean,
-    errorMessage: String?
+    errorMessage: String?,
+    buttonMessage: String = "Find Match",
 ){
     var expanded by remember { mutableStateOf(false) }
     val gameTypes = remember { MatchType.entries.toTypedArray() }
@@ -94,7 +95,7 @@ fun FindMatchScreen(
                 )
             }
             else {
-                Text("Find Match", color = Color.White)
+                Text(buttonMessage, color = Color.White)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

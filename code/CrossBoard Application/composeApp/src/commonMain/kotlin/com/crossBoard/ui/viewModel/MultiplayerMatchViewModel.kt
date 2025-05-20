@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
 import com.crossBoard.interfaces.Clearable
-import com.crossBoard.model.MatchUiState
+import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
 import io.ktor.websocket.*
 
 
-class MatchViewModel(
+class MultiplayerMatchViewModel(
     private val client: ApiClient,
     private val userToken: String,
     private val currentUserId: Int,
@@ -21,8 +21,8 @@ class MatchViewModel(
 ): Clearable {
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
-    private val _matchState = MutableStateFlow(MatchUiState())
-    val matchState: StateFlow<MatchUiState> = _matchState.asStateFlow()
+    private val _matchState = MutableStateFlow(MultiplayerMatchUiState())
+    val matchState: StateFlow<MultiplayerMatchUiState> = _matchState.asStateFlow()
 
 
     private var pollingJob: Job? = null
