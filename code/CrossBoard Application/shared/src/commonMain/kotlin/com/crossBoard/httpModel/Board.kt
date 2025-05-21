@@ -16,6 +16,13 @@ import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toPosition
 import kotlinx.serialization.Serializable
 
+/**
+ * Data class "BoardOutput" represents the output of a board came from the http response.
+ * @param winner the winner of the board.
+ * @param turn the player who has the turn to play.
+ * @param positions the list of positions in the board.
+ * @param moves the list of moves made in the game.
+ */
 @Serializable
 data class BoardOutput(
     val winner: String?,
@@ -24,6 +31,13 @@ data class BoardOutput(
     val moves: List<String>,
 )
 
+/**
+ * Function "toBoard" responsible to convert a BoardOutput object to a Board object.
+ * @param matchType the type of the match played.
+ * @param player1Type the type of the first player.
+ * @param state the state of the match.
+ * @return Board the Board object corresponding to the BoardOutput object.
+ */
 fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): Board {
 
     val tur = turn.toPlayer()
@@ -73,7 +87,6 @@ fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): 
                     player2,
                 )
             }
-
         }
     }
 }
