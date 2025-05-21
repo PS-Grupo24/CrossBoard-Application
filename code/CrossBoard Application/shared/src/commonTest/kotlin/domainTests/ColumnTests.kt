@@ -1,4 +1,4 @@
-
+package domainTests
 import com.crossBoard.domain.Column
 import kotlin.test.Test
 import kotlin.test.assertEquals

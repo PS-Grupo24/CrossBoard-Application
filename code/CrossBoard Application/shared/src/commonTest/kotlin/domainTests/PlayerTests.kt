@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.toPlayer
 import kotlin.test.Test

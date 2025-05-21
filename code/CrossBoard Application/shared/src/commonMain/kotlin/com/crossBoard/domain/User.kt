@@ -3,29 +3,28 @@ package com.crossBoard.domain
 import kotlin.jvm.JvmInline
 
 /**
- * Inline class "Username" represents the username of a user.
+ * Inline value class "Username" represents the username of a user.
  * @param value the username value.
  */
 @JvmInline
-value class Username (val value: String){
+value class Username (val value: String) {
 
     companion object{
         const val MIN_USERNAME_SIZE = 3
     }
 
     init {
-        require(value.isNotBlank()){"Username can not be blank."}
-        require(value.length >= MIN_USERNAME_SIZE){"Username must contain at least 3 letters."}
+        require(value.isNotBlank()) {"Username can not be blank."}
+        require(value.length >= MIN_USERNAME_SIZE) {"Username must contain at least 3 letters."}
     }
 }
 
 /**
- * Inline class "Email" represents the email of a user.
+ * Inline value class "Email" represents the email of a user.
  * @param value the email value.
  */
 @JvmInline
-value class Email(val value: String){
-
+value class Email(val value: String) {
     init {
         require(value.isNotBlank()){"Email can not be blank."}
         require(value.contains("@")) {"The email must contain \"@\""}
@@ -35,11 +34,11 @@ value class Email(val value: String){
 }
 
 /**
- * Inline class "Password" represents the password of a user.
+ * Inline value class "Password" represents the password of a user.
  * @param value the password value.
  */
 @JvmInline
-value class Password(val value: String){
+value class Password(val value: String) {
     init {
         require(value.isNotBlank()) {"The password cannot be blank."}
         require(value.length >= 8) {"The password must have at least 8 characters."}
@@ -51,11 +50,11 @@ value class Password(val value: String){
 }
 
 /**
- * Inline class "Token" represents the token of a user.
+ * Inline value class "Token" represents the token of a user.
  * @param value the token value.
  */
 @JvmInline
-value class Token(val value: String){
+value class Token(val value: String) {
     init {
         require(value.isNotBlank()) {"Token must not be blank."}
     }

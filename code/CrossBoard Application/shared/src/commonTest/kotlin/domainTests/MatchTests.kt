@@ -1,4 +1,4 @@
-
+package domainTests
 import com.crossBoard.domain.*
 import com.crossBoard.httpModel.*
 import kotlin.test.*

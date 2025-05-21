@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.Column
 import com.crossBoard.domain.Row
 import com.crossBoard.domain.Square

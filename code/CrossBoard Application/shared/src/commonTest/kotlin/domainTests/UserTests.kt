@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token

@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

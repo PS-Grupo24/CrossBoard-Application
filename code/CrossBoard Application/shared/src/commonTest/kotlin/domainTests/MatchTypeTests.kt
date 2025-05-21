@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.toMatchType
 import kotlin.test.Test

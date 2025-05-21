@@ -1,3 +1,5 @@
+package domainTests
+
 import com.crossBoard.domain.*
 import com.crossBoard.httpModel.TicTacToeMoveOutput
 import kotlin.test.Test
