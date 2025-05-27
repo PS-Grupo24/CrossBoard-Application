@@ -26,6 +26,7 @@ class AuthViewModel(
     private val nameSettingsString = "userUsername"
     private val emailSettingsString = "userEmail"
     private val passwordSettingsString = "userPassword"
+    private val stateSettingsString = "userState"
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun updateLoginUsername(input: String) {
@@ -85,15 +86,26 @@ class AuthViewModel(
                     username.value, password.value
                 )){
                     is Success -> {
-                        _authState.update { it.copy(
-                            isLoading = false,
-                            user = User(
+                        val user = if (result.value.state == UserState.NORMAL.name ||
+                            result.value.state == UserState.BANNED.name)
+                            NormalUser(
                                 result.value.id,
                                 username,
                                 Email(result.value.email),
                                 password,
-                                Token(result.value.token)
-                            ),
+                                Token(result.value.token),
+                                UserState.valueOf(result.value.state)
+                            )
+                        else Admin(
+                            result.value.id,
+                            username,
+                            Email(result.value.email),
+                            password,
+                            Token(result.value.token),
+                        )
+                        _authState.update { it.copy(
+                            isLoading = false,
+                            user = user,
                             loginPasswordInput = "",
                             loginUsernameInput = ""
                         ) }
@@ -103,7 +115,8 @@ class AuthViewModel(
                             username.value,
                             result.value.email,
                             password.value,
-                            result.value.token
+                            result.value.token,
+                            result.value.state,
                         )
                     }
                     is Failure -> {
@@ -134,15 +147,16 @@ class AuthViewModel(
                     username.value, email.value, password.value
                 )){
                     is Success -> {
+                        val state = UserState.NORMAL
                         _authState.update { it.copy(
                             isLoading = false,
-                            user = User(
+                            user = NormalUser(
                                 result.value.id,
                                 username,
                                 email,
                                 password,
-                                Token(result.value.token)
-
+                                Token(result.value.token),
+                                state
                             ),
                             loginUsernameInput = currentState.loginUsernameInput,
 
@@ -156,7 +170,8 @@ class AuthViewModel(
                             username.value,
                             email.value,
                             password.value,
-                            result.value.token
+                            result.value.token,
+                            state.name,
                         )
                     }
                     is Failure -> {
@@ -177,6 +192,7 @@ class AuthViewModel(
         settings.remove(nameSettingsString)
         settings.remove(emailSettingsString)
         settings.remove(passwordSettingsString)
+        settings.remove(stateSettingsString)
     }
 
     fun checkSession(){
@@ -185,8 +201,13 @@ class AuthViewModel(
         val email = settings.getStringOrNull(emailSettingsString)
         val password = settings.getStringOrNull(passwordSettingsString)
         val username = settings.getStringOrNull(nameSettingsString)
-        if (token != null && id != null && email != null && password != null && username != null) {
-            _authState.update{ it.copy(user = User(id, Username(username), Email(email), Password(password), Token(token)),isLoading = false, errorMessage = null) }
+        val state = settings.getStringOrNull(stateSettingsString)
+        if (token != null && id != null && email != null && password != null && username != null && state != null) {
+            val userState = UserState.valueOf(state)
+            val user = if (userState == UserState.NORMAL || userState == UserState.BANNED)
+                NormalUser(id, Username(username), Email(email), Password(password), Token(token), userState)
+            else Admin(id, Username(username), Email(email), Password(password), Token(token))
+            _authState.update{ it.copy(user = user,isLoading = false, errorMessage = null) }
         }
     }
 
@@ -194,12 +215,13 @@ class AuthViewModel(
         viewModelScope.cancel()
     }
 
-    private fun storeSettings(settings: Settings, id: Int, username: String, email: String, password: String, token: String) {
+    private fun storeSettings(settings: Settings, id: Int, username: String, email: String, password: String, token: String, state: String) {
         settings.putInt(idSettingsString, id)
         settings.putString(nameSettingsString, username)
         settings.putString(passwordSettingsString, password)
         settings.putString(tokenSettingsString, token)
         settings.putString(emailSettingsString, email)
+        settings.putString(stateSettingsString, state)
     }
 
 

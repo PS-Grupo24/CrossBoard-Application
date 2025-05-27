@@ -104,6 +104,7 @@ fun MainMenu(
                 when(currentScreen){
                     MainScreen.MainMenu -> {
                         MainMenuScreen(
+                            user = user,
                             onSinglePlayerClicked = { vm.goToSinglePlayer("Single Player") },
                             onFindMatchClicked = { vm.goToGameFlow("Multiplayer Match") },
                             onCheckStatsClicked = {vm.goToStatistics("Match History")}

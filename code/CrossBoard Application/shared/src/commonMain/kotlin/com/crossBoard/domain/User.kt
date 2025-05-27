@@ -61,6 +61,19 @@ value class Token(val value: String){
     }
 }
 
+enum class UserState{
+    BANNED, NORMAL
+}
+
+
+interface User{
+    val id: Int
+    val username: Username
+    val email: Email
+    val password: Password
+    val token: Token
+}
+
 /**
  * Data class "User" represents a user of the application.
  * @param id the id of the user.
@@ -69,14 +82,23 @@ value class Token(val value: String){
  * @param password the password of the user.
  * @param token the token of the user.
  */
-data class User(
-    val id:Int,
-    val username: Username,
-    val email: Email,
-    val password: Password,
-    val token: Token
-){
+data class NormalUser(
+    override val id:Int,
+    override val username: Username,
+    override val email: Email,
+    override val password: Password,
+    override val token: Token,
+    val state: UserState
+):User{
     init {
         require(id > 0) {"Id must not be greater than 0."}
     }
 }
+
+data class Admin(
+    override val id: Int,
+    override val username: Username,
+    override val email: Email,
+    override val password: Password,
+    override val token: Token,
+): User

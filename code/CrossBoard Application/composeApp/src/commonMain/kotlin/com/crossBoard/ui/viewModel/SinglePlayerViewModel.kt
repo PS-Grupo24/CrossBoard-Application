@@ -1,12 +1,10 @@
 package com.crossBoard.ui.viewModel
 
-import com.crossBoard.domain.BoardRun
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Move
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.TicPosition
-import com.crossBoard.domain.TicTacToeBoard
 import com.crossBoard.domain.TicTacToeMove
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.interfaces.Clearable
@@ -70,7 +68,9 @@ class SinglePlayerViewModel(
                 _singlePlayerMatch.update{
                     it.copy(match = newMatch, errorMessage = null)
                 }
-                if (newMatch.state == MatchState.RUNNING){
+                if (
+                    newMatch.state == MatchState.RUNNING
+                    ){
                     delay(1000L)
                     randomMachineMove()
                 }

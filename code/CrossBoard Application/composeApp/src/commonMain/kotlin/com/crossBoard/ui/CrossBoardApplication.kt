@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.crossBoard.ApiClient
+import com.crossBoard.domain.NormalUser
+import com.crossBoard.domain.UserState
 import com.crossBoard.ui.screens.AuthenticationScreen
 import com.crossBoard.ui.viewModel.AuthViewModel
 import com.russhwolf.settings.Settings
@@ -30,7 +32,14 @@ fun CrossBoardApplication(client: ApiClient, settings: Settings) {
         val user = authState.user
 
         if (user != null) {
-            MainMenu(
+            if (user is NormalUser && user.state == UserState.BANNED){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: User Banned. Please logout.", color = Color.Red)
+                    Spacer(Modifier.height(20.dp))
+                    Button(onClick = { authViewModel.logout() }) { Text("Logout") }
+                }
+            }
+            else MainMenu(
                 client = client,
                 user = user,
                 onLogout = authViewModel::logout,

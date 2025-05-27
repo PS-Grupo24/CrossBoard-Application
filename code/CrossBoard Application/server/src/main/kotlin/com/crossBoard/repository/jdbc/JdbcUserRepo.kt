@@ -1,9 +1,12 @@
 package com.crossBoard.repository.jdbc
 
+import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
+import com.crossBoard.domain.NormalUser
 import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.User
+import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.httpModel.UserCreationOutput
 import com.crossBoard.httpModel.UserLoginOutput
@@ -20,7 +23,7 @@ import javax.sql.DataSource
 class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
     override fun getUserProfileById(userId:Int): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email FROM users WHERE id = ?").apply {
+        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
 
@@ -30,7 +33,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     }
 
     override fun getUserProfileByEmail(email: Email): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email FROM users WHERE email = ?").apply {
+        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE email = ?").apply {
             setString(1, email.value)
         }
 
@@ -40,7 +43,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     }
 
     override fun getUserProfileByName(username: Username): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email FROM users WHERE username = ?").apply {
+        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE username = ?").apply {
             setString(1, username.value)
         }
 
@@ -59,7 +62,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     }
 
     override fun updateUser(userId: Int, username: Username?, email: Email?, password: Password?): UserProfileOutput = transaction(jdbc) { connection ->
-        val selectPreparation = connection.prepareStatement("SELECT token, username, email FROM users WHERE id = ?").apply {
+        val selectPreparation = connection.prepareStatement("SELECT token, username, email, state FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
 
@@ -80,9 +83,10 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
             UserProfileOutput(
                 userId,
-                rs.getString("token"),
-                username,
-                email
+                token = rs.getString("token"),
+                username = username,
+                email = email,
+                state = rs.getString("state")
             )
         }
     }
@@ -100,19 +104,20 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     override fun addUser(username: Username, email: Email, password: Password): UserCreationOutput = transaction(jdbc) { connection ->
         val token = generateTokenValue()
         val hashPassword = hashPassword(password.value)
-
-        val prepared = connection.prepareStatement("INSERT INTO users (token, username, email, password) values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS).apply {
+        val state = UserState.NORMAL.name
+        val prepared = connection.prepareStatement("INSERT INTO users (token, username, email, password, state) values (?,?,?,?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
             setString(1, token)
             setString(2, username.value)
             setString(3, email.value)
             setString(4, hashPassword)
+            setString(5, state)
             executeUpdate()
         }
         UserCreationOutput(getIdStatement(prepared).toInt(), token)
     }
 
     override fun getUserProfileByToken(token: String): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email FROM users WHERE token = ?").apply {
+        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE token = ?").apply {
             setString(1, token)
         }
 
@@ -123,7 +128,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
     override fun login(username: Username, password: Password): UserLoginOutput? = transaction(jdbc){ connection ->
         val hashPassword = hashPassword(password.value)
-        val prepared = connection.prepareStatement("SELECT password, token, id, email FROM USERS WHERE username = ?").apply {
+        val prepared = connection.prepareStatement("SELECT password, token, id, email, state FROM USERS WHERE username = ?").apply {
             setString(1, username.value)
         }
 
@@ -133,7 +138,9 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
                 if (hashPassword == actualPassword){
                      return@transaction UserLoginOutput(
                         rs.getInt("id"),
-                        rs.getString("token"), rs.getString("email"),
+                        rs.getString("token"),
+                         rs.getString("email"),
+                         rs.getString("state")
                     )
                 }
 
@@ -148,17 +155,27 @@ private fun userProfileOutputResult(rs: ResultSet): UserProfileOutput {
         id = rs.getInt("id"),
         token = rs.getString("token"),
         username = rs.getString("username"),
-        email = rs.getString("email")
+        email = rs.getString("email"),
+        state = rs.getString("state")
     )
 }
 
 private fun userResult(rs: ResultSet): User {
-    return User(
+    val state = rs.getString("state")
+    return if (state == UserState.NORMAL.name || state == UserState.BANNED.name) NormalUser(
         rs.getInt("id"),
         Username(rs.getString("username")),
         Email(rs.getString("email")),
         Password(rs.getString("password")),
-        Token(rs.getString("token"))
+        Token(rs.getString("token")),
+        UserState.valueOf(state)
+    )
+    else Admin(
+        rs.getInt("id"),
+        Username(rs.getString("username")),
+        Email(rs.getString("email")),
+        Password(rs.getString("password")),
+        Token(rs.getString("token")),
     )
 }
 

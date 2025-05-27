@@ -3,7 +3,8 @@ create table users (
                        token VARCHAR(255) unique not null,
                        username VARCHAR(255) unique not null,
                        email VARCHAR(255) unique not null,
-                       password VARCHAR(255) not null
+                       password VARCHAR(255) not null,
+                       state VARCHAR(10) not null
 );
 
 create table match (
@@ -19,6 +20,6 @@ create table match (
     FOREIGN KEY (player2) References users(id)
 );
 
-insert into users (token, username, email, password) values ('1', 'Rúben Louro', 'A48926@alunos.isel.pt', 'Aa12345!');
-insert into users (token, username, email, password) values ('2', 'Luís Reis', 'A48318@alunos.isel.pt', 'Aa12345!');
-insert into users (token, username, email, password) values ('3', 'Pedro Pereira', 'palex@cc.isel.ipl.pt', 'Aa12345!');
+insert into users (token, username, email, password, state) values ('1', 'Rúben Louro', 'A48926@alunos.isel.pt', 'Aa12345!', 'Admin');
+insert into users (token, username, email, password, state) values ('2', 'Luís Reis', 'A48318@alunos.isel.pt', 'Aa12345!', 'Admin');
+insert into users (token, username, email, password, state) values ('3', 'Pedro Pereira', 'palex@cc.isel.ipl.pt', 'Aa12345!', 'Admin');

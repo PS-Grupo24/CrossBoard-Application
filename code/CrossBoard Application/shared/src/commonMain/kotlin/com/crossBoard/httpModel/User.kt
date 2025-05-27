@@ -39,7 +39,8 @@ data class UserProfileOutput(
     val id:Int,
     val username: String,
     val email: String,
-    val token: String
+    val token: String,
+    val state: String
 )
 
 /**
@@ -71,5 +72,6 @@ data class UserLoginInput(
 data class UserLoginOutput(
     val id:Int,
     val token: String,
-    val email: String
+    val email: String,
+    val state: String
 )

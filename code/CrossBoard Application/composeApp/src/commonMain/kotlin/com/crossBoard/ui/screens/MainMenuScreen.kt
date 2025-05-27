@@ -7,11 +7,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.crossBoard.domain.Admin
+import com.crossBoard.domain.NormalUser
+import com.crossBoard.domain.User
 import com.crossBoard.utils.CustomColor
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MainMenuScreen(
+    user: User,
     onSinglePlayerClicked: () -> Unit,
     onFindMatchClicked: () -> Unit,
     onCheckStatsClicked: () -> Unit
@@ -49,11 +53,15 @@ fun MainMenuScreen(
         ){
             Text("Check Statistics", color = Color.White)
         }
+        if (user is Admin){
+            Spacer(Modifier.height(4.dp))
+            Button(
+                onClick = {},
+                modifier = Modifier.fillMaxWidth(0.7f),
+                colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
+            ){
+                Text("Admin Panel", color = Color.White)
+            }
+        }
     }
-}
-
-@Preview
-@Composable
-fun previewMenuScreen(){
-    MainMenuScreen({}, {},{})
 }
