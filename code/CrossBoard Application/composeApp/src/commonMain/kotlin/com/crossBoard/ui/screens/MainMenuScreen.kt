@@ -18,7 +18,8 @@ fun MainMenuScreen(
     user: User,
     onSinglePlayerClicked: () -> Unit,
     onFindMatchClicked: () -> Unit,
-    onCheckStatsClicked: () -> Unit
+    onCheckStatsClicked: () -> Unit,
+    onAdminPanelClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -56,7 +57,7 @@ fun MainMenuScreen(
         if (user is Admin){
             Spacer(Modifier.height(4.dp))
             Button(
-                onClick = {},
+                onClick = onAdminPanelClicked,
                 modifier = Modifier.fillMaxWidth(0.7f),
                 colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
             ){

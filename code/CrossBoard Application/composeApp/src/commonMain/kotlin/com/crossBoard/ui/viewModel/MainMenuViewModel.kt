@@ -43,6 +43,11 @@ class MainMenuViewModel(
         navigateTo(MainScreen.Statistics)
     }
 
+    fun goToAdminPanel(topBarMessage: String? = null) {
+        if (topBarMessage != null) setTobBarMessage(topBarMessage)
+        navigateTo(MainScreen.AdminPanel)
+    }
+
     fun goToSinglePlayer(topBarMessage: String? = null) {
         if (topBarMessage != null) setTobBarMessage(topBarMessage)
         navigateTo(MainScreen.SinglePlayer)

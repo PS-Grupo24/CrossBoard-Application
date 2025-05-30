@@ -202,10 +202,10 @@ class AuthViewModel(
         val username = settings.getStringOrNull(nameSettingsString)
         val state = settings.getStringOrNull(stateSettingsString)
         if (token != null && id != null && email != null && password != null && username != null && state != null) {
-            val userState = UserState.valueOf(state)
-            val user = if (userState == UserState.NORMAL || userState == UserState.BANNED)
-                NormalUser(id, Username(username), Email(email), Password(password), Token(token), userState)
-            else Admin(id, Username(username), Email(email), Password(password), Token(token))
+            val user = if (state == Admin.STATE)
+                Admin(id, Username(username), Email(email), Password(password), Token(token))
+
+            else NormalUser(id, Username(username), Email(email), Password(password), Token(token), UserState.valueOf(state))
             _authState.update{ it.copy(user = user,isLoading = false, errorMessage = null) }
         }
     }

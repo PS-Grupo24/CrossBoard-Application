@@ -10,7 +10,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.crossBoard.AdminPanel
 import com.crossBoard.ApiClient
+import com.crossBoard.domain.Admin
 import com.crossBoard.domain.User
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.SubScreen
@@ -107,7 +109,8 @@ fun MainMenu(
                             user = user,
                             onSinglePlayerClicked = { vm.goToSinglePlayer("Single Player") },
                             onFindMatchClicked = { vm.goToGameFlow("Multiplayer Match") },
-                            onCheckStatsClicked = {vm.goToStatistics("Match History")}
+                            onCheckStatsClicked = {vm.goToStatistics("Match History")},
+                            onAdminPanelClicked = {vm.goToAdminPanel("Admin Panel")}
                         )
                     }
                     MainScreen.Profile -> {
@@ -134,6 +137,12 @@ fun MainMenu(
                         SinglePlayerMatch(
                             user,
                             ongoBack = { vm.goToMainMenu(user.username.value) }
+                        )
+                    }
+                    MainScreen.AdminPanel -> {
+                        AdminPanel(
+                            (user as Admin),
+                            client
                         )
                     }
                 }

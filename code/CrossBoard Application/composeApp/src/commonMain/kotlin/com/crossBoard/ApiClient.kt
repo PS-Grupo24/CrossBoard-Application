@@ -1,5 +1,9 @@
 package com.crossBoard
 
+import com.crossBoard.domain.Email
+import com.crossBoard.domain.Token
+import com.crossBoard.domain.UserInfo
+import com.crossBoard.domain.Username
 import com.crossBoard.httpModel.ErrorMessage
 import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchOutput
@@ -41,6 +45,87 @@ class ApiClient(
         extraBufferCapacity = 64
     )
     val incomingMessages: SharedFlow<Frame> = _incomingMessages.asSharedFlow()
+
+    suspend fun banUser(userToken: String, userId: Int): Either<String, UserInfo> {
+        val response = try {
+            client.post("$baseUrl/user/$userId/ban") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception){
+            return Either.Left(e.message ?: "Something went wrong")
+        }
+        return if (response.status.value in 200 .. 299){
+            val body = response.body<UserProfileOutput>()
+            Either.Right(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
+
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
+
+    suspend fun unbanUser(userToken: String, userId: Int): Either<String, UserInfo> {
+        val response = try {
+            client.post("$baseUrl/user/$userId/unban") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception){
+            return Either.Left(e.message ?: "Something went wrong")
+        }
+        return if (response.status.value in 200 .. 299){
+            val body = response.body<UserProfileOutput>()
+            Either.Right(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
+
+    suspend fun getUsersByName(userToken: String, username: String, skip: Int? = null, limit: Int? = null): Either<String, List<UserInfo>> {
+        val response = try {
+            client.get("$baseUrl/user/$username") {
+                parameter("skip", skip)
+                parameter("limit", limit)
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $userToken")
+            }
+        }
+        catch (e: UnresolvedAddressException) {
+            return Either.Left(e.message ?: "No internet connection")
+        }
+        catch (e: Exception){
+            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+        }
+
+        return if (response.status.value in 200 .. 299){
+            val users = response.body<List<UserProfileOutput>>().map {
+                UserInfo(
+                    it.id,
+                    Token(it.token),
+                    Username(it.username),
+                    Email(it.email),
+                    it.state
+                )
+            }
+            Either.Right(users)
+        }
+        else {
+            val error = response.body<ErrorMessage>()
+            Either.Left(error.message)
+        }
+    }
 
     suspend fun login(username: String, password: String): Either<String, UserLoginOutput> {
         val response = try {

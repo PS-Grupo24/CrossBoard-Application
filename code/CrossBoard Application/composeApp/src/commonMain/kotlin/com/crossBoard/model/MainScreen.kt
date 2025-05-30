@@ -6,4 +6,5 @@ enum class MainScreen    {
     Profile,
     Statistics,
     SinglePlayer,
+    AdminPanel
 }
