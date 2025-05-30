@@ -174,6 +174,7 @@ class MultiplayerMatchViewModel(
         viewModelScope.launch {
             _matchState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
+                println("TOKEN: $userToken")
                 when(val result = client.enterMatch(userToken, currentState.gameTypeInput)){
                     is Success -> {
                         val match = result.value.toMultiplayerMatch()

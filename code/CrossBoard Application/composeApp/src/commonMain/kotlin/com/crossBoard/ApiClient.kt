@@ -95,7 +95,7 @@ class ApiClient(
 
     suspend fun getUsersByName(userToken: String, username: String, skip: Int? = null, limit: Int? = null): Either<String, List<UserInfo>> {
         val response = try {
-            client.get("$baseUrl/user/$username") {
+            client.get("$baseUrl/user/username/$username") {
                 parameter("skip", skip)
                 parameter("limit", limit)
                 contentType(ContentType.Application.Json)

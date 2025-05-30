@@ -49,7 +49,7 @@ class SinglePlayerMatch(
         return SinglePlayerMatch(
             id,
             newBoard,
-            getMatchStateFromBoard(board),
+            getMatchStateFromBoard(newBoard),
             matchType,
             version + 1
         )

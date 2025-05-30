@@ -42,7 +42,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
 
         //route to get a list of users' name segment.
-        route("/user/{username}") {
+        route("/user/username/{username}") {
             get {
                 runHttp(call){
 
@@ -291,7 +291,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             post {
                 runHttp(call){
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
-                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
+                        ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing Token"))
 
                     when(val user = usersService.getUserByToken(userToken)) {
                         is Failure -> handleFailure(call, user.value)
