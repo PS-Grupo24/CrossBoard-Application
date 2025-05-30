@@ -100,4 +100,16 @@ data class Admin(
     override val email: Email,
     override val password: Password,
     override val token: Token,
-): User
+): User{
+    companion object{
+        const val STATE = "Admin"
+    }
+}
+
+data class UserInfo(
+    val id: Int,
+    val token: Token,
+    val username: Username,
+    val email: Email,
+    val state: String
+)

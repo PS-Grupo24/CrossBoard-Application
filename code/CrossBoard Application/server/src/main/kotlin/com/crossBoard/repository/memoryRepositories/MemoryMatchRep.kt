@@ -6,8 +6,8 @@ import com.crossBoard.domain.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.httpModel.MatchCancelOutput
-import com.crossBoard.httpModel.MatchStatsOutput
+import com.crossBoard.httpModel.MatchCancel
+import com.crossBoard.httpModel.MatchStats
 import com.crossBoard.repository.interfaces.MatchRepository
 
 /**
@@ -68,16 +68,16 @@ class MemoryMatchRep: MatchRepository {
         return match
     }
 
-    override fun cancelSearch(userId: Int, matchId: Int): MatchCancelOutput {
+    override fun cancelSearch(userId: Int, matchId: Int): MatchCancel {
         matches.removeIf { it.id == matchId }
-        return MatchCancelOutput(
+        return MatchCancel(
             userId,
             matchId
         )
     }
 
-    override fun getStatistics(userId: Int): List<MatchStatsOutput> {
-        val statsList = mutableListOf<MatchStatsOutput>()
+    override fun getStatistics(userId: Int): List<MatchStats> {
+        val statsList = mutableListOf<MatchStats>()
         for (matchType in MatchType.entries) {
             val matchList = matches.filter {
                 it.matchType == matchType &&
@@ -87,16 +87,18 @@ class MemoryMatchRep: MatchRepository {
             val drawCount = matchList.count { it.state == MatchState.DRAW }
             val winCount = matchList.count { it.state == MatchState.WIN && (it.board as BoardWin).winner == it.getPlayerType(userId) }
             val lossCount = matchCount - drawCount - winCount
-            val stats = MatchStatsOutput(
+            val stats = MatchStats(
                 matchType.name,
                 matchCount,
                 winCount,
                 drawCount,
                 lossCount,
-                winCount.toDouble() / matchCount.toDouble(),
+                if (matchCount == 0) 0.0 else winCount.toDouble()/matchCount.toDouble()
             )
             statsList.add(stats)
         }
         return statsList.toList()
     }
+
+
 }

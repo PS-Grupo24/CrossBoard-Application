@@ -6,6 +6,7 @@ import com.crossBoard.domain.NormalUser
 import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.User
+import com.crossBoard.domain.UserInfo
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.httpModel.UserCreationOutput
@@ -22,33 +23,33 @@ import javax.sql.DataSource
 
 class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
-    override fun getUserProfileById(userId:Int): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE id = ?").apply {
+    override fun getUserProfileById(userId:Int): UserInfo? = transaction(jdbc) { connection ->
+        val prepared = connection.prepareStatement("SELECT * FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
 
         prepared.executeQuery().use { rs ->
-            if(rs.next()) userProfileOutputResult(rs) else null
+            if(rs.next()) userResult(rs) else null
         }
     }
 
-    override fun getUserProfileByEmail(email: Email): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE email = ?").apply {
+    override fun getUserProfileByEmail(email: Email): UserInfo? = transaction(jdbc) { connection ->
+        val prepared = connection.prepareStatement("SELECT * FROM users WHERE email = ?").apply {
             setString(1, email.value)
         }
 
         prepared.executeQuery().use { rs ->
-            if(rs.next()) userProfileOutputResult(rs) else null
+            if(rs.next()) userResult(rs) else null
         }
     }
 
-    override fun getUserProfileByName(username: Username): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE username = ?").apply {
+    override fun getUserProfileByName(username: Username): UserInfo? = transaction(jdbc) { connection ->
+        val prepared = connection.prepareStatement("SELECT * FROM users WHERE username = ?").apply {
             setString(1, username.value)
         }
 
         prepared.executeQuery().use { rs ->
-            if(rs.next()) userProfileOutputResult(rs) else null
+            if(rs.next()) userResult(rs) else null
         }
     }
 
@@ -61,8 +62,8 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
         true
     }
 
-    override fun updateUser(userId: Int, username: Username?, email: Email?, password: Password?): UserProfileOutput = transaction(jdbc) { connection ->
-        val selectPreparation = connection.prepareStatement("SELECT token, username, email, state FROM users WHERE id = ?").apply {
+    override fun updateUser(userId: Int, username: Username?, email: Email?, password: Password?, state: UserState?): UserInfo = transaction(jdbc) { connection ->
+        val selectPreparation = connection.prepareStatement("SELECT * FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
 
@@ -71,37 +72,30 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
             val username = username?.value ?: rs.getString("username")
             val email = email?.value ?: rs.getString("email")
-            val password = password?.value ?: rs.getString("password")
-
-            connection.prepareStatement("UPDATE users SET username = ?, email = ?, password = ? where id = ?").apply {
+            val password = if(password != null) hashPassword(password.value)
+            else rs.getString("password")
+            val state = state?.name ?: rs.getString("state")
+            connection.prepareStatement("UPDATE users SET username = ?, email = ?, password = ?, state = ? where id = ?").apply {
                 setString(1, username)
                 setString(2, email)
                 setString(3, password)
-                setLong(4, userId.toLong())
+                setString(4, state)
+                setLong(5, userId.toLong())
                 executeUpdate()
             }
 
-            UserProfileOutput(
+            UserInfo(
                 userId,
-                token = rs.getString("token"),
-                username = username,
-                email = email,
-                state = rs.getString("state")
+                Token(rs.getString("token")),
+                Username(username),
+                Email(email),
+                state
             )
+
         }
     }
 
-    override fun getUserFullDetails(userId: Int): User? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT * FROM users WHERE id = ?").apply {
-            setLong(1, userId.toLong())
-        }
-
-        prepared.executeQuery().use { rs ->
-            if(rs.next()) userResult(rs) else null
-        }
-    }
-
-    override fun addUser(username: Username, email: Email, password: Password): UserCreationOutput = transaction(jdbc) { connection ->
+    override fun addUser(username: Username, email: Email, password: Password): User = transaction(jdbc) { connection ->
         val token = generateTokenValue()
         val hashPassword = hashPassword(password.value)
         val state = UserState.NORMAL.name
@@ -113,22 +107,23 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
             setString(5, state)
             executeUpdate()
         }
-        UserCreationOutput(getIdStatement(prepared).toInt(), token)
+        val id = getIdStatement(prepared)
+        NormalUser(id.toInt(), username, email, password, Token(token), UserState.NORMAL)
     }
 
-    override fun getUserProfileByToken(token: String): UserProfileOutput? = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("SELECT id, token, username, email, state FROM users WHERE token = ?").apply {
+    override fun getUserProfileByToken(token: String): UserInfo? = transaction(jdbc) { connection ->
+        val prepared = connection.prepareStatement("SELECT * FROM users WHERE token = ?").apply {
             setString(1, token)
         }
 
         prepared.executeQuery().use { rs ->
-            if(rs.next()) userProfileOutputResult(rs) else null
+            if(rs.next()) userResult(rs) else null
         }
     }
 
-    override fun login(username: Username, password: Password): UserLoginOutput? = transaction(jdbc){ connection ->
+    override fun login(username: Username, password: Password): UserInfo? = transaction(jdbc){ connection ->
         val hashPassword = hashPassword(password.value)
-        val prepared = connection.prepareStatement("SELECT password, token, id, email, state FROM USERS WHERE username = ?").apply {
+        val prepared = connection.prepareStatement("SELECT * FROM USERS WHERE username = ?").apply {
             setString(1, username.value)
         }
 
@@ -136,46 +131,35 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
             if (rs.next()){
                 val actualPassword = rs.getString("password")
                 if (hashPassword == actualPassword){
-                     return@transaction UserLoginOutput(
-                        rs.getInt("id"),
-                        rs.getString("token"),
-                         rs.getString("email"),
-                         rs.getString("state")
-                    )
+                     return@transaction userResult(rs)
                 }
-
             }
             return@transaction null
         }
     }
+
+    override fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo> {
+        val prepared = jdbc.connection.prepareStatement("SELECT * FROM users WHERE username LIKE ? LIMIT ? OFFSET ?")
+        prepared.setString(1, "$username%")
+        prepared.setInt(2, limit)
+        prepared.setInt(3, skip)
+        return prepared.executeQuery().use { rs ->
+            val users = mutableListOf<UserInfo>()
+            while (rs.next()) {
+                users.add(userResult(rs))
+            }
+            users
+        }
+    }
 }
 
-private fun userProfileOutputResult(rs: ResultSet): UserProfileOutput {
-    return UserProfileOutput(
-        id = rs.getInt("id"),
-        token = rs.getString("token"),
-        username = rs.getString("username"),
-        email = rs.getString("email"),
-        state = rs.getString("state")
-    )
-}
-
-private fun userResult(rs: ResultSet): User {
-    val state = rs.getString("state")
-    return if (state == UserState.NORMAL.name || state == UserState.BANNED.name) NormalUser(
+private fun userResult(rs: ResultSet): UserInfo {
+    return UserInfo(
         rs.getInt("id"),
+        Token(rs.getString("token")),
         Username(rs.getString("username")),
         Email(rs.getString("email")),
-        Password(rs.getString("password")),
-        Token(rs.getString("token")),
-        UserState.valueOf(state)
-    )
-    else Admin(
-        rs.getInt("id"),
-        Username(rs.getString("username")),
-        Email(rs.getString("email")),
-        Password(rs.getString("password")),
-        Token(rs.getString("token")),
+        rs.getString("state")
     )
 }
 

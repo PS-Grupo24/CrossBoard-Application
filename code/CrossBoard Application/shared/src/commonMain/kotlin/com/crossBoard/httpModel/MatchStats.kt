@@ -3,7 +3,7 @@ package com.crossBoard.httpModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MatchStatsOutput(
+data class MatchStats(
     val matchType: String,
     val numberOfGames: Int,
     val numberOfWins: Int,

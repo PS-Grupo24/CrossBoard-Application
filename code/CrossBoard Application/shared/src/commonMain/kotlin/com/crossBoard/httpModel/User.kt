@@ -53,7 +53,7 @@ data class UserProfileOutput(
 data class UserUpdateInput(
     val username: String? = null,
     val email: String? = null,
-    val password: String? = null
+    val password: String? = null,
 )
 
 

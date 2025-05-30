@@ -86,9 +86,15 @@ class AuthViewModel(
                     username.value, password.value
                 )){
                     is Success -> {
-                        val user = if (result.value.state == UserState.NORMAL.name ||
-                            result.value.state == UserState.BANNED.name)
-                            NormalUser(
+                        val user = if (result.value.state == Admin.STATE)
+                            Admin(
+                                result.value.id,
+                                username,
+                                Email(result.value.email),
+                                password,
+                                Token(result.value.token),
+                            )
+                        else NormalUser(
                                 result.value.id,
                                 username,
                                 Email(result.value.email),
@@ -96,13 +102,6 @@ class AuthViewModel(
                                 Token(result.value.token),
                                 UserState.valueOf(result.value.state)
                             )
-                        else Admin(
-                            result.value.id,
-                            username,
-                            Email(result.value.email),
-                            password,
-                            Token(result.value.token),
-                        )
                         _authState.update { it.copy(
                             isLoading = false,
                             user = user,

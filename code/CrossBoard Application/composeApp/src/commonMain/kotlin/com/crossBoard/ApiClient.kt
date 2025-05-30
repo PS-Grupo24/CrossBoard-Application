@@ -1,10 +1,10 @@
 package com.crossBoard
 
 import com.crossBoard.httpModel.ErrorMessage
-import com.crossBoard.httpModel.MatchCancelOutput
+import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchOutput
 import com.crossBoard.httpModel.MatchPlayedOutput
-import com.crossBoard.httpModel.MatchStatsOutput
+import com.crossBoard.httpModel.MatchStats
 import com.crossBoard.httpModel.UserCreationInput
 import com.crossBoard.httpModel.UserCreationOutput
 import com.crossBoard.httpModel.UserLoginInput
@@ -244,7 +244,7 @@ class ApiClient(
         }
     }
 
-    suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancelOutput> {
+    suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancel> {
         val response = try {
             client.post(
                 urlString = "$baseUrl/match/$matchId/cancel",
@@ -261,7 +261,7 @@ class ApiClient(
         }
 
         return if (response.status.value in 200 .. 299){
-            val move = response.body<MatchCancelOutput>()
+            val move = response.body<MatchCancel>()
             Either.Right(move)
         }
         else {
@@ -340,7 +340,7 @@ class ApiClient(
         }
     }
 
-    suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStatsOutput>>{
+    suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStats>>{
         val response = try {
             client.get("$baseUrl/user/statistics"){
                 contentType(ContentType.Application.Json)
@@ -355,7 +355,7 @@ class ApiClient(
         }
 
         return if (response.status.value in 200 .. 299){
-            Either.Right(response.body<List<MatchStatsOutput>>())
+            Either.Right(response.body<List<MatchStats>>())
         }
         else {
             val error = response.body<ErrorMessage>()

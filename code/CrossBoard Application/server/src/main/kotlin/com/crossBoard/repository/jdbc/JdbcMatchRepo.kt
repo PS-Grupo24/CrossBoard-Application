@@ -10,8 +10,8 @@ import com.crossBoard.domain.TicTacToeBoardWin
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import com.google.gson.Gson
-import com.crossBoard.httpModel.MatchCancelOutput
-import com.crossBoard.httpModel.MatchStatsOutput
+import com.crossBoard.httpModel.MatchCancel
+import com.crossBoard.httpModel.MatchStats
 import com.crossBoard.repository.interfaces.MatchRepository
 import javax.sql.DataSource
 import java.sql.ResultSet
@@ -111,19 +111,19 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         )
     }
 
-    override fun cancelSearch(userId: Int, matchId:Int): MatchCancelOutput = transaction(jdbc){ connection ->
+    override fun cancelSearch(userId: Int, matchId:Int): MatchCancel = transaction(jdbc){ connection ->
         connection.prepareStatement("DELETE FROM match WHERE id = ?").apply {
             setInt(1, matchId)
             executeUpdate()
         }
 
-        return@transaction MatchCancelOutput(
+        return@transaction MatchCancel(
             userId, matchId
         )
     }
 
-    override fun getStatistics(userId: Int): List<MatchStatsOutput> = transaction(jdbc){connection ->
-        val statsList = mutableListOf<MatchStatsOutput>()
+    override fun getStatistics(userId: Int): List<MatchStats> = transaction(jdbc){ connection ->
+        val statsList = mutableListOf<MatchStats>()
         for (matchType in MatchType.entries) {
             val matches = mutableListOf<MultiPlayerMatch>()
             val prepared = connection.prepareStatement("SELECT * FROM match WHERE match_type = ? AND (player1 = ? OR player2 = ?)").apply {
@@ -141,13 +141,13 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
             val totalMatches = matches.size
             val totalWins = matches.count{it.winner == userId}
             val totalDraws = matches.count{it.state == MatchState.DRAW}
-            val stat = MatchStatsOutput(
+            val stat = MatchStats(
                 matchType.name,
                 totalMatches,
                 totalWins,
                 totalDraws,
                 totalMatches - totalWins - totalDraws,
-                totalWins.toDouble()/totalMatches.toDouble()
+                if (totalMatches == 0) 0.0 else totalWins.toDouble()/totalMatches.toDouble()
             )
             statsList.add(stat)
         }

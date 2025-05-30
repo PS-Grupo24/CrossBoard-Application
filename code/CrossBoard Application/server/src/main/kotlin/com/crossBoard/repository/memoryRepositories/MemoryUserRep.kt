@@ -6,11 +6,9 @@ import com.crossBoard.domain.NormalUser
 import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.User
+import com.crossBoard.domain.UserInfo
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
-import com.crossBoard.httpModel.UserCreationOutput
-import com.crossBoard.httpModel.UserLoginOutput
-import com.crossBoard.httpModel.UserProfileOutput
 import com.crossBoard.repository.interfaces.UserRepository
 import com.crossBoard.repository.interfaces.generateTokenValue
 import com.crossBoard.repository.interfaces.hashPassword
@@ -20,7 +18,7 @@ import com.crossBoard.repository.interfaces.hashPassword
  * @implements UserRepository the user repository.
  */
 class MemoryUserRep : UserRepository {
-    //Value storing the list of users of the app.
+    //Value storing the user list of the app.
     private val users = mutableListOf<User>(
         Admin(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!"), Token("1")),
         Admin(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!"), Token("2")),
@@ -32,10 +30,15 @@ class MemoryUserRep : UserRepository {
      * @param userId the id of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileById(userId: Int): UserProfileOutput? {
+    override fun getUserProfileById(userId: Int): UserInfo? {
         val u = users.find { it.id == userId } ?: return null
-        val state = if (u is Admin) "Admin" else (u as NormalUser).state.name
-        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token.value,state = state )
+        return UserInfo(
+            u.id,
+            u.token,
+            u.username,
+            u.email,
+            if(u is Admin) Admin.STATE else (u as NormalUser).state.name,
+        )
     }
 
     /**
@@ -43,10 +46,15 @@ class MemoryUserRep : UserRepository {
      * @param email the email of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileByEmail(email: Email): UserProfileOutput? {
+    override fun getUserProfileByEmail(email: Email): UserInfo? {
         val u = users.find { it.email == email } ?: return null
-        val state = if (u is Admin) "Admin" else (u as NormalUser).state.name
-        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token.value,state = state )
+        return UserInfo(
+            u.id,
+            u.token,
+            u.username,
+            u.email,
+            if(u is Admin) Admin.STATE else (u as NormalUser).state.name,
+        )
     }
 
     /**
@@ -54,10 +62,15 @@ class MemoryUserRep : UserRepository {
      * @param username the username of the user being searched.
      * @return UserProfileInfo? the user profile information if found, null otherwise.
      */
-    override fun getUserProfileByName(username: Username): UserProfileOutput? {
+    override fun getUserProfileByName(username: Username): UserInfo? {
         val u = users.find { it.username == username } ?: return null
-        val state = if (u is Admin) "Admin" else (u as NormalUser).state.name
-        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token.value,state = state )
+        return UserInfo(
+            u.id,
+            u.token,
+            u.username,
+            u.email,
+            if(u is Admin) Admin.STATE else (u as NormalUser).state.name,
+        )
     }
 
     /**
@@ -81,19 +94,25 @@ class MemoryUserRep : UserRepository {
         userId: Int,
         username: Username?,
         email: Email?,
-        password: Password?
-    ): UserProfileOutput {
+        password: Password?,
+        state: UserState?
+    ): UserInfo {
         val user = getUserFullDetails(userId)!!
         val newName = username ?: user.username
         val newEmail = email ?: user.email
         val newPassword = password ?: user.password
 
         val updatedUser = if(user is Admin) Admin(user.id, newName, newEmail, newPassword, user.token)
-        else NormalUser(user.id, newName, newEmail, newPassword, user.token, (user as NormalUser).state)
+        else NormalUser(user.id, newName, newEmail, newPassword, user.token, state ?: (user as NormalUser).state)
         users.remove(user)
         users.add(updatedUser)
-        val state = if (updatedUser is Admin) "Admin" else (updatedUser as NormalUser).state.name
-        return UserProfileOutput(updatedUser.id, updatedUser.username.value, updatedUser.email.value, updatedUser.token.value, state = state )
+        return UserInfo(
+            updatedUser.id,
+            updatedUser.token,
+            updatedUser.username,
+            updatedUser.email,
+            if(updatedUser is Admin) Admin.STATE else (updatedUser as NormalUser).state.name,
+        )
     }
 
     /**
@@ -101,7 +120,7 @@ class MemoryUserRep : UserRepository {
      * @param userId the id of the user being searched.
      * @return User? the user if found, null otherwise.
      */
-    override fun getUserFullDetails(userId: Int): User? = users.find { it.id == userId }
+     private fun getUserFullDetails(userId: Int): User? = users.find { it.id == userId }
 
     /**
      * Function "addUser" responsible to add a new user to the list of users.
@@ -114,25 +133,47 @@ class MemoryUserRep : UserRepository {
         username: Username,
         email: Email,
         password: Password
-    ): UserCreationOutput {
+    ): User {
         val lastId = if(users.isEmpty()) 0 else users.maxOf { it.id }
 
         val newUser = NormalUser(lastId + 1, username, email, password, Token(generateTokenValue()), UserState.NORMAL)
         users.add(newUser)
-        return UserCreationOutput(newUser.id, newUser.token.value)
+        return newUser
     }
 
-    override fun getUserProfileByToken(token: String): UserProfileOutput? {
+    override fun getUserProfileByToken(token: String): UserInfo? {
         val u = users.find { it.token.value == token } ?: return null
-        val state = if (u is Admin) "Admin" else (u as NormalUser).state.name
-        return UserProfileOutput(u.id, u.username.value, u.email.value, u.token.value,state = state )
+        return UserInfo(
+            u.id,
+            u.token,
+            u.username,
+            u.email,
+            if(u is Admin) Admin.STATE else (u as NormalUser).state.name,
+        )
     }
 
-    override fun login(username: Username, password: Password): UserLoginOutput? {
+    override fun login(username: Username, password: Password): UserInfo? {
         val hashPassword = hashPassword(password.value)
-        val user = users.find { it.username == username }!!
-        val state = if (user is Admin) "Admin" else (user as NormalUser).state.name
-        if (user.password.value == hashPassword) return UserLoginOutput(user.id, user.token.value, user.email.value, state)
-        return null
+        val u = users.find { it.username == username }!!
+        if (u.password.value != hashPassword) return null
+        return UserInfo(
+            u.id,
+            u.token,
+            u.username,
+            u.email,
+            if(u is Admin) Admin.STATE else (u as NormalUser).state.name,
+        )
+    }
+
+    override fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo> {
+        val usersFiltered = users.filter { it.username.value.contains(username) }
+        return usersFiltered.subList(skip, minOf(skip + limit, usersFiltered.size))
+            .map { UserInfo(it.id, it.token, it.username, it.email, if(it is Admin) Admin.STATE else (it as NormalUser).state.name) }
+            .toList()
+            .sortedBy { it.username.value }
+            .sortedBy { it.email.value }
+            .sortedBy { it.state }
+            .sortedBy { it.id }
+            .toList()
     }
 }

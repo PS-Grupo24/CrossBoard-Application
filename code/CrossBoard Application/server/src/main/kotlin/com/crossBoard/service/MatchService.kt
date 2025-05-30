@@ -4,8 +4,8 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.Move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.httpModel.MatchCancelOutput
-import com.crossBoard.httpModel.MatchStatsOutput
+import com.crossBoard.httpModel.MatchCancel
+import com.crossBoard.httpModel.MatchStats
 import com.crossBoard.repository.interfaces.MatchRepository
 import com.crossBoard.triggerAutoForfeit
 import com.crossBoard.util.ApiError
@@ -117,7 +117,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         return Either.Right(forfeitedMatch)
     }
 
-    fun cancelSearch(userId:Int, matchId: Int): Either<ApiError, MatchCancelOutput> {
+    fun cancelSearch(userId:Int, matchId: Int): Either<ApiError, MatchCancel> {
         val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId) return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
         if (match.state != MatchState.WAITING) return Either.Left(ApiError.MATCH_NOT_IN_WAITING_STATE)
@@ -132,7 +132,7 @@ class MatchService(private val matchRepository: MatchRepository) {
         return Either.Right(match)
     }
 
-    fun getStatistics(userId: Int): List<MatchStatsOutput>{
+    fun getStatistics(userId: Int): List<MatchStats>{
         return matchRepository.getStatistics(userId)
     }
 
