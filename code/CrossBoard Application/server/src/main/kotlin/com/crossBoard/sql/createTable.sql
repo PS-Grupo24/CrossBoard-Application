@@ -19,7 +19,3 @@ create table match (
     FOREIGN KEY (player1) References users(id),
     FOREIGN KEY (player2) References users(id)
 );
-
-insert into users (token, username, email, password, state) values ('1', 'Rúben Louro', 'A48926@alunos.isel.pt', 'Aa12345!', 'Admin');
-insert into users (token, username, email, password, state) values ('2', 'Luís Reis', 'A48318@alunos.isel.pt', 'Aa12345!', 'Admin');
-insert into users (token, username, email, password, state) values ('3', 'Pedro Pereira', 'palex@cc.isel.ipl.pt', 'Aa12345!', 'Admin');

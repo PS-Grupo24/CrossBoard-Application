@@ -33,8 +33,6 @@ fun Application.configureWebSocket(matchService: MatchService, usersService: Use
         pingPeriod = 30.seconds
         timeout = 15.seconds
         maxFrameSize = 65536L
-
-
     }
     routing {
         webSocket("/match-ws") {
