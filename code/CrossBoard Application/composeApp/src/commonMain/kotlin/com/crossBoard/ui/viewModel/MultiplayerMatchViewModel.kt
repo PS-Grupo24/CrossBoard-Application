@@ -6,6 +6,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.httpModel.MatchMessage
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -56,7 +57,7 @@ class MultiplayerMatchViewModel(
         if (frame is Frame.Text){
             val message = frame.readText()
             _matchState.update{
-                it.copy(incomingWebSocketErrorMessage = it.incomingWebSocketErrorMessage + message)
+                it.copy(webSocketMessage = message)
             }
         }
     }
@@ -98,6 +99,7 @@ class MultiplayerMatchViewModel(
                     _matchState.update { it.copy(currentMatch = fetchedMatch) }
                     stopPolling()
                     stopTurnTimer()
+                    disconnectFromWebSocket()
                     return false
                 }
 
@@ -251,13 +253,19 @@ class MultiplayerMatchViewModel(
                 ){
                     is Success -> {
                         val move = result.value.move.toMove()
-                        _matchState.update { it.copy(currentMatch = match.play(move)) }
+                        val newMatch = match.play(move)
+                        _matchState.update { it.copy(currentMatch = newMatch) }
                         startTurnTimer(30)
-                        val webSocketMessage = "Player ${playerType.name} made a move at position $rowNumber$columnChar"
-                        sendMessageToWebSocket(webSocketMessage)
+
+                        if (newMatch.state == MatchState.RUNNING) {
+                            sendMessageToWebSocket(MatchMessage.MoveMade.message)
+                        }
+                        else{
+                            sendMessageToWebSocket(MatchMessage.MatchOver.message)
+                        }
                     }
                     is Failure -> {
-                        _matchState.update { it.copy(errorMessage = result.value, isLoading = false) }
+                        _matchState.update { it.copy(errorMessage = result.value, isLoading = false, webSocketMessage = null) }
                     }
                 }
             }
@@ -286,9 +294,11 @@ class MultiplayerMatchViewModel(
             it.copy(
                 currentMatch = null,
                 isLoading = false,
-                errorMessage = null
+                errorMessage = null,
+                webSocketMessage = null,
             )
         }
+        sendMessageToWebSocket(MatchMessage.MatchCancel.message)
         disconnectFromWebSocket()
     }
 
@@ -335,6 +345,7 @@ class MultiplayerMatchViewModel(
             when(val result = client.cancelSearch(userToken,matchId)){
                 is Success -> {
                     resetMatch()
+
                 }
                 is Failure -> {
                     _matchState.update { it.copy(isLoading = false, errorMessage = result.value) }
@@ -355,11 +366,10 @@ class MultiplayerMatchViewModel(
 
             when(val result = client.forfeitMatch(userToken, match.id)){
                 is Success -> {
-                    val webSocketMessage = "User $currentUserId has forfeited the game"
-                    sendMessageToWebSocket(webSocketMessage)
+                    sendMessageToWebSocket(MatchMessage.MatchForfeited.message)
                     stopPolling()
                     stopTurnTimer()
-                    _matchState.update { it.copy(isLoading = false, errorMessage = null) }
+                    _matchState.update { it.copy(isLoading = false, errorMessage = null, webSocketMessage = null) }
                 }
 
                 is Failure -> {

@@ -1,8 +1,7 @@
 package com.crossBoard
 
-import com.crossBoard.domain.MatchState
 import com.crossBoard.httpModel.ErrorMessage
-import com.crossBoard.httpModel.GameMessage
+import com.crossBoard.httpModel.MatchMessage
 import com.crossBoard.service.MatchService
 import com.crossBoard.service.UsersService
 import com.crossBoard.util.Failure
@@ -18,16 +17,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
+data class PlayerConnection(
+    val userId: Int,
+    val matchId: Int,
+    val incoming: ReceiveChannel<Frame>,
+    val outgoing: SendChannel<Frame>
+)
 private val activeConnections = ConcurrentHashMap<Int, PlayerConnection>()
 
 fun Application.configureWebSocket(matchService: MatchService, usersService: UsersService) {
     install(WebSockets){
-        pingPeriod = 15.seconds
-        timeout = 30.seconds
+        pingPeriod = 30.seconds
+        timeout = 15.seconds
+        maxFrameSize = 65536L
+
+
     }
     routing {
         webSocket("/match-ws") {
@@ -37,7 +44,6 @@ fun Application.configureWebSocket(matchService: MatchService, usersService: Use
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No match or user ID found"))
                 return@webSocket
             }
-
             when (val user = usersService.getUserByToken(userToken)) {
                 is Success -> {
                     val match = matchService.getRunningMatch(user.value.id)
@@ -53,10 +59,25 @@ fun Application.configureWebSocket(matchService: MatchService, usersService: Use
 
                             for (frame in incoming) {
                                 when (frame) {
-                                    is Frame.Pong -> println("WS: Received pong from user ${user.value.username}")
+                                    is Frame.Pong -> {}
                                     is Frame.Text -> {
                                         val message = frame.readText()
                                         println("WS: Received text from user ${user.value.username}: $message")
+                                        val opponentId = if (match.value.player1 == user.value.id) match.value.player2 else match.value.player1
+                                        when(message){
+                                            MatchMessage.MatchOver.message-> {
+                                                activeConnections[opponentId]?.outgoing?.send(Frame.Text(MatchMessage.MatchOver.message))
+                                                activeConnections.remove(opponentId)
+                                                activeConnections.remove(user.value.id)
+                                            }
+                                            MatchMessage.MatchForfeited.message -> {
+                                                activeConnections[opponentId]?.outgoing?.send(Frame.Text(MatchMessage.MatchForfeited.message))
+                                                activeConnections.remove(opponentId)
+                                                activeConnections.remove(user.value.id)
+                                            }
+                                            MatchMessage.MatchCancel.message -> activeConnections.remove(user.value.id)
+                                            MatchMessage.MoveMade.message -> activeConnections[opponentId]?.outgoing?.send(Frame.Text(message))
+                                        }
                                     }
 
                                     is Frame.Binary -> {}
@@ -70,16 +91,7 @@ fun Application.configureWebSocket(matchService: MatchService, usersService: Use
                             println("WS: User ${user.value.username} connected but not in match.")
                         }
                     }
-
-                    println("User ${user.value.username} disconnected")
-                    activeConnections.remove(user.value.id)
-                    if (match is Success && match.value.state == MatchState.RUNNING) {
-                        println("User ${user.value.username} disconnected mid match ${match.value.id}.")
-
-                        triggerAutoForfeit(match.value.id, user.value.id, matchService)
-                    }
                 }
-
                 is Failure -> {
                     return@webSocket call.respond(HttpStatusCode.NotFound, ErrorMessage("User not found"))
                 }
@@ -95,20 +107,12 @@ fun triggerAutoForfeit(matchId: Int, userId: Int, matchService: MatchService) {
                 val match = forfeit.value
                 println("Auto-forfeit successful for user $userId in match $matchId.")
                 val opponentId = if (match.player1 == userId) match.player2 else match.player1
-                if (opponentId != null) {
-                    val json = Json.encodeToString(GameMessage.MatchForfeit(matchId, "Opponent Forfeited"))
-                    activeConnections[opponentId]?.outgoing?.send(Frame.Text(json))
-                }
+                activeConnections[opponentId]?.outgoing?.send(Frame.Text(MatchMessage.MatchForfeited.message))
+                activeConnections.remove(opponentId)
+                activeConnections.remove(userId)
             }
-
             is Failure -> println("Auto-forfeit failed for user $userId in match $matchId: ${forfeit.value}")
         }
     }
 }
 
-data class PlayerConnection(
-    val userId: Int,
-    val matchId: Int,
-    val incoming: ReceiveChannel<Frame>,
-    val outgoing: SendChannel<Frame>
-)

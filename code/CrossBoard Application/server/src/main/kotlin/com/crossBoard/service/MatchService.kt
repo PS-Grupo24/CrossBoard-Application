@@ -10,6 +10,8 @@ import com.crossBoard.repository.interfaces.MatchRepository
 import com.crossBoard.triggerAutoForfeit
 import com.crossBoard.util.ApiError
 import com.crossBoard.util.Either
+import com.crossBoard.util.failure
+import com.crossBoard.util.success
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -18,7 +20,7 @@ class MatchService(private val matchRepository: MatchRepository) {
     private val turnTimers = ConcurrentHashMap<Int, Job>()
 
     fun enterMatch(userId: Int, matchType: MatchType): Either<ApiError, MultiPlayerMatch> {
-        if (matchRepository.getRunningMatchByUser(userId) != null) return Either.Left(ApiError.USER_ALREADY_IN_MATCH)
+        if (matchRepository.getRunningMatchByUser(userId) != null) return failure(ApiError.USER_ALREADY_IN_MATCH)
         val waitingMatch = matchRepository.getWaitingMatch(matchType)
         println(waitingMatch)
         if (waitingMatch != null){
@@ -38,48 +40,48 @@ class MatchService(private val matchRepository: MatchRepository) {
                 updatedMatch.id,
                 updatedMatch.otherPlayer(userId)
             )
-            return Either.Right(updatedMatch)
+            return success(updatedMatch)
         }
         val m = MultiPlayerMatch.startGame(userId, matchType)
         matchRepository.addMatch(m)
-        return Either.Right(m)
+        return success(m)
     }
 
     fun getMatchById(matchId: Int): Either<ApiError, MultiPlayerMatch> =
         when(val m = matchRepository.getMatchById(matchId)){
-            null -> Either.Left(ApiError.MATCH_NOT_FOUND)
-            else -> Either.Right(m)
+            null -> failure(ApiError.MATCH_NOT_FOUND)
+            else -> success(m)
         }
 
     fun getMatchByVersion(matchId: Int, version: Int): Either<ApiError, MultiPlayerMatch> {
-        val m = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
-        if (m.version < version) return Either.Left(ApiError.VERSION_MISMATCH)
-        return Either.Right(m)
+        val m = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
+        if (m.version < version) return failure(ApiError.VERSION_MISMATCH)
+        return success(m)
     }
 
     fun getMatchByUser(userId: Int): Either<ApiError, MultiPlayerMatch> =
         when(val match = matchRepository.getRunningMatchByUser(userId)){
-            null -> Either.Left(ApiError.MATCH_NOT_FOUND)
-            else -> Either.Right(match)
+            null -> failure(ApiError.MATCH_NOT_FOUND)
+            else -> success(match)
         }
 
     fun getWaitingMatch(matchType: MatchType): Either<ApiError, MultiPlayerMatch> =
         when(val match = matchRepository.getWaitingMatch(matchType)){
-            null -> Either.Left(ApiError.MATCH_NOT_FOUND)
-            else -> Either.Right(match)
+            null -> failure(ApiError.MATCH_NOT_FOUND)
+            else -> success(match)
         }
 
     fun playMatch(matchId: Int, userId: Int, move: Move, version: Int): Either<ApiError, MultiPlayerMatch> {
-        val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
+        val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
-            return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
+            return failure(ApiError.USER_NOT_IN_THIS_MATCH)
         if(match.version != version)
-            return Either.Left(ApiError.VERSION_MISMATCH)
+            return failure(ApiError.VERSION_MISMATCH)
 
         cancelTurnTimer(matchId)
 
         val p = if (match.player1 == userId) match.board.player1 else match.board.player2
-        if (p != move.player) return Either.Left(ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER)
+        if (p != move.player) return failure(ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER)
         val updatedMatch = match.play(move)
         matchRepository.updateMatch(
             updatedMatch.id,
@@ -93,13 +95,13 @@ class MatchService(private val matchRepository: MatchRepository) {
         )
         if (updatedMatch.state == MatchState.RUNNING) startTurnTimer(updatedMatch.id, updatedMatch.otherPlayer(userId))
         else cancelTurnTimer(updatedMatch.id)
-        return Either.Right(updatedMatch)
+        return success(updatedMatch)
     }
 
     fun forfeit(matchId: Int, userId: Int): Either<ApiError, MultiPlayerMatch> {
-        val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
+        val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
         if (match.player1 != userId && match.player2 != userId)
-            return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
+            return failure(ApiError.USER_NOT_IN_THIS_MATCH)
 
         cancelTurnTimer(matchId)
 
@@ -114,22 +116,22 @@ class MatchService(private val matchRepository: MatchRepository) {
             forfeitedMatch.state,
             forfeitedMatch.winner,
         )
-        return Either.Right(forfeitedMatch)
+        return success(forfeitedMatch)
     }
 
     fun cancelSearch(userId:Int, matchId: Int): Either<ApiError, MatchCancel> {
-        val match = matchRepository.getMatchById(matchId) ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
-        if (match.player1 != userId && match.player2 != userId) return Either.Left(ApiError.USER_NOT_IN_THIS_MATCH)
-        if (match.state != MatchState.WAITING) return Either.Left(ApiError.MATCH_NOT_IN_WAITING_STATE)
+        val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
+        if (match.player1 != userId && match.player2 != userId) return failure(ApiError.USER_NOT_IN_THIS_MATCH)
+        if (match.state != MatchState.WAITING) return failure(ApiError.MATCH_NOT_IN_WAITING_STATE)
 
 
-        return Either.Right(matchRepository.cancelSearch(userId, matchId))
+        return success(matchRepository.cancelSearch(userId, matchId))
     }
 
     fun getRunningMatch(userId: Int): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getRunningMatchByUser(userId)
-            ?: return Either.Left(ApiError.MATCH_NOT_FOUND)
-        return Either.Right(match)
+            ?: return failure(ApiError.MATCH_NOT_FOUND)
+        return success(match)
     }
 
     fun getStatistics(userId: Int): List<MatchStats>{

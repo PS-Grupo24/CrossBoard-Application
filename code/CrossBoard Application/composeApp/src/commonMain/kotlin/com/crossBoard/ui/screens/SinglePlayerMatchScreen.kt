@@ -95,6 +95,7 @@ fun SinglePlayerMatchScreen(
         GameActions(
             isLoading = false,
             errorMessage = errorMessage,
+            webSocketMessage = null,
             isGameOver = isMatchOver,
             onForfeitClick = onForfeit,
             onPlayAgainClick = onPlayAgain

@@ -10,6 +10,8 @@ import com.crossBoard.domain.toMatchOutput
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.domain.toPlayedMatch
 import com.crossBoard.httpModel.ErrorMessage
+import com.crossBoard.httpModel.MatchOutput
+import com.crossBoard.httpModel.MatchStats
 import com.crossBoard.httpModel.MoveInput
 import com.crossBoard.httpModel.TicTacToeMoveInput
 import com.crossBoard.httpModel.UserCreationInput
@@ -24,9 +26,6 @@ import io.ktor.server.application.Application
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.RoutingCall
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import com.crossBoard.service.MatchService
@@ -34,6 +33,9 @@ import com.crossBoard.service.UsersService
 import com.crossBoard.util.ApiError
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.put
 
 fun Application.configureRouting(usersService: UsersService, matchService: MatchService) {
     routing {
@@ -43,9 +45,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
         //route to get a list of users' name segment.
         route("/user/username/{username}") {
-            get {
+            get({
+                summary = "Get users by username"
+                description = "Gets the users whose username match with the given username fraction"
+                tags = listOf("Users")
+                request {
+                    headerParameter<String>("Authorization") { // Documenting the auth header
+                        description = "Bearer token"
+                        required = true
+                    }
+                    pathParameter<String>("username") {
+                        description = "The username to match with"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<UserProfileOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
-
                     val username = call.parameters["username"]
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Missing username"))
 
@@ -75,7 +96,30 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
 
         //route to ban a user.
         route("/user/{userId}/ban"){
-            post {
+            post(
+                {
+                    summary = "Ban a user"
+                    description = "Bans a user"
+                    tags = listOf("Admin")
+                    request {
+                        headerParameter<String>("Authorization") { // Documenting the auth header
+                            description = "Bearer token"
+                            required = true
+                        }
+                        pathParameter<Int>("userId") {
+                            description = "The id of the user to ban"
+                        }
+                    }
+                    response {
+                        HttpStatusCode.OK to { body<UserProfileOutput>() }
+                        HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                        HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                        HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                        HttpStatusCode.Forbidden to { body<ErrorMessage>() }
+                        HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                    }
+                }
+            ) {
                 runHttp(call){
                     val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
@@ -108,7 +152,30 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route to unban a user.
         route("/user/{userId}/unban"){
-            post {
+            post(
+                {
+                    summary = "Unban a user"
+                    description = "Unbans a user"
+                    tags = listOf("Admin")
+                    request {
+                        headerParameter<String>("Authorization") { // Documenting the auth header
+                            description = "Bearer token"
+                            required = true
+                        }
+                        pathParameter<Int>("userId") {
+                            description = "The id of the user to unban"
+                        }
+                    }
+                    response {
+                        HttpStatusCode.OK to { body<UserProfileOutput>() }
+                        HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                        HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                        HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                        HttpStatusCode.Forbidden to { body<ErrorMessage>() }
+                        HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                    }
+                }
+            ) {
                 runHttp(call){
                     val userId = call.parameters["userId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing userId"))
@@ -141,7 +208,24 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route for login.
         route("/user/login"){
-            post {
+            post({
+                    summary = "Login"
+                    description = "Login to the application"
+                    tags = listOf("Users")
+                    request {
+                        body<UserLoginInput> {
+                            description = "The user's credentials"
+                        }
+                    }
+                    response {
+                        HttpStatusCode.OK to { body<UserLoginOutput>() }
+                        HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                        HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                        HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                        HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                    }
+
+                }) {
                 runHttp(call){
                     val loginInfo = call.receive<UserLoginInput>()
 
@@ -164,7 +248,23 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route to get the user statistics
         route("/user/statistics"){
-            get {
+            get({
+                summary = "Gets user statistics"
+                description = "Gets the user statistics for the different types of matches"
+                tags = listOf("Users")
+                request {
+                    headerParameter<String>("Authorization") { // Documenting the auth header
+                        description = "Bearer token"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<List<MatchStats>>()}
+                    HttpStatusCode.Unauthorized to {body<ErrorMessage>()}
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
@@ -180,7 +280,23 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to get a user.
         route("/user") {
-            get {
+            get({
+                summary = "Get a user"
+                description = "Gets a user"
+                tags = listOf("Users")
+                request {
+                    headerParameter<String>("Authorization") { // Documenting the auth header
+                        description = "Bearer token"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<UserProfileOutput>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call) {
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
@@ -202,7 +318,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
             //Route to update a user
-            put {
+            put({
+                summary = "Update a user"
+                description = "Update a user"
+                tags = listOf("Users")
+                request {
+                    headerParameter<String>("Authorization") { // Documenting the auth header
+                        description = "Bearer token"
+                        required = true
+                    }
+                    body<UserUpdateInput> {
+                        description = "The user's new information"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<UserProfileOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))
@@ -239,7 +376,22 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
             //Route to create a user
-            post {
+            post({
+                summary = "Create a user"
+                description = "Create a user"
+                tags = listOf("Users")
+                request {
+                    body<UserCreationInput> {
+                        description = "The user's information"
+                    }
+                }
+                response {
+                    HttpStatusCode.Created to { body<UserCreationOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val user = call.receive<UserCreationInput>()
                     when(
@@ -252,6 +404,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                         is Success -> {
                             val user = result.value
                             call.respond(
+                                HttpStatusCode.Created,
                                 UserCreationOutput(
                                     user.id,
                                     user.token.value
@@ -265,7 +418,22 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route to get a user by id.
         route("user/{userId}"){
-            get {
+            get({
+                summary = "Gets a user by id"
+                description = "Gets a user by its id"
+                tags = listOf("Users")
+                request {
+                    pathParameter<Int>("userId") {
+                        description = "The id of the user"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<UserProfileOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val userId = call.parameters["userId"] ?:
                         return@runHttp call.respond(HttpStatusCode.BadRequest, "Missing user id")
@@ -288,7 +456,29 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to join a match.
         route("/match/{match_type}"){
-            post {
+            post({
+                summary = "Joins a match"
+                description = "Joins a match of a certain type"
+                tags = listOf("Matches")
+                request {
+                    headerParameter<String>("Authorization"){
+                        description = "Bearer token"
+                        required = true
+                    }
+                    pathParameter<String>("match_type"){
+                        description = "The type of match to join"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.Forbidden to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing Token"))
@@ -314,7 +504,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to forfeit a match.
         route("/match/{matchId}/forfeit"){
-            post {
+            post({
+                summary = "Forfeit a match"
+                description = "Forfeit a match"
+                tags = listOf("Matches")
+                request {
+                    headerParameter<String>("Authorization"){
+                        description = "Bearer token"
+                        required = true
+                    }
+                    pathParameter<Int>("matchId"){
+                        description = "The id of the match to forfeit"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
@@ -337,7 +548,23 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to get a match by its id.
         route("/match/{matchId}"){
-            get {
+            get({
+                summary = "Gets a match by id"
+                description = "Gets a match by its id"
+                tags = listOf("Matches")
+                request {
+                    pathParameter<Int>("matchId"){
+                        description = "The id of the match"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
@@ -351,7 +578,30 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //Route to play a match.
         route("/match/{matchId}/version/{version}/play"){
-            post {
+            post({
+                summary = "Play a match"
+                description = "Play a match"
+                tags = listOf("Matches")
+                request {
+                    headerParameter<String>("Authorization"){
+                        description = "Bearer token"
+                        required = true
+                    }
+                    pathParameter<Int>("matchId"){
+                        description = "The id of the match to play"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.Forbidden to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                    HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
@@ -391,7 +641,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route to get a match by its version.
         route("/match/{matchId}/version/{version}"){
-            get {
+            get({
+                summary = "Gets a match by its version"
+                description = "Gets a match by its version"
+                tags = listOf("Matches")
+                request {
+                    pathParameter<Int>("matchId"){
+                        description = "The id of the match"
+                        required = true
+                    }
+                    pathParameter<Int>("version"){
+                        description = "The version of the match"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.InternalServerError to { body<ErrorMessage>() }
+                    HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val matchId = call.parameters["matchId"]?.toIntOrNull()
                         ?: return@runHttp call.respond(HttpStatusCode.BadRequest, ErrorMessage("Invalid or missing matchId"))
@@ -408,7 +679,28 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
         }
         //route to cancel a match.
         route("/match/{matchId}/cancel"){
-            post {
+            post({
+                summary = "Cancel a match"
+                description = "Cancel a match"
+                tags = listOf("Matches")
+                request {
+                    headerParameter<String>("Authorization"){
+                        description = "Bearer token"
+                        required = true
+                    }
+                    pathParameter<Int>("matchId"){
+                        description = "The id of the match to cancel"
+                        required = true
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to { body<MatchOutput>() }
+                    HttpStatusCode.BadRequest to { body<ErrorMessage>() }
+                    HttpStatusCode.Unauthorized to { body<ErrorMessage>() }
+                    HttpStatusCode.NotFound to { body<ErrorMessage>() }
+                    HttpStatusCode.Conflict to { body<ErrorMessage>() }
+                }
+            }) {
                 runHttp(call){
                     val userToken = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                         ?: return@runHttp call.respond(HttpStatusCode.Unauthorized, ErrorMessage("Missing token"))

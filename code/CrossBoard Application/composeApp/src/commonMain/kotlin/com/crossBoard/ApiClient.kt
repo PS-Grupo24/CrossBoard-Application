@@ -32,10 +32,10 @@ import kotlinx.coroutines.sync.withLock
 
 class ApiClient(
     private val client: HttpClient,
-    host: Host,
+    val host: Host,
     private val apiScope: CoroutineScope = CoroutineScope(SupervisorJob())
 ): Clearable {
-    private val baseUrl = host.hostname
+    private val baseUrl = "http://${host.host}:${host.port}"
 
     private var gameWebSocketSession: DefaultWebSocketSession? = null
     private val wsMutex = Mutex()
@@ -365,7 +365,8 @@ class ApiClient(
             try {
                 client.webSocket(
                     method = HttpMethod.Get,
-                    host = baseUrl,
+                    host = host.host,
+                    port = host.port,
                     path = "/match-ws",
                     request = { header(HttpHeaders.Authorization, "Bearer $userToken") },
                 ){
@@ -377,7 +378,8 @@ class ApiClient(
                 }
             }
             catch (e: Exception) {
-                //_connectionStatusFlow.value = ConnectionStatus.Error(e.message)
+                e.printStackTrace()
+                println("WS Flow: Exception caught in connectGameWebSocket: ${e.message ?: e.cause?.message ?: "Unknown error"}")
             }
         }
 

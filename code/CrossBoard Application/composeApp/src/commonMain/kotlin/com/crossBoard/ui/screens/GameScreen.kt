@@ -26,6 +26,7 @@ fun GameScreen(
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
+    webSocketMessage: String?,
     onPlayAgainClick: () -> Unit,
     timeLeft: Int?
 ) {
@@ -66,6 +67,7 @@ fun GameScreen(
         GameActions(
             isLoading = isLoading,
             errorMessage = errorMessage,
+            webSocketMessage = webSocketMessage,
             isGameOver = isGameOver,
             onForfeitClick = onForfeitClick,
             onPlayAgainClick = onPlayAgainClick
@@ -142,6 +144,7 @@ fun GameStatusAndBoard(
 fun GameActions(
     isLoading: Boolean,
     errorMessage: String?,
+    webSocketMessage: String?,
     isGameOver: Boolean,
     onForfeitClick: () -> Unit,
     onPlayAgainClick: () -> Unit
@@ -165,12 +168,13 @@ fun GameActions(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val elementHeight = 48.dp
-
-        Box(modifier = Modifier.height(elementHeight)) {
-            if (isLoading) {
+        if (isLoading) {
+            Box(modifier = Modifier.height(elementHeight)){
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                errorMessage?.let {
+            }
+        } else {
+            errorMessage?.let {
+                Box(modifier = Modifier.height(elementHeight)){
                     Text(
                         text = it,
                         color = MaterialTheme.colors.error,
@@ -179,7 +183,18 @@ fun GameActions(
                     )
                 }
             }
+            webSocketMessage?.let {
+                Box(modifier = Modifier.height(elementHeight)){
+                    Text(
+                        text = "Match Message: $it",
+                        color = CustomColor.LightBrown.value,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp).align(Alignment.Center)
+                    )
+                }
+            }
         }
+
 
         Box(modifier = Modifier.height(elementHeight)) {
             if (isGameOver) {

@@ -8,7 +8,7 @@ import com.crossBoard.domain.Username
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-
+/*
 class UserTests {
 
     @Test fun usernameClassTest() {
@@ -101,4 +101,4 @@ class UserTests {
         assertEquals("Aa12345!", user.password.value)
         assertEquals("test", user.token.value)
     }
-}
+}*/

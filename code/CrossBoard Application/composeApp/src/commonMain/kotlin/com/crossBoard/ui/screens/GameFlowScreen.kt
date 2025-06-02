@@ -29,6 +29,7 @@ fun GameFlowScreen(
                 currentUserId = currentUserId,
                 isLoading = multiplayerMatchUiState.isLoading,
                 errorMessage = multiplayerMatchUiState.errorMessage,
+                webSocketMessage = multiplayerMatchUiState.webSocketMessage,
                 onCellClick = onMakeMove,
                 onForfeitClick = onForfeit,
                 onPlayAgainClick = onResetMatch,

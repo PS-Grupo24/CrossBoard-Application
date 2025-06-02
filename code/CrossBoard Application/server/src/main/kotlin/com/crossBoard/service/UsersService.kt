@@ -7,24 +7,23 @@ import com.crossBoard.domain.User
 import com.crossBoard.domain.UserInfo
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
-import com.crossBoard.httpModel.UserCreationOutput
-import com.crossBoard.httpModel.UserLoginOutput
-import com.crossBoard.httpModel.UserProfileOutput
 import com.crossBoard.repository.interfaces.UserRepository
 import com.crossBoard.util.Either
+import com.crossBoard.util.failure
+import com.crossBoard.util.success
 
 class UsersService(private val userRepo: UserRepository) {
 
      fun createUser(username: Username, email: Email, password: Password): Either<ApiError, User> {
-        if (userRepo.getUserProfileByName(username) != null) return Either.Left(ApiError.USERNAME_ALREADY_EXISTS)
-        if (userRepo.getUserProfileByEmail(email) != null) return Either.Left(ApiError.EMAIL_ALREADY_EXISTS)
+        if (userRepo.getUserProfileByName(username) != null) return failure(ApiError.USERNAME_ALREADY_EXISTS)
+        if (userRepo.getUserProfileByEmail(email) != null) return failure(ApiError.EMAIL_ALREADY_EXISTS)
 
-        return Either.Right(userRepo.addUser(username, email, password))
+        return success(userRepo.addUser(username, email, password))
     }
 
     fun login(username: Username, password: Password): Either<ApiError, UserInfo> {
-        if (userRepo.getUserProfileByName(username) == null) return Either.Left(ApiError.USER_NOT_FOUND)
-        return Either.Right(userRepo.login(username, password) ?: return Either.Left(ApiError.WRONG_PASSWORD))
+        if (userRepo.getUserProfileByName(username) == null) return failure(ApiError.USER_NOT_FOUND)
+        return success(userRepo.login(username, password) ?: return failure(ApiError.WRONG_PASSWORD))
     }
 
     fun updateUser(
@@ -34,18 +33,18 @@ class UsersService(private val userRepo: UserRepository) {
         password: Password? = null,
         state: UserState? = null
     ): Either<ApiError, UserInfo> {
-        if (userRepo.getUserProfileById(userId) == null) return Either.Left(ApiError.USER_NOT_FOUND)
-        return Either.Right(userRepo.updateUser(userId, username, email, password, state))
+        if (userRepo.getUserProfileById(userId) == null) return failure(ApiError.USER_NOT_FOUND)
+        return success(userRepo.updateUser(userId, username, email, password, state))
     }
 
     fun getUserById(userId: Int): Either<ApiError, UserInfo> {
-        val u = userRepo.getUserProfileById(userId) ?: return Either.Left(ApiError.USER_NOT_FOUND)
-        return Either.Right(u)
+        val u = userRepo.getUserProfileById(userId) ?: return failure(ApiError.USER_NOT_FOUND)
+        return success(u)
     }
 
     fun getUserByToken(userToken: String): Either<ApiError, UserInfo> {
-        val u = userRepo.getUserProfileByToken(userToken) ?: return Either.Left(ApiError.USER_NOT_FOUND)
-        return Either.Right(u)
+        val u = userRepo.getUserProfileByToken(userToken) ?: return failure(ApiError.USER_NOT_FOUND)
+        return success(u)
     }
 
     fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo> {

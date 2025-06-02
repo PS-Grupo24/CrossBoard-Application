@@ -135,12 +135,24 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = ".com.crossBoard.MainKt"
-
+        mainClass = "com.crossBoard.MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.crossBoard"
             packageVersion = "1.0.0"
+
         }
     }
+}
+
+tasks.register<JavaExec>("desktopRunCustomQuiet") {
+    group = "application"
+    description = "Run Compose Desktop quietly with custom main class"
+
+    mainClass.set("com.crossBoard.MainKt")
+    classpath = tasks.named<JavaExec>("desktopRun").get().classpath
+    jvmArgs("-DmainClass=com.crossBoard.MainKt")
+
+    logging.captureStandardOutput(LogLevel.QUIET)
+    logging.captureStandardError(LogLevel.QUIET)
 }

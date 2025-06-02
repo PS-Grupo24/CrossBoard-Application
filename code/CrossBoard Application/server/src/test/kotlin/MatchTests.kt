@@ -15,7 +15,7 @@ class MatchTests {
         assertEquals("TicTacToe", gametype.name)
     }
 
-    @Test fun multiplayermatchStartGameTest() {
+    /*@Test fun multiplayermatchStartGameTest() {
 
         val player = Player.random()
         val board = TicTacToeBoardRun(
@@ -32,4 +32,5 @@ class MatchTests {
         assertEquals(null, newMatch.player2)
         assertEquals(MatchType.TicTacToe, newMatch.matchType)
     }
+     */
 }

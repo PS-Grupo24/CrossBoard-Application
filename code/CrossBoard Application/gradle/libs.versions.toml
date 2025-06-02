@@ -32,7 +32,7 @@ foundationLayoutAndroid = "1.7.8"
 uiAndroid = "1.7.8"
 uiToolingPreviewDesktop = "1.7.0"
 uiTooling = "1.8.0"
-
+ktorOpenAPIVersion = "5.0.2"
 [libraries]
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
@@ -58,11 +58,12 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
-
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets-jvm", version.ref = "ktor" }
 ktor-server-cors = {module = "io.ktor:ktor-server-cors-jvm", version.ref = "ktor"}
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "ktorOpenAPIVersion"}
+
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}

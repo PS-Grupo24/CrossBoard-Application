@@ -1,7 +1,8 @@
 package com.crossBoard
 
 interface Host{
-    val hostname: String
+    val host: String
+    val port: Int
 }
 
 expect fun getHost(): Host
