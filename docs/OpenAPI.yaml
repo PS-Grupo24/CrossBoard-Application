@@ -1,0 +1,1075 @@
+openapi: 3.1.0
+info:
+  title: API
+  version: latest
+externalDocs:
+  url: /
+servers: []
+tags:
+- name: Match
+  description: Matches
+- name: User
+  description: Users
+paths:
+  /match-ws:
+    get:
+      tags: []
+      parameters: []
+      responses: {}
+      deprecated: false
+  ? ""
+  : get:
+      tags: []
+      parameters: []
+      responses: {}
+      deprecated: false
+  /user/username/{username}:
+    get:
+      tags:
+      - Users
+      summary: Get users by username
+      description: Gets the users whose username match with the given username fraction
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: username
+        in: path
+        description: The username to match with
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user/{userId}/ban:
+    post:
+      tags:
+      - Admin
+      summary: Ban a user
+      description: Bans a user
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: userId
+        in: path
+        description: The id of the user to ban
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "403":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user/{userId}/unban:
+    post:
+      tags:
+      - Admin
+      summary: Unban a user
+      description: Unbans a user
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: userId
+        in: path
+        description: The id of the user to unban
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "403":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user/{userId}:
+    get:
+      tags:
+      - Users
+      summary: Gets a user by id
+      description: Gets a user by its id
+      parameters:
+      - name: userId
+        in: path
+        description: The id of the user
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user/login:
+    post:
+      tags:
+      - Users
+      summary: Login
+      description: Login to the application
+      parameters: []
+      requestBody:
+        description: The user's credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/com.crossBoard.httpModel.UserLoginInput"
+        required: false
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserLoginOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user/statistics:
+    get:
+      tags:
+      - Users
+      summary: Gets user statistics
+      description: Gets the user statistics for the different types of matches
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/com.crossBoard.httpModel.MatchStats"
+                title: List<MatchStats>
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /user:
+    get:
+      tags:
+      - Users
+      summary: Get a user
+      description: Gets a user
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+    put:
+      tags:
+      - Users
+      summary: Update a user
+      description: Update a user
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      requestBody:
+        description: The user's new information
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/com.crossBoard.httpModel.UserUpdateInput"
+        required: false
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserProfileOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+    post:
+      tags:
+      - Users
+      summary: Create a user
+      description: Create a user
+      parameters: []
+      requestBody:
+        description: The user's information
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/com.crossBoard.httpModel.UserCreationInput"
+        required: false
+      responses:
+        "201":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.UserCreationOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{match_type}:
+    post:
+      tags:
+      - Matches
+      summary: Joins a match
+      description: Joins a match of a certain type
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: match_type
+        in: path
+        description: The type of match to join
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "403":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{matchId}/forfeit:
+    post:
+      tags:
+      - Matches
+      summary: Forfeit a match
+      description: Forfeit a match
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: matchId
+        in: path
+        description: The id of the match to forfeit
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{matchId}:
+    get:
+      tags:
+      - Matches
+      summary: Gets a match by id
+      description: Gets a match by its id
+      parameters:
+      - name: matchId
+        in: path
+        description: The id of the match
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{matchId}/version/{version}/play:
+    post:
+      tags:
+      - Matches
+      summary: Play a match
+      description: Play a match
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: matchId
+        in: path
+        description: The id of the match to play
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "403":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{matchId}/version/{version}:
+    get:
+      tags:
+      - Matches
+      summary: Gets a match by its version
+      description: Gets a match by its version
+      parameters:
+      - name: matchId
+        in: path
+        description: The id of the match
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      - name: version
+        in: path
+        description: The version of the match
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "500":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+  /match/{matchId}/cancel:
+    post:
+      tags:
+      - Matches
+      summary: Cancel a match
+      description: Cancel a match
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: string
+          title: String
+      - name: matchId
+        in: path
+        description: The id of the match to cancel
+        required: true
+        deprecated: false
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          title: Int
+      responses:
+        "200":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.MatchOutput"
+        "400":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "401":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "404":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+        "409":
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/com.crossBoard.httpModel.ErrorMessage"
+      deprecated: false
+components:
+  schemas:
+    com.crossBoard.httpModel.UserProfileOutput:
+      type: object
+      properties:
+        email:
+          type: string
+          title: String
+        id:
+          type: integer
+          format: int32
+          title: Int
+        state:
+          type: string
+          title: String
+        token:
+          type: string
+          title: String
+        username:
+          type: string
+          title: String
+      required:
+      - email
+      - id
+      - state
+      - token
+      - username
+      title: UserProfileOutput
+    com.crossBoard.httpModel.ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          title: String
+      required:
+      - message
+      title: ErrorMessage
+    com.crossBoard.httpModel.UserLoginInput:
+      type: object
+      properties:
+        password:
+          type: string
+          title: String
+        username:
+          type: string
+          title: String
+      required:
+      - password
+      - username
+      title: UserLoginInput
+    com.crossBoard.httpModel.UserLoginOutput:
+      type: object
+      properties:
+        email:
+          type: string
+          title: String
+        id:
+          type: integer
+          format: int32
+          title: Int
+        state:
+          type: string
+          title: String
+        token:
+          type: string
+          title: String
+      required:
+      - email
+      - id
+      - state
+      - token
+      title: UserLoginOutput
+    com.crossBoard.httpModel.MatchStats:
+      type: object
+      properties:
+        averageWinningRate:
+          type: number
+          format: double
+          title: Double
+        matchType:
+          type: string
+          title: String
+        numberOfDraws:
+          type: integer
+          format: int32
+          title: Int
+        numberOfGames:
+          type: integer
+          format: int32
+          title: Int
+        numberOfLosses:
+          type: integer
+          format: int32
+          title: Int
+        numberOfWins:
+          type: integer
+          format: int32
+          title: Int
+      required:
+      - averageWinningRate
+      - matchType
+      - numberOfDraws
+      - numberOfGames
+      - numberOfLosses
+      - numberOfWins
+      title: MatchStats
+    com.crossBoard.httpModel.UserUpdateInput:
+      type: object
+      properties:
+        email:
+          type:
+          - "null"
+          - string
+          title: String
+        password:
+          type:
+          - "null"
+          - string
+          title: String
+        username:
+          type:
+          - "null"
+          - string
+          title: String
+      title: UserUpdateInput
+    com.crossBoard.httpModel.UserCreationInput:
+      type: object
+      properties:
+        email:
+          type: string
+          title: String
+        password:
+          type: string
+          title: String
+        username:
+          type: string
+          title: String
+      required:
+      - email
+      - password
+      - username
+      title: UserCreationInput
+    com.crossBoard.httpModel.UserCreationOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          title: Int
+        token:
+          type: string
+          title: String
+      required:
+      - id
+      - token
+      title: UserCreationOutput
+    com.crossBoard.httpModel.BoardOutput:
+      type: object
+      properties:
+        moves:
+          type: array
+          items:
+            type: string
+            title: String
+          title: List<String>
+        positions:
+          type: array
+          items:
+            type: string
+            title: String
+          title: List<String>
+        turn:
+          type: string
+          title: String
+        winner:
+          type:
+          - "null"
+          - string
+          title: String
+      required:
+      - moves
+      - positions
+      - turn
+      title: BoardOutput
+    com.crossBoard.httpModel.PlayerOutput:
+      type: object
+      properties:
+        playerType:
+          type: string
+          title: String
+        userId:
+          type:
+          - "null"
+          - integer
+          format: int32
+          title: Int
+      required:
+      - playerType
+      title: PlayerOutput
+    com.crossBoard.httpModel.MatchOutput:
+      type: object
+      properties:
+        board:
+          $ref: "#/components/schemas/com.crossBoard.httpModel.BoardOutput"
+        gameType:
+          type: string
+          title: String
+        matchId:
+          type: integer
+          format: int32
+          title: Int
+        player1:
+          $ref: "#/components/schemas/com.crossBoard.httpModel.PlayerOutput"
+        player2:
+          $ref: "#/components/schemas/com.crossBoard.httpModel.PlayerOutput"
+        state:
+          type: string
+          title: String
+        version:
+          type: integer
+          format: int32
+          title: Int
+        winner:
+          type:
+          - "null"
+          - integer
+          format: int32
+          title: Int
+      required:
+      - board
+      - gameType
+      - matchId
+      - player1
+      - player2
+      - state
+      - version
+      title: MatchOutput
+  examples: {}
+webhooks: {}
