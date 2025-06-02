@@ -14,7 +14,7 @@ const val URL = "URL_PS"
 const val PORT = "PS_PORT"
 
 fun main() {
-    val port = System.getenv(PORT)?.toInt() ?: 8080
+    val port = System.getenv(PORT)?.toInt() ?: 8000
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }

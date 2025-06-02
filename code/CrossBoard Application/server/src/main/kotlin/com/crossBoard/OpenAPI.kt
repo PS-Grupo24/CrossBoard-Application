@@ -17,6 +17,9 @@ fun Application.configureOpenAPI() {
                 description = "Users"
 
             }
+            tag("Admin"){
+                description = "Admin"
+            }
         }
     }
     routing{
