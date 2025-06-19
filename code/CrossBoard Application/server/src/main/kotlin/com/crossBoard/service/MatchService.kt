@@ -1,28 +1,49 @@
 package com.crossBoard.service
 
+import com.crossBoard.disconnectUserEvent
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.Move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
+import com.crossBoard.domain.toMatchOutput
+import com.crossBoard.httpModel.EventType
 import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchStats
+import com.crossBoard.json
 import com.crossBoard.repository.interfaces.MatchRepository
-import com.crossBoard.triggerAutoForfeit
+import com.crossBoard.sendEventToUser
 import com.crossBoard.util.ApiError
 import com.crossBoard.util.Either
 import com.crossBoard.util.failure
 import com.crossBoard.util.success
+import io.ktor.sse.ServerSentEvent
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Responsible for the match management.
+ * @param matchRepository The auxiliary for communication with the database.
+ */
 class MatchService(private val matchRepository: MatchRepository) {
-
+    /**
+     * The play timers.
+     */
     private val turnTimers = ConcurrentHashMap<Int, Job>()
 
+    /**
+     * This class scope.
+     */
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    /**
+     * Responsible to find a match for a user.
+     * @param userId The user id of the user to join a match.
+     * @param matchType The type of match to find.
+     * @return APIError on failure or MultiplayerMatch on success.
+     */
     fun enterMatch(userId: Int, matchType: MatchType): Either<ApiError, MultiPlayerMatch> {
         if (matchRepository.getRunningMatchByUser(userId) != null) return failure(ApiError.USER_ALREADY_IN_MATCH)
         val waitingMatch = matchRepository.getWaitingMatch(matchType)
-        println(waitingMatch)
         if (waitingMatch != null){
             val updatedMatch = waitingMatch.join(userId)
             matchRepository.updateMatch(
@@ -35,6 +56,15 @@ class MatchService(private val matchRepository: MatchRepository) {
                 updatedMatch.state,
                 updatedMatch.winner,
             )
+            scope.launch {
+                sendEventToUser(
+                    updatedMatch.otherPlayer(userId),
+                    ServerSentEvent(
+                        event = EventType.MatchUpdate.name,
+                        data = json.encodeToString(updatedMatch.toMatchOutput())
+                    )
+                )
+            }
             if (updatedMatch.isMyTurn(userId)) startTurnTimer(updatedMatch.id, userId)
             else startTurnTimer(
                 updatedMatch.id,
@@ -47,6 +77,10 @@ class MatchService(private val matchRepository: MatchRepository) {
         return success(m)
     }
 
+    /**
+     * Responsible for finding a match given an id.
+     * @param matchId The id of the match to find.
+     */
     fun getMatchById(matchId: Int): Either<ApiError, MultiPlayerMatch> =
         when(val m = matchRepository.getMatchById(matchId)){
             null -> failure(ApiError.MATCH_NOT_FOUND)
@@ -93,7 +127,21 @@ class MatchService(private val matchRepository: MatchRepository) {
             updatedMatch.state,
             updatedMatch.winner,
         )
-        if (updatedMatch.state == MatchState.RUNNING) startTurnTimer(updatedMatch.id, updatedMatch.otherPlayer(userId))
+        scope.launch {
+            sendEventToUser(
+                updatedMatch.otherPlayer(userId),
+                ServerSentEvent(
+                    event = EventType.MatchUpdate.name,
+                    data = json.encodeToString(updatedMatch.toMatchOutput())
+                )
+            )
+            if (updatedMatch.state == MatchState.WIN || updatedMatch.state == MatchState.DRAW) {
+                disconnectUserEvent(userId)
+                disconnectUserEvent(updatedMatch.otherPlayer(userId))
+            }
+        }
+        if (updatedMatch.state == MatchState.RUNNING)
+            startTurnTimer(updatedMatch.id, updatedMatch.otherPlayer(userId))
         else cancelTurnTimer(updatedMatch.id)
         return success(updatedMatch)
     }
@@ -116,6 +164,25 @@ class MatchService(private val matchRepository: MatchRepository) {
             forfeitedMatch.state,
             forfeitedMatch.winner,
         )
+        val opponentId = forfeitedMatch.otherPlayer(userId)
+        scope.launch {
+            sendEventToUser(
+                userId,
+                ServerSentEvent(
+                    event = EventType.MatchUpdate.name,
+                    data = json.encodeToString(forfeitedMatch.toMatchOutput())
+                )
+            )
+            sendEventToUser(
+                opponentId,
+                ServerSentEvent(
+                    event = EventType.MatchUpdate.name,
+                    data = json.encodeToString(forfeitedMatch.toMatchOutput())
+                )
+            )
+            disconnectUserEvent(userId)
+            disconnectUserEvent(forfeitedMatch.otherPlayer(userId))
+        }
         return success(forfeitedMatch)
     }
 
@@ -143,12 +210,12 @@ class MatchService(private val matchRepository: MatchRepository) {
 
         turnTimers[matchId]?.cancel()
 
-        val timerJob = CoroutineScope(Dispatchers.Default).launch {
+        val timerJob = scope.launch {
             delay(turnTimeOut)
 
             val match = matchRepository.getMatchById(matchId)
             if (match != null && match.state == MatchState.RUNNING && match.isMyTurn(userId)) {
-                triggerAutoForfeit(matchId, userId, this@MatchService)
+                forfeit(matchId, userId)
             }
             else println("Turn timer expired but match $matchId is no longer running or it's not user $userId's turn.")
 

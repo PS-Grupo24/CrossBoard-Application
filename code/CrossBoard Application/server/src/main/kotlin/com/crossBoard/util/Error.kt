@@ -2,6 +2,9 @@ package com.crossBoard.util
 
 interface Error
 
+/**
+ * The multiple types of errors in the service.
+ */
 enum class ApiError: Error {
     USER_NOT_FOUND,
     UNAUTHORIZED,

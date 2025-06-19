@@ -1,10 +1,12 @@
 package com.crossBoard
 
 import com.crossBoard.domain.Email
+import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.UserInfo
 import com.crossBoard.domain.Username
 import com.crossBoard.httpModel.ErrorMessage
+import com.crossBoard.httpModel.EventType
 import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchOutput
 import com.crossBoard.httpModel.MatchPlayedOutput
@@ -15,6 +17,7 @@ import com.crossBoard.httpModel.UserLoginInput
 import com.crossBoard.httpModel.UserLoginOutput
 import com.crossBoard.httpModel.UserProfileOutput
 import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.httpModel.toMultiplayerMatch
 import com.crossBoard.interfaces.Clearable
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -23,13 +26,21 @@ import io.ktor.http.*
 import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
 import com.crossBoard.util.Either
+import com.crossBoard.utils.clientJson
+import io.ktor.client.plugins.sse.sse
 import io.ktor.client.plugins.websocket.*
+import io.ktor.client.statement.HttpResponse
+import io.ktor.sse.ServerSentEvent
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * class ApiClient, responsible for the requests to the server
+ */
 class ApiClient(
     private val client: HttpClient,
     val host: Host,
@@ -41,11 +52,17 @@ class ApiClient(
     private val wsMutex = Mutex()
 
     private val _incomingMessages = MutableSharedFlow<Frame>(
-        replay = 0,
+        replay = 1,
         extraBufferCapacity = 64
     )
     val incomingMessages: SharedFlow<Frame> = _incomingMessages.asSharedFlow()
 
+    /**
+     * Function "banUser", responsible for the request to ban a user.
+     * @param userToken The token of the admin performing the ban.
+     * @param userId The id of the user to forfeit.
+     * @return the error message in String if failure or UserInfo if success
+     */
     suspend fun banUser(userToken: String, userId: Int): Either<String, UserInfo> {
         val response = try {
             client.post("$baseUrl/user/$userId/ban") {
@@ -70,6 +87,12 @@ class ApiClient(
         }
     }
 
+    /**
+     * Function "unbanUser" responsible for unbanning a user.
+     * @param userToken The token of the admin performing unban.
+     * @param userId The id of the user to unban.
+     * @return the error message in String if failure or UserInfo if success
+     */
     suspend fun unbanUser(userToken: String, userId: Int): Either<String, UserInfo> {
         val response = try {
             client.post("$baseUrl/user/$userId/unban") {
@@ -248,7 +271,8 @@ class ApiClient(
         }
     }
 
-    suspend fun forfeitMatch(userToken: String, matchId: Int): Either<String, MatchOutput> {
+    suspend fun forfeitMatch(userToken: String, matchId: Int): Either<String, MatchOutput>
+    {
         val response = try {
             client.post(
                 urlString = "$baseUrl/match/$matchId/forfeit",
@@ -274,182 +298,105 @@ class ApiClient(
         }
     }
 
-    suspend fun getMatch(matchId: Int): Either<String, MatchOutput> {
-        val response = try {
+    suspend fun getMatch(matchId: Int): Either<String, MatchOutput> =
+        safeRequest<MatchOutput> {
             client.get(
                 urlString = "$baseUrl/match/$matchId"
             )
         }
-        catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
-        }
-        catch (e: Exception) {
-            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
-        }
-
-        return if (response.status.value in 200 .. 299){
-            val match = response.body<MatchOutput>()
-            Either.Right(match)
-        }
-        else {
-            val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
-        }
-    }
 
     suspend fun playMatch(
         userToken: String,
         matchId: Int,
         version: Int,
         moveInput: MoveInput,
-    ): Either<String, MatchPlayedOutput> {
-        val response = try {
-            client.post(
-                urlString = "$baseUrl/match/$matchId/version/$version/play",
-            ){
-                contentType(ContentType.Application.Json)
-                setBody(moveInput)
-                header(HttpHeaders.Authorization, "Bearer $userToken")
-            }
-        }
-        catch (e: SerializationException) {
-            return Either.Left(e.message ?: "Serialization exception")
-        }
-        catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
-        }
-
-        return if (response.status.value in 200 .. 299){
-            val move = response.body<MatchPlayedOutput>()
-            Either.Right(move)
-        }
-        else {
-            val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+    ): Either<String, MatchPlayedOutput> = safeRequest<MatchPlayedOutput> {
+        client.post(
+            urlString = "$baseUrl/match/$matchId/version/$version/play",
+        ){
+            contentType(ContentType.Application.Json)
+            setBody(moveInput)
+            header(HttpHeaders.Authorization, "Bearer $userToken")
         }
     }
 
-    suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancel> {
-        val response = try {
-            client.post(
-                urlString = "$baseUrl/match/$matchId/cancel",
-            ){
-                contentType(ContentType.Application.Json)
-                header(HttpHeaders.Authorization, "Bearer $userToken")
-            }
-        }
-        catch (e: SerializationException) {
-            return Either.Left(e.message ?: "Serialization exception")
-        }
-        catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
-        }
+    suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancel> =
+        safeRequest<MatchCancel> { client.post(
+            urlString = "$baseUrl/match/$matchId/cancel",
+        ){
+            contentType(ContentType.Application.Json)
+            header(HttpHeaders.Authorization, "Bearer $userToken")
+        }}
 
-        return if (response.status.value in 200 .. 299){
-            val move = response.body<MatchCancel>()
-            Either.Right(move)
-        }
-        else {
-            val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
-        }
-
-    }
-
-    fun connectGameWebSocket(userId:Int, userToken: String): Flow<Frame>{
-        if (gameWebSocketSession?.isActive == true){
-            return incomingMessages
-        }
-
-        apiScope.launch {
-            try {
-                client.webSocket(
-                    method = HttpMethod.Get,
-                    host = host.host,
-                    port = host.port,
-                    path = "/match-ws",
-                    request = { header(HttpHeaders.Authorization, "Bearer $userToken") },
-                ){
-                    wsMutex.withLock { gameWebSocketSession = this}
-
-                    for (frame in incoming) {
-                        _incomingMessages.emit(frame)
+    fun connectSSE(userToken: String): Flow<MultiPlayerMatch>{
+        return callbackFlow {
+            val collectJob = launch{
+                try {
+                    client.sse(
+                        host = host.host,
+                        port = host.port,
+                        path = "/events",
+                        request = {
+                            header(HttpHeaders.Authorization, "Bearer $userToken")
+                        }
+                    ){
+                        println("ApiClientImpl: SSE Connection established in session scope for user")
+                        incoming
+                            .filter { it.event == EventType.MatchUpdate.name && it.data != null }
+                            .mapNotNull { event ->
+                                runCatching {
+                                    val matchOut = clientJson.decodeFromString<MatchOutput>(event.data!!)
+                                    matchOut.toMultiplayerMatch()
+                                }.getOrElse {
+                                    println("Bad MatchUpdate JSON: ${it.message}")
+                                    null
+                                }
+                            }
+                            .collect { match -> send(match) }
                     }
                 }
-            }
-            catch (e: Exception) {
-                e.printStackTrace()
-                println("WS Flow: Exception caught in connectGameWebSocket: ${e.message ?: e.cause?.message ?: "Unknown error"}")
-            }
-        }
-
-        return incomingMessages
-            .onStart { println("WS Flow: Collector started incoming messages flow for user")}
-            .onEach { frame -> println("WS Flow: Emitted frame from flow: ${frame::class.simpleName}") }
-            .onCompletion { cause -> println("WS Flow: Collector completed on incoming messages flow for user $userId. Cause: $cause") }
-            .catch { cause -> println("WS Flow: Collector caught exception downstream: ${cause.message}") }
-    }
-
-    suspend fun sendGameWebSocketMessage(frame: Frame) {
-        wsMutex.withLock {
-            val session = gameWebSocketSession
-            if (session?.isActive == true) {
-                try {
-                    session.send(frame)
-                    println("WS Send: Sent frame: ${frame::class.simpleName}")
-                }
                 catch (e: Exception){
-                    println("WS Send: Failed to send frame: ${e.message}")
-                    throw e
+                    println("ApiClientImpl: SSE Connection failed or errored for user: ${e.message}")
                 }
             }
-        }
-    }
-
-    suspend fun disconnectGameWebSocket(){
-        wsMutex.withLock {
-            val session = gameWebSocketSession
-
-            if (session?.isActive == true) {
-                try {
-                    session.close(CloseReason(CloseReason.Codes.NORMAL, "Client disconnected"))
-                    println("WS Disconnect: Sent close frame.")
-                }
-                catch (e: Exception){
-                    println("WS Disconnect: Failed to send close frame: ${e.message}")
-                }
-                finally {
-                    gameWebSocketSession = null
-                }
-            } else {
-                println("WS Disconnect: No active session to disconnect.")
+            awaitClose{
+                collectJob.cancel()
             }
-        }
+        }.onStart { println("ApiClientImpl: SSE Flow (returned): Collector started.") }
+            .onEach { match -> println("Match version: ${match.version}") }
+            .onCompletion { cause -> println("ApiClientImpl: SSE Flow (returned): Collector completed. Cause: $cause") }
+            .catch { cause -> println("ApiClientImpl: SSE Flow (returned): Collector caught downstream error: ${cause?.message}") }
+
     }
 
-    suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStats>>{
-        val response = try {
+    suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStats>>
+        = safeRequest<List<MatchStats>> {
             client.get("$baseUrl/user/statistics"){
                 contentType(ContentType.Application.Json)
                 header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }
-        catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
-        }
-        catch (e: Exception) {
-            return Either.Left(e.message ?: "Something went wrong")
-        }
 
-        return if (response.status.value in 200 .. 299){
-            Either.Right(response.body<List<MatchStats>>())
-        }
-        else {
-            val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
-        }
-    }
     override fun clear() {
         apiScope.cancel()
+    }
+}
+
+private suspend inline fun <reified T> safeRequest(
+    block: suspend () -> HttpResponse
+): Either<String, T> {
+    val response = try {
+        block()
+    } catch (e: UnresolvedAddressException) {
+        return Either.Left(e.message ?: "No internet connection")
+    } catch (e: Exception) {
+        return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+    }
+
+    return if (response.status.isSuccess()) {
+        Either.Right(response.body())
+    } else {
+        val error = response.body<ErrorMessage>()
+        Either.Left(error.message)
     }
 }

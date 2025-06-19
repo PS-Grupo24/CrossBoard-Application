@@ -36,7 +36,14 @@ import com.crossBoard.util.Success
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktoropenapi.put
+import io.ktor.server.application.ApplicationCall
 
+
+/**
+ * Responsible for configuring the server endpoints.
+ * @param usersService The service for user management.
+ * @param matchService The service for match management.
+ */
 fun Application.configureRouting(usersService: UsersService, matchService: MatchService) {
     routing {
         route("/") {
@@ -206,7 +213,9 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
-        //route for login.
+        /**
+         * Route for login.
+         */
         route("/user/login"){
             post({
                     summary = "Login"
@@ -727,7 +736,12 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
     }
 }
 
-private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
+/**
+ * Responsible for managing the responses given a type of error.
+ * @param call The call to respond to.
+ * @param error The type of error to handle.
+ */
+suspend fun handleFailure(call: ApplicationCall, error: ApiError) {
     when (error) {
         ApiError.USER_NOT_FOUND -> call.respond(HttpStatusCode.NotFound, ErrorMessage("User not found"))
         ApiError.USERNAME_ALREADY_EXISTS -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Username already exists"))
@@ -744,6 +758,11 @@ private suspend fun handleFailure(call: RoutingCall, error: ApiError) {
     }
 }
 
+/**
+ * Auxiliary function for routing.
+ * @param call The routing call to respond to.
+ * @param block The block to run safely.
+ */
 private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     try {
         block()
@@ -752,6 +771,11 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     }
 }
 
+/**
+ * Responsible for the deserialization of the move input.
+ * @param call The Routing call where that contains the data.
+ * @param matchType The match type that determines which type of move input to use.
+ */
 private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput = when(matchType){
     MatchType.TicTacToe -> call.receive<TicTacToeMoveInput>()
 }

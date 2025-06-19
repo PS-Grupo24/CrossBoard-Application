@@ -6,6 +6,9 @@ import io.github.smiley4.ktoropenapi.openApi
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
+/**
+ * Responsible for configuring the Open API file generator.
+ */
 fun Application.configureOpenAPI() {
     install(OpenApi){
         outputFormat = OutputFormat.YAML

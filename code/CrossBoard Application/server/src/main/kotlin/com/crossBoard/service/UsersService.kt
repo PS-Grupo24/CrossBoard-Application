@@ -12,8 +12,17 @@ import com.crossBoard.util.Either
 import com.crossBoard.util.failure
 import com.crossBoard.util.success
 
+/**
+ * Responsible for the user management
+ * @param userRepo The auxiliary for communication with the database.
+ */
 class UsersService(private val userRepo: UserRepository) {
-
+    /**
+     * Responsible for creating a user.
+     * @param username The username of the new user.
+     * @param email The email of the new user.
+     * @param password The password of the new user
+     */
      fun createUser(username: Username, email: Email, password: Password): Either<ApiError, User> {
         if (userRepo.getUserProfileByName(username) != null) return failure(ApiError.USERNAME_ALREADY_EXISTS)
         if (userRepo.getUserProfileByEmail(email) != null) return failure(ApiError.EMAIL_ALREADY_EXISTS)
@@ -21,11 +30,24 @@ class UsersService(private val userRepo: UserRepository) {
         return success(userRepo.addUser(username, email, password))
     }
 
+    /**
+     * Responsible for the login verification.
+     * @param username The username of the user to login.
+     * @param password The password of the user to login.
+     */
     fun login(username: Username, password: Password): Either<ApiError, UserInfo> {
         if (userRepo.getUserProfileByName(username) == null) return failure(ApiError.USER_NOT_FOUND)
         return success(userRepo.login(username, password) ?: return failure(ApiError.WRONG_PASSWORD))
     }
 
+    /**
+     * Responsible for updating the information of a user.
+     * @param userId The id of the user to update.
+     * @param username The new username for the user or null if not to change.
+     * @param email The new email for the user or null if not to change.
+     * @param password The new password for the user or null if not to change.
+     * @param state The new state for the user or null if not to change
+     */
     fun updateUser(
         userId: Int,
         username: Username? = null,
@@ -37,16 +59,30 @@ class UsersService(private val userRepo: UserRepository) {
         return success(userRepo.updateUser(userId, username, email, password, state))
     }
 
+    /**
+     * Responsible to find a user given an id.
+     * @param userId The id of the user to find.
+     */
     fun getUserById(userId: Int): Either<ApiError, UserInfo> {
         val u = userRepo.getUserProfileById(userId) ?: return failure(ApiError.USER_NOT_FOUND)
         return success(u)
     }
 
+    /**
+     * Responsible to find a user given a token.
+     * @param userToken The token of the user to find.
+     */
     fun getUserByToken(userToken: String): Either<ApiError, UserInfo> {
         val u = userRepo.getUserProfileByToken(userToken) ?: return failure(ApiError.USER_NOT_FOUND)
         return success(u)
     }
 
+    /**
+     * Responsible to find users whose name matches with a sequence.
+     * @param username The username sequence to filter by.
+     * @param skip The number of elements to skip.
+     * @param limit The maximum number of elements to return.
+     */
     fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo> {
         return userRepo.getUsersByName(username,  skip, limit)
     }

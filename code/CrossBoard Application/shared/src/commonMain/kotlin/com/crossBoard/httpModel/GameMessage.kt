@@ -7,5 +7,6 @@ enum class MatchMessage(val message: String) {
     MatchForfeited("Match Forfeited"),
     MatchOver("Match Over"),
     MoveMade("Move Made"),
-    MatchCancel("Match Cancelled")
+    MatchCancel("Match Cancelled"),
+    OpponentFound("Opponent Found"),
 }

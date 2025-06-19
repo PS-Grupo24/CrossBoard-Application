@@ -13,6 +13,9 @@ import com.crossBoard.service.UsersService
 const val URL = "URL_PS"
 const val PORT = "PS_PORT"
 
+/**
+ * Main function for the application
+ */
 fun main() {
     val port = System.getenv(PORT)?.toInt() ?: 8000
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
@@ -29,7 +32,8 @@ fun Application.module() {
     val matchService = MatchService(JdbcMatchRepo(jdbc))
 
     configureOpenAPI()
-    configureWebSocket(matchService, userService)
+    //configureWebSocket(matchService, userService)
+    configureServerSentEvents(userService)
     configureCors()
     configureSerialization()
     configureRouting(userService, matchService)
