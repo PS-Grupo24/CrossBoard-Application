@@ -44,8 +44,8 @@ class MatchStateTests {
     @Test fun getMatchStateFromBoardTest() {
         val player1 = Player.random()
 
-        val board = TicTacToeBoardRun(
-            initialTicTacToePositions(),
+        val board = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardRun(
+            _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions(),
             emptyList(),
             Player.random(),
             player1,
@@ -56,9 +56,9 @@ class MatchStateTests {
 
         assertEquals(MatchState.RUNNING, getMatchStateFromBoard(2, board))
 
-        val boardWin = TicTacToeBoardWin(
+        val boardWin = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardWin(
             player1,
-            initialTicTacToePositions(),
+            _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions(),
             emptyList(),
             Player.random(),
             player1,
@@ -67,8 +67,8 @@ class MatchStateTests {
 
         assertEquals(MatchState.WIN, getMatchStateFromBoard(2, boardWin))
 
-        val boardDraw = TicTacToeBoardDraw(
-            initialTicTacToePositions(),
+        val boardDraw = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardDraw(
+            _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions(),
             emptyList(),
             Player.random(),
             player1,

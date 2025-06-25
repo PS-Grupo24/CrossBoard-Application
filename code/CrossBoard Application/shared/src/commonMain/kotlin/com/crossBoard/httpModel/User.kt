@@ -58,7 +58,7 @@ data class UserUpdateInput(
 
 
 /**
- * Data class "UserLoginInput" represents the data format to login.
+ * Data class "UserLoginInput" represents the data format to log in.
  * @param username The username of the target user to login.
  * @param password The password of the target username.
  */
@@ -68,6 +68,13 @@ data class UserLoginInput(
     val password: String
 )
 
+/**
+ * Data class UserLoginOutput represents the data format of a response to a log in request.
+ * @param id The id of the logged user.
+ * @param token The token of the logged user.
+ * @param email The email of the logged user.
+ * @param state The user state of the logged user.
+ */
 @Serializable
 data class UserLoginOutput(
     val id:Int,

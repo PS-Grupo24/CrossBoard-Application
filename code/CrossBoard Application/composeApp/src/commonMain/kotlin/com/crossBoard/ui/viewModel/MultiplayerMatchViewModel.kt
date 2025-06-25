@@ -6,6 +6,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.move.toMove
+import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -60,7 +63,7 @@ class MultiplayerMatchViewModel(
                         val currentMatch = _matchState.value.currentMatch
                         _matchState.update{ it.copy(currentMatch = matchUpdate) }
                         if (currentMatch?.version == 1 && matchUpdate.version == 2){
-                            viewModelScope.launch { getPlayersUsernames(matchUpdate.player1, matchUpdate.player2) }
+                            viewModelScope.launch { getPlayersUsernames(matchUpdate.user1, matchUpdate.user2) }
                         }
                         if (matchUpdate.state == MatchState.WIN || matchUpdate.state == MatchState.DRAW){
                             disconnectSSE()
@@ -119,7 +122,7 @@ class MultiplayerMatchViewModel(
                         val match = result.value.toMultiplayerMatch()
                         _matchState.update { it.copy(isLoading = false, currentMatch = match) }
                         if (match?.state == MatchState.RUNNING) { startTurnTimer(30)}
-                        getPlayersUsernames(match?.player1, match?.player2)
+                        getPlayersUsernames(match?.user1, match?.user2)
                         //startPolling(result.value.matchId)
                         startSSE()
                     }
@@ -151,7 +154,7 @@ class MultiplayerMatchViewModel(
 
         val playerType = match.getPlayerType(currentUserId)
 
-        if (match.player2 == null){
+        if (match.user2 == null){
             _matchState.update { it.copy(errorMessage = "Please wait for a player to join") }
             return
         }

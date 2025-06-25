@@ -1,6 +1,5 @@
 package com.crossBoard.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +33,7 @@ fun StatisticsScreen(
                 for(stat in stats.stats){
                     Text(stat.matchType, style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
                     Spacer(Modifier.height(8.dp))
-                    Text("Total Games: ${stat.numberOfGames}",
+                    Text("Total Games: ${stat.numberOfMatches}",
                         style = MaterialTheme.typography.body1,
                         color = CustomColor.LightBrown.value
                     )

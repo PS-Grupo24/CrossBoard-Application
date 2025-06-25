@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.crossBoard.domain.Board
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicPosition
-import com.crossBoard.domain.TicTacToeBoard
+import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.domain.board.TicTacToeBoard
 
 @Composable
 fun ticTacToeBoardView(

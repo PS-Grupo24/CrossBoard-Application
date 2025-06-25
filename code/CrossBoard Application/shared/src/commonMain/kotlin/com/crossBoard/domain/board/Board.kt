@@ -1,4 +1,9 @@
-package com.crossBoard.domain
+package com.crossBoard.domain.board
+
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.position.Position
+import com.crossBoard.domain.Square
 
 /**
  * Sealed Interface "Board" representing the game board and their properties.

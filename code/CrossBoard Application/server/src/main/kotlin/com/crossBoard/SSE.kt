@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * The user sessions.
+ * The user sessions using ConcurrentHashMap to store the ServerSSESession.
  */
 private val userEventSessions = ConcurrentHashMap<Int, ServerSSESession>()
 

@@ -1,19 +1,19 @@
 package com.crossBoard.httpModel
 
-import com.crossBoard.domain.Board
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
-import com.crossBoard.domain.TicPosition
-import com.crossBoard.domain.TicTacToeBoard
-import com.crossBoard.domain.TicTacToeBoardDraw
-import com.crossBoard.domain.TicTacToeBoardRun
-import com.crossBoard.domain.TicTacToeBoardWin
-import com.crossBoard.domain.TicTacToeMove
+import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.board.TicTacToeBoardDraw
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.TicTacToeBoardWin
+import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
-import com.crossBoard.domain.toMove
+import com.crossBoard.domain.move.toMove
 import com.crossBoard.domain.toPlayer
-import com.crossBoard.domain.toPosition
+import com.crossBoard.domain.position.toPosition
 import kotlinx.serialization.Serializable
 
 /**
@@ -36,7 +36,7 @@ data class BoardOutput(
  * @param matchType the type of the match played.
  * @param player1Type the type of the first player.
  * @param state the state of the match.
- * @return Board the Board object corresponding to the BoardOutput object.
+ * @return `Board` object corresponding to the `BoardOutput` object.
  */
 fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): Board {
 

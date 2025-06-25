@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.crossBoard.domain.Board
-import com.crossBoard.domain.BoardWin
+import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.Player
@@ -36,7 +36,7 @@ fun GameScreen(
     val player1Symbol = "X"
     val player2Symbol = "O"
 
-    val player1Type = remember(match.player1) { match.getPlayerType(match.player1) }
+    val player1Type = remember(match.user1) { match.getPlayerType(match.user1) }
 
     Column(
         modifier = Modifier
@@ -48,8 +48,8 @@ fun GameScreen(
         MatchInfoPanel(
             matchId = match.id,
             currentUserId = currentUserId?: 0,
-            PlayerInfo(match.player1, player1Username, player1Symbol),
-            PlayerInfo(match.player2, player2Username, player2Symbol),
+            PlayerInfo(match.user1, player1Username, player1Symbol),
+            PlayerInfo(match.user2, player2Username, player2Symbol),
             timeLeft = timeLeft,
         )
 

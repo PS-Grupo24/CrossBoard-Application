@@ -1,15 +1,15 @@
 package com.crossBoard.model
 
-import com.crossBoard.domain.Board
-import com.crossBoard.domain.BoardDraw
-import com.crossBoard.domain.BoardRun
-import com.crossBoard.domain.BoardWin
+import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardDraw
+import com.crossBoard.domain.board.BoardRun
+import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
-import com.crossBoard.domain.Move
+import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicTacToeBoardRun
-import com.crossBoard.domain.initialTicTacToePositions
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.initialTicTacToePositions
 import kotlin.random.Random
 
 class SinglePlayerMatch(

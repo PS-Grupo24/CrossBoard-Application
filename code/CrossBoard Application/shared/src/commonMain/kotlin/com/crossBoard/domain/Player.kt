@@ -2,6 +2,7 @@ package com.crossBoard.domain
 
 /**
  * Enum class "Player" represents the Player in the application of the game.
+ * TODO("Remove Empty to use null instead")
  */
 enum class Player {
     WHITE,
@@ -9,7 +10,7 @@ enum class Player {
     EMPTY;
 
     /**
-     * Function "other" used to obtain the opposite type of player.
+     * Function "other" used to get the opposite type of player.
      * @return Player, the opposite player or empty.
      */
     fun other() = when(this) {
@@ -20,13 +21,13 @@ enum class Player {
 
     companion object{
         /**
-         * Function random used to obtain a random type of player.
+         * Function random used to get a random type of player.
          */
         fun random() = listOf(BLACK, WHITE).random()
     }
 
     /**
-     * Function "toString" used to obtain the String representation of the player.
+     * Function "toString" used to get the String representation of the player.
      * @return String, the String representation of the player.
      */
     override fun toString(): String = when(this) {

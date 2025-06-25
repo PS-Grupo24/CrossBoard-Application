@@ -1,6 +1,7 @@
 package httpModelTests
 
 import com.crossBoard.domain.*
+import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.httpModel.BoardOutput
 import com.crossBoard.httpModel.toBoard
 import kotlin.test.Test
@@ -42,7 +43,7 @@ class BoardTests {
 
         val board1 = boardOutput.toBoard("tic", "BLACK", "RUNNING")
 
-        assertTrue(board1 is TicTacToeBoardRun)
+        assertTrue(board1 is com.crossBoard.domain.board.TicTacToeBoardRun)
         assertEquals(positions, board1.positions.map { it.toString() })
         assertEquals(movesResult, board1.moves)
 
@@ -52,7 +53,7 @@ class BoardTests {
 
         val board2 = boardOutput.toBoard("tic", "BLACK", "WAITING")
 
-        assertTrue(board2 is TicTacToeBoardRun)
+        assertTrue(board2 is com.crossBoard.domain.board.TicTacToeBoardRun)
         assertEquals(positions, board2.positions.map { it.toString() })
         assertEquals(movesResult, board2.moves)
         assertEquals("BLACK", board2.player1.toString())
@@ -61,7 +62,7 @@ class BoardTests {
 
         val board3 = boardOutput.toBoard("tic", "BLACK", "DRAW")
 
-        assertTrue(board3 is TicTacToeBoardDraw)
+        assertTrue(board3 is com.crossBoard.domain.board.TicTacToeBoardDraw)
         assertEquals(positions, board3.positions.map { it.toString() })
         assertEquals(movesResult, board3.moves)
         assertEquals("BLACK", board3.player1.toString())
@@ -71,7 +72,7 @@ class BoardTests {
         val boardOutput2 = BoardOutput(winner2, turn, positions, moves)
         val board4 = boardOutput2.toBoard("tic", "BLACK", "WIN")
 
-        assertTrue(board4 is TicTacToeBoardWin)
+        assertTrue(board4 is com.crossBoard.domain.board.TicTacToeBoardWin)
         assertEquals(positions, board4.positions.map { it.toString() })
         assertEquals(movesResult, board4.moves)
         assertEquals("BLACK", board4.player1.toString())

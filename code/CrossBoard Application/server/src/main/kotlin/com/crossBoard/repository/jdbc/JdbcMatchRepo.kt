@@ -1,12 +1,12 @@
 package com.crossBoard.repository.jdbc
 
-import com.crossBoard.domain.Board
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.domain.TicTacToeBoardDraw
-import com.crossBoard.domain.TicTacToeBoardRun
-import com.crossBoard.domain.TicTacToeBoardWin
+import com.crossBoard.domain.board.TicTacToeBoardDraw
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.TicTacToeBoardWin
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import com.google.gson.Gson
@@ -17,14 +17,23 @@ import javax.sql.DataSource
 import java.sql.ResultSet
 import java.sql.Statement
 
+/**
+ * Manages the transactions with the database for the Match entity.
+ * @param jdbc The datasource that provides the connection with the database.
+ */
 class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
 
+    /**
+     * Function "addMatch" responsible to add the match to the list of matches.
+     * @param match represents the match information to be added.
+     * @return Int the match id that was added.
+     */
     override fun addMatch(match: MultiPlayerMatch): Int = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(match.board)
         val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state, winner) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?, null)", Statement.RETURN_GENERATED_KEYS).apply {
             setInt(1, match.id)
             setString(2, serializedBoard)
-            setInt(3, match.player1)
+            setInt(3, match.user1)
             setString(4, match.matchType.toString())
             setInt(5, match.version)
             setString(6, match.state.toString())
@@ -33,6 +42,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         return@transaction getIdStatement(prepared).toInt()
     }
 
+    /**
+     * Function "getRunningMatchByUser" responsible to get the running match by the user.
+     * @param userId the id of the user.
+     * @return MultiPlayerMatch? the running match if found, null otherwise.
+     */
     override fun getRunningMatchByUser(userId:Int): MultiPlayerMatch? = transaction(jdbc) { connection ->
         val prepared = connection.prepareStatement("SELECT * FROM match WHERE (player1 = ? OR player2 = ?) AND (state = ? OR state = ?)").apply {
             setInt(1, userId)
@@ -65,6 +79,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
     }
 
+    /**
+     * Function "getMatchById" responsible to get the match by its id.
+     * @param matchId the id of the match.
+     * @return MultiPlayerMatch? the match if found, null otherwise.
+     */
     override fun getMatchById(matchId:Int): MultiPlayerMatch? = transaction(jdbc) { connection ->
         val prepared = connection.prepareStatement("SELECT * FROM match WHERE id = ?").apply {
             setInt(1, matchId)
@@ -75,6 +94,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
     }
 
+    /**
+     * Function "getWaitingMatch" responsible to get the waiting match.
+     * @param matchType the type of the game.
+     * @return MultiPlayerMatch? the waiting match if found, null otherwise.
+     */
     override fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch? = transaction(jdbc) { connection ->
         val prepared = connection.prepareStatement("SELECT * FROM match WHERE player2 IS NULL AND match_type = ? LIMIT 1").apply {
             setString(1, matchType.toString())
@@ -85,6 +109,14 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         }
     }
 
+    /**
+     * Function "updateMatch" responsible to update the match information.
+     * @param matchId the id of the match.
+     * @param board the board of the match.
+     * @param player1 the first player.
+     * @param player2 the second player.
+     * @param matchType the type of the game.
+     */
     override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState, winner: Int?): MultiPlayerMatch = transaction(jdbc) { connection ->
         val serializedBoard = Gson().toJson(board)
         connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), state = ? ,player1 = ?, player2 = ?, match_type = ?, version = ?, winner = ? WHERE id = ?").apply {
@@ -111,6 +143,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         )
     }
 
+    /**
+     * Function "cancelSearch" responsible for canceling a match.
+     * @param userId The id of the user canceling the search.
+     * @param matchId The id of the match to be canceled.
+     */
     override fun cancelSearch(userId: Int, matchId:Int): MatchCancel = transaction(jdbc){ connection ->
         connection.prepareStatement("DELETE FROM match WHERE id = ?").apply {
             setInt(1, matchId)
@@ -122,6 +159,10 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         )
     }
 
+    /**
+     * Function "getStatistics" responsible for getting match statistics of a user.
+     * @param userId The id of the user to get the statistics of.
+     */
     override fun getStatistics(userId: Int): List<MatchStats> = transaction(jdbc){ connection ->
         val statsList = mutableListOf<MatchStats>()
         for (matchType in MatchType.entries) {
@@ -155,6 +196,10 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
     }
 }
 
+/**
+ * Private auxiliary function responsible for converting a ResultSet from match table into MultiPlayerMatch type.
+ * @param rs The match result set.
+ */
 private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
     val matchType = rs.getString("match_type").toMatchType()
     val state = rs.getString("state").toMatchState()
@@ -175,7 +220,12 @@ private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
     )
 }
 
-
+/**
+ * Responsible for deserializing the board into the correct type.
+ * @param matchType The type of the match to deserialize into.
+ * @param state The state of the match to deserialize into.
+ * @param serializedBoard The serialized board.
+ */
 private fun getBoard(matchType: MatchType, state: MatchState, serializedBoard: String): Board {
     when(matchType) {
         MatchType.TicTacToe -> {

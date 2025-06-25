@@ -1,21 +1,32 @@
 package com.crossBoard.httpModel
-import com.crossBoard.domain.Move
-import com.crossBoard.domain.TicTacToeBoard
-import com.crossBoard.domain.TicTacToeMove
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * General MoveInput contract for the HTTP requests.
+ */
 @Serializable
 sealed interface MoveInput
 
+/**
+ * Data class TicTacToeMoveInput represents the format of the expected `MoveInput` in a `TicTacToe` match.
+ * @param player The player type making the move.
+ * @param square The target square to be made a move on.
+ */
 @Serializable
 data class TicTacToeMoveInput(
     val player: String,
     val square: String
 ): MoveInput
 
+/**
+ * Auxiliary Function that converts a `MoveInput` into an actual `Move` format.
+ */
 fun MoveInput.toMove() : Move {
     when(this){
         is TicTacToeMoveInput -> {
@@ -27,9 +38,17 @@ fun MoveInput.toMove() : Move {
     }
 }
 
+/**
+ * General MoveOutput contract for the HTTP responses.
+ */
 @Serializable
 sealed interface MoveOutput
 
+/**
+ * Data class TicTacToeMoveOutput represents the format of the expected `MoveOutput` in a `TicTacToe` match.
+ * @param player The player type making the move.
+ * @param square The target square to be made a move on.
+ */
 @Serializable
 @SerialName("ticMoveOutput")
 data class TicTacToeMoveOutput(
@@ -37,6 +56,9 @@ data class TicTacToeMoveOutput(
     val square: String
 ) : MoveOutput
 
+/**
+ * Auxiliary function that converts a `Move` object into a `MoveOutput` format.
+ */
 fun Move.toMoveOutput() : MoveOutput {
     return when(this){
         is TicTacToeMove -> TicTacToeMoveOutput(player.toString(), square.toString())

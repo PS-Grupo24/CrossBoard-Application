@@ -1,13 +1,15 @@
 package domainTests
 
 import com.crossBoard.domain.*
+import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.domain.position.toPosition
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TicPositionTests {
     @Test fun creatingTicPosition() {
-        val ticPosition = TicPosition(Player.BLACK, Square(Row(1,3), Column('a')))
+        val ticPosition = TicPosition(Player.BLACK, Square(Row(1, 3), Column('a')))
 
         assertEquals(Player.BLACK.name, ticPosition.player.name)
         assertEquals(2, ticPosition.square.row.number)
@@ -17,7 +19,7 @@ class TicPositionTests {
     }
 
     @Test fun creatingTicPositionString() {
-        val ticPosition = TicPosition(Player.BLACK, Square(Row(2,3), Column('a')))
+        val ticPosition = TicPosition(Player.BLACK, Square(Row(2, 3), Column('a')))
 
         val stringTicPosition = ticPosition.toString()
 
@@ -27,7 +29,7 @@ class TicPositionTests {
     @Test fun creatingTicPositionWithValidString() {
         val stringTicPosition = "BLACK,1a".toPosition(3, MatchType.TicTacToe)
 
-        val ticPosition = TicPosition(Player.BLACK, Square(Row(2,3), Column('a')))
+        val ticPosition = TicPosition(Player.BLACK, Square(Row(2, 3), Column('a')))
 
         assertTrue(stringTicPosition is TicPosition)
         assertEquals(ticPosition.player.name, stringTicPosition.player.name)

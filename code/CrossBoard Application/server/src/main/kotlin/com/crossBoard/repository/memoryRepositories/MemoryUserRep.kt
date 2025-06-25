@@ -18,7 +18,10 @@ import com.crossBoard.repository.interfaces.hashPassword
  * @implements UserRepository the user repository.
  */
 class MemoryUserRep : UserRepository {
-    //Value storing the user list of the app.
+
+    /**
+     * List of users stored in memory.
+     */
     private val users = mutableListOf<User>(
         Admin(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!"), Token("1")),
         Admin(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!"), Token("2")),
@@ -141,6 +144,10 @@ class MemoryUserRep : UserRepository {
         return newUser
     }
 
+    /**
+     * Responsible for getting a user given a token.
+     * @param token The token string of the user to find.
+     */
     override fun getUserProfileByToken(token: String): UserInfo? {
         val u = users.find { it.token.value == token } ?: return null
         return UserInfo(
@@ -152,6 +159,11 @@ class MemoryUserRep : UserRepository {
         )
     }
 
+    /**
+     * Responsible for performing the login of a user.
+     * @param username The username of the user to log in to.
+     * @param password The password of the user to log in to.
+     */
     override fun login(username: Username, password: Password): UserInfo? {
         val hashPassword = hashPassword(password.value)
         val u = users.find { it.username == username }!!
@@ -165,6 +177,12 @@ class MemoryUserRep : UserRepository {
         )
     }
 
+    /**
+     * Responsible for getting the users that match a given username sequence.
+     * @param username The username sequence to get matches of.
+     * @param skip The number of elements to skip.
+     * @param limit The maximum number of elements to get.
+     */
     override fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo> {
         val usersFiltered = users.filter { it.username.value.contains(username) }
         return usersFiltered.subList(skip, minOf(skip + limit, usersFiltered.size))

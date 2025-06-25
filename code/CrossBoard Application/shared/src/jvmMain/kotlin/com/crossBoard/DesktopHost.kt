@@ -1,7 +1,10 @@
 package com.crossBoard
 
+/**
+ *
+ */
 class DesktopHost: Host {
-    override val host: String
+    override val address: String
         get() = "127.0.0.1"
 
     override val port: Int

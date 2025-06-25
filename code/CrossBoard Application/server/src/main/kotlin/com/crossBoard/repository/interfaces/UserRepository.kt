@@ -36,12 +36,20 @@ interface UserRepository {
     fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo>
 }
 
+
+/**
+ * Hashes a password.
+ * @param password The password to hash.
+ */
 fun hashPassword(password: String): String {
     val md = MessageDigest.getInstance("SHA-256")
     val bytes = md.digest(password.toByteArray())
     return Base64.getEncoder().encodeToString(bytes)
 }
 
+/**
+ * Generates a random token.
+ */
 fun generateTokenValue(): String {
     return UUID.randomUUID().toString()
 }

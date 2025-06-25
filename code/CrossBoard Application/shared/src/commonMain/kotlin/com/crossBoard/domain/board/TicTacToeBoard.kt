@@ -1,4 +1,12 @@
-package com.crossBoard.domain
+package com.crossBoard.domain.board
+
+import com.crossBoard.domain.Column
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.Row
+import com.crossBoard.domain.Square
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.position.TicPosition
 
 
 /**
@@ -27,7 +35,7 @@ abstract class TicTacToeBoard: Board {
      * @param square the square to get the player.
      * @return Player the player at the square.
      */
-    override fun get(square: Square): Player? =
+    override fun get(square: com.crossBoard.domain.Square): com.crossBoard.domain.Player? =
         positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
 
     /**
@@ -74,7 +82,7 @@ class TicTacToeBoardRun(
         require(get(move.square) == Player.EMPTY) {"This position is not empty!"}
         val newPositions = positions.map {
             if (it.square.row.number == move.square.row.number && it.square.column.symbol == move.square.column.symbol)
-                    TicPosition(move.player, move.square)
+                TicPosition(move.player, move.square)
             else it
         }
 
@@ -189,10 +197,13 @@ fun initialTicTacToePositions():List<TicPosition> {
         repeat(TicTacToeBoard.BOARD_DIM){ col ->
                 positions.add(
                     TicPosition(
-                    Player.EMPTY,
+                        Player.EMPTY,
                         Square(
-                            Row.invoke(line, TicTacToeBoard.BOARD_DIM),
-                            Column('a' + col)
+                            Row.Companion.invoke(
+                                line,
+                                TicTacToeBoard.BOARD_DIM
+                            ),
+                            Column.Companion('a' + col)
                         )
                     )
                 )

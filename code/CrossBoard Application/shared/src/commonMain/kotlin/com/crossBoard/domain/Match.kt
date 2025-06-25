@@ -1,5 +1,11 @@
 package com.crossBoard.domain
 
+import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardWin
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.move.moveToString
 import com.crossBoard.httpModel.BoardOutput
 import com.crossBoard.httpModel.MatchOutput
 import com.crossBoard.httpModel.MatchPlayedOutput
@@ -26,8 +32,8 @@ interface Match {
  * @param board the board of the match.
  * @param id the id of the match.
  * @param state the state of the match.
- * @param player1 the first player.
- * @param player2 the second player.
+ * @param user1 the first player.
+ * @param user2 the second player.
  * @param matchType the type of the match.
  * @param version the version of the match.
  * @param winner the winner of the match.
@@ -37,14 +43,13 @@ data class MultiPlayerMatch(
     override val board: Board,
     override val id: Int,
     override val state: MatchState,
-    val player1: Int,
-    val player2: Int? = null,
+    val user1: Int,
+    val user2: Int? = null,
     val matchType: MatchType,
     val version: Int,
     val winner: Int? = null,
 ): Match {
     companion object{
-
         /**
          * Function startGame responsible to start a game.
          * @param player1 the first player.
@@ -86,10 +91,10 @@ data class MultiPlayerMatch(
      */
     fun join(userId2: Int): MultiPlayerMatch {
         require(userId2 > 0) { "userId2 must be greater than 0" }
-        require(player2 == null) { "This game is full" }
-        require(userId2 != player1) { "Player2 can't be the same as Player1" }
+        require(user2 == null) { "This game is full" }
+        require(userId2 != user1) { "Player2 can't be the same as Player1" }
         return MultiPlayerMatch(
-            board, id, MatchState.RUNNING, player1, userId2, matchType, version + 1, null
+            board, id, MatchState.RUNNING, user1, userId2, matchType, version + 1, null
         )
     }
 
@@ -101,14 +106,14 @@ data class MultiPlayerMatch(
     fun play(move: Move): MultiPlayerMatch {
         val newBoard = board.play(move)
         val winnerType = if (newBoard is BoardWin) newBoard.winner else null
-        val player1Type = getPlayerType(player1)
-        val winner = if (winnerType == player1Type) player1 else if (winnerType == player1Type.other()) player2 else null
+        val player1Type = getPlayerType(user1)
+        val winner = if (winnerType == player1Type) user1 else if (winnerType == player1Type.other()) user2 else null
         return MultiPlayerMatch(
             newBoard,
             id,
-            getMatchStateFromBoard(player2, newBoard),
-            player1,
-            player2,
+            getMatchStateFromBoard(user2, newBoard),
+            user1,
+            user2,
             matchType,
             version + 1,
             winner = winner,
@@ -127,12 +132,12 @@ data class MultiPlayerMatch(
         return MultiPlayerMatch(
             newBoard,
             id,
-            getMatchStateFromBoard(player2, newBoard),
-            player1,
-            player2,
+            getMatchStateFromBoard(user2, newBoard),
+            user1,
+            user2,
             matchType,
             version + 1,
-            winner = if(player == player1) player2 else player1
+            winner = if(player == user1) user2 else user1
         )
     }
 
@@ -142,9 +147,9 @@ data class MultiPlayerMatch(
      * @return Player the player type.
      */
     override fun getPlayerType(userId: Int): Player {
-        require(userId == player1 || userId == player2) {"This user is not a player in this match"}
+        require(userId == user1 || userId == user2) {"This user is not a player in this match"}
         return when(userId) {
-            player1 -> board.player1
+            user1 -> board.player1
             else -> board.player2
         }
     }
@@ -169,8 +174,8 @@ data class MultiPlayerMatch(
      */
     fun isMyTurn(userId: Int): Boolean {
         require(userId > 0) { "userId must be greater than 0" }
-        require(userId == player1 || userId == player2) { "User is not in match" }
-        val myType = if (userId == player1) board.player1 else board.player2
+        require(userId == user1 || userId == user2) { "User is not in match" }
+        val myType = if (userId == user1) board.player1 else board.player2
 
         return board.turn == myType
     }
@@ -182,38 +187,38 @@ data class MultiPlayerMatch(
      */
     fun otherPlayer(userId: Int): Int {
         require(userId > 0) { "userId must be greater than 0" }
-        require(userId == player1 || userId == player2) { "User is not in match" }
-        require(player2 != null) { "Player2 can't be null" }
+        require(userId == user1 || userId == user2) { "User is not in match" }
+        require(user2 != null) { "Player2 can't be null" }
 
-        return if (userId == player2) player1 else player2
+        return if (userId == user2) user1 else user2
     }
 }
 
 /**
  * Function to convert a MultiPlayerMatch to a MatchOutput.
- * @return MatchOutput the match output.
+ * @return `MatchOutput` The match output.
  */
 fun MultiPlayerMatch.toMatchOutput(): MatchOutput {
     val winner = if (board is BoardWin) board.winner else null
     val winnerId = when(state){
         MatchState.WIN -> {
-            val player1Type = getPlayerType(player1)
+            val player1Type = getPlayerType(user1)
             if(winner == player1Type)
-                player1
+                user1
             else
-                player2
+                user2
         }
         else -> null
     }
     return MatchOutput(
         id,
         PlayerOutput(
-            player1,
-            getPlayerType(player1).toString()
+            user1,
+            getPlayerType(user1).toString()
         ),
         PlayerOutput(
-            player2,
-            getPlayerType(player1).other().toString()
+            user2,
+            getPlayerType(user1).other().toString()
         ),
         BoardOutput(
             winner.toString(),
@@ -234,21 +239,3 @@ fun MultiPlayerMatch.toMatchOutput(): MatchOutput {
  */
 fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(), this.version)
 
-/*
-/**
- * Class "SinglePlayerGame" represents a single player game.
- * @param board the board of the game.
- * @param user the player.
- * @param difficulty the difficulty of the game.
- * @return Game the game that was created as a single player game.
- */
-class SinglePlayerMatch(
-    override val board: Board,
-    override val id: Int,
-    override val state: MatchState,
-    val user: UInt,
-    difficulty: Difficulty
-):
-    Match {
-    override fun getPlayerType(userId: Int): Player = board.player1
-}*/

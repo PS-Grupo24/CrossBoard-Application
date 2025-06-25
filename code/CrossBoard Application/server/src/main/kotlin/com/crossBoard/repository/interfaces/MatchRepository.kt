@@ -1,6 +1,6 @@
 package com.crossBoard.repository.interfaces
 
-import com.crossBoard.domain.Board
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch

@@ -1,5 +1,8 @@
 package domainTests
 import com.crossBoard.domain.*
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.move.moveToString
 import com.crossBoard.httpModel.*
 import kotlin.test.*
 
@@ -14,7 +17,7 @@ class MatchTests {
     @Test fun startMultiplayerMatchValidTest() {
         val expectedMatch = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
 
-        val player2 = expectedMatch.player2
+        val player2 = expectedMatch.user2
         val matchId = expectedMatch.id
         val board = expectedMatch.board
         val boardState = getMatchStateFromBoard(player2, board)
@@ -22,8 +25,8 @@ class MatchTests {
         assertEquals(board, expectedMatch.board)
         assertEquals(matchId, expectedMatch.id)
         assertEquals(boardState, expectedMatch.state)
-        assertEquals(1, expectedMatch.player1)
-        assertNull(expectedMatch.player2)
+        assertEquals(1, expectedMatch.user1)
+        assertNull(expectedMatch.user2)
         assertEquals(MatchType.TicTacToe, expectedMatch.matchType)
         assertEquals(1, expectedMatch.version)
     }
@@ -51,8 +54,8 @@ class MatchTests {
 
         assertEquals(match.board, newMatch.board)
         assertEquals(match.id, newMatch.id)
-        assertEquals(1, match.player1)
-        assertEquals(2, newMatch.player2)
+        assertEquals(1, match.user1)
+        assertEquals(2, newMatch.user2)
         assertEquals(MatchType.TicTacToe, newMatch.matchType)
         assertEquals(MatchState.RUNNING, newMatch.state)
         assertEquals(2, newMatch.version)
@@ -71,8 +74,8 @@ class MatchTests {
         assertEquals(List<Move>(1){move}, updatedMatch.board.moves)
         assertEquals(newMatch.id, updatedMatch.id)
         assertEquals(MatchState.RUNNING, updatedMatch.state)
-        assertEquals(newMatch.player1, updatedMatch.player1)
-        assertEquals(newMatch.player2, updatedMatch.player2)
+        assertEquals(newMatch.user1, updatedMatch.user1)
+        assertEquals(newMatch.user2, updatedMatch.user2)
         assertEquals(MatchType.TicTacToe, updatedMatch.matchType)
         assertEquals(3, updatedMatch.version)
     }
@@ -93,8 +96,8 @@ class MatchTests {
         assertEquals(match.board, updatedMatch.board)
         assertEquals(match.id, updatedMatch.id)
         assertEquals(MatchState.WIN, updatedMatch.state)
-        assertEquals(newMatch.player1, updatedMatch.player1)
-        assertEquals(newMatch.player2, updatedMatch.player2)
+        assertEquals(newMatch.user1, updatedMatch.user1)
+        assertEquals(newMatch.user2, updatedMatch.user2)
         assertEquals(MatchType.TicTacToe, updatedMatch.matchType)
         assertEquals(3, updatedMatch.version)
     }
@@ -133,10 +136,10 @@ class MatchTests {
         val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
         val newMatch = match.join(2)
 
-        assertTrue(newMatch.player2 != null)
+        assertTrue(newMatch.user2 != null)
 
         val turn = match.board.turn
-        val turnId = if(turn == newMatch.getPlayerType(1)) newMatch.player1 else newMatch.player2!!
+        val turnId = if(turn == newMatch.getPlayerType(1)) newMatch.user1 else newMatch.user2!!
 
         assertTrue(newMatch.isMyTurn(turnId))
         assertFalse(newMatch.isMyTurn(newMatch.otherPlayer(turnId)))
@@ -162,15 +165,17 @@ class MatchTests {
         val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
         val newMatch = match.join(2)
 
-        assertEquals(newMatch.player2, newMatch.otherPlayer(newMatch.player1))
-        assertEquals(newMatch.player1, newMatch.otherPlayer(newMatch.player2!!))
+        assertEquals(newMatch.user2, newMatch.otherPlayer(newMatch.user1))
+        assertEquals(newMatch.user1, newMatch.otherPlayer(newMatch.user2!!))
     }
 
     @Test fun toMatchOutputWithSuccess() {
         val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
         val newMatch = match.join(2)
 
-        val boardOutput = BoardOutput(null, newMatch.board.turn.toString(), newMatch.board.positions.map {it.toString()}, newMatch.board.moves.map { moveToString(it)})
+        val boardOutput = BoardOutput(null, newMatch.board.turn.toString(), newMatch.board.positions.map {it.toString()}, newMatch.board.moves.map {
+            moveToString(it)
+        })
         val expectedMatchOutput = MatchOutput(
             newMatch.id, PlayerOutput(1, newMatch.board.player1.name), PlayerOutput(2, newMatch.board.player2.name),
             boardOutput, newMatch.matchType.toString(), newMatch.version, newMatch.state.toString()
@@ -179,14 +184,14 @@ class MatchTests {
         val result = newMatch.toMatchOutput()
 
         assertEquals(newMatch.id, result.matchId)
-        assertEquals(newMatch.player1, result.player1.userId)
-        assertEquals(newMatch.player2, result.player2.userId)
+        assertEquals(newMatch.user1, result.user1Info.userId)
+        assertEquals(newMatch.user2, result.user2Info.userId)
         assertEquals("null", result.board.winner)
         assertEquals(expectedMatchOutput.board.turn, result.board.turn)
         assertEquals(expectedMatchOutput.board.moves, result.board.moves)
         assertEquals(expectedMatchOutput.board.positions, result.board.positions)
         assertEquals(expectedMatchOutput.board.moves, result.board.moves)
-        assertEquals(expectedMatchOutput.gameType, result.gameType)
+        assertEquals(expectedMatchOutput.matchType, result.matchType)
         assertEquals(expectedMatchOutput.version, result.version)
         assertEquals(expectedMatchOutput.state, result.state)
     }

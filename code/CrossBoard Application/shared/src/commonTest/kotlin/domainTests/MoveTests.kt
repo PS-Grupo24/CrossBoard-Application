@@ -1,6 +1,9 @@
 package domainTests
 
 import com.crossBoard.domain.*
+import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.move.moveToString
+import com.crossBoard.domain.move.toMove
 import com.crossBoard.httpModel.TicTacToeMoveOutput
 import kotlin.test.Test
 import kotlin.test.assertEquals

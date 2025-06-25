@@ -2,10 +2,10 @@ package com.crossBoard.ui.viewModel
 
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
-import com.crossBoard.domain.Move
+import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicPosition
-import com.crossBoard.domain.TicTacToeMove
+import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.SinglePlayerMatch

@@ -28,15 +28,12 @@ import kotlinx.serialization.SerializationException
 import com.crossBoard.util.Either
 import com.crossBoard.utils.clientJson
 import io.ktor.client.plugins.sse.sse
-import io.ktor.client.plugins.websocket.*
 import io.ktor.client.statement.HttpResponse
-import io.ktor.sse.ServerSentEvent
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * class ApiClient, responsible for the requests to the server
@@ -46,16 +43,7 @@ class ApiClient(
     val host: Host,
     private val apiScope: CoroutineScope = CoroutineScope(SupervisorJob())
 ): Clearable {
-    private val baseUrl = "http://${host.host}:${host.port}"
-
-    private var gameWebSocketSession: DefaultWebSocketSession? = null
-    private val wsMutex = Mutex()
-
-    private val _incomingMessages = MutableSharedFlow<Frame>(
-        replay = 1,
-        extraBufferCapacity = 64
-    )
-    val incomingMessages: SharedFlow<Frame> = _incomingMessages.asSharedFlow()
+    private val baseUrl = "http://${host.address}:${host.port}"
 
     /**
      * Function "banUser", responsible for the request to ban a user.
@@ -333,7 +321,7 @@ class ApiClient(
             val collectJob = launch{
                 try {
                     client.sse(
-                        host = host.host,
+                        host = host.address,
                         port = host.port,
                         path = "/events",
                         request = {

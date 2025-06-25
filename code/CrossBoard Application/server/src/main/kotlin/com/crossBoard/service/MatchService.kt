@@ -2,7 +2,7 @@ package com.crossBoard.service
 
 import com.crossBoard.disconnectUserEvent
 import com.crossBoard.domain.MatchState
-import com.crossBoard.domain.Move
+import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.toMatchOutput
@@ -49,8 +49,8 @@ class MatchService(private val matchRepository: MatchRepository) {
             matchRepository.updateMatch(
                 updatedMatch.id,
                 updatedMatch.board,
-                updatedMatch.player1,
-                updatedMatch.player2,
+                updatedMatch.user1,
+                updatedMatch.user2,
                 updatedMatch.matchType,
                 updatedMatch.version,
                 updatedMatch.state,
@@ -87,41 +87,41 @@ class MatchService(private val matchRepository: MatchRepository) {
             else -> success(m)
         }
 
+    /**
+     * Responsible for getting a certain version of a match.
+     * @param matchId The id of the match to find.
+     * @param version The version to get.
+     */
     fun getMatchByVersion(matchId: Int, version: Int): Either<ApiError, MultiPlayerMatch> {
         val m = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
         if (m.version < version) return failure(ApiError.VERSION_MISMATCH)
         return success(m)
     }
 
-    fun getMatchByUser(userId: Int): Either<ApiError, MultiPlayerMatch> =
-        when(val match = matchRepository.getRunningMatchByUser(userId)){
-            null -> failure(ApiError.MATCH_NOT_FOUND)
-            else -> success(match)
-        }
-
-    fun getWaitingMatch(matchType: MatchType): Either<ApiError, MultiPlayerMatch> =
-        when(val match = matchRepository.getWaitingMatch(matchType)){
-            null -> failure(ApiError.MATCH_NOT_FOUND)
-            else -> success(match)
-        }
-
+    /**
+     * Responsible for making a play on a match.
+     * @param matchId The id of the match to make a play.
+     * @param userId The id of the user making the play.
+     * @param move The move being made.
+     * @param version The target version to make a play.
+     */
     fun playMatch(matchId: Int, userId: Int, move: Move, version: Int): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
-        if (match.player1 != userId && match.player2 != userId)
+        if (match.user1 != userId && match.user2 != userId)
             return failure(ApiError.USER_NOT_IN_THIS_MATCH)
         if(match.version != version)
             return failure(ApiError.VERSION_MISMATCH)
 
         cancelTurnTimer(matchId)
 
-        val p = if (match.player1 == userId) match.board.player1 else match.board.player2
+        val p = if (match.user1 == userId) match.board.player1 else match.board.player2
         if (p != move.player) return failure(ApiError.INCORRECT_PLAYER_TYPE_FOR_THIS_USER)
         val updatedMatch = match.play(move)
         matchRepository.updateMatch(
             updatedMatch.id,
             updatedMatch.board,
-            updatedMatch.player1,
-            updatedMatch.player2,
+            updatedMatch.user1,
+            updatedMatch.user2,
             updatedMatch.matchType,
             updatedMatch.version,
             updatedMatch.state,
@@ -146,9 +146,14 @@ class MatchService(private val matchRepository: MatchRepository) {
         return success(updatedMatch)
     }
 
+    /**
+     * Responsible for forfeiting a match.
+     * @param matchId The id of the match to forfeit.
+     * @param userId The id of the user to make the forfeit.
+     */
     fun forfeit(matchId: Int, userId: Int): Either<ApiError, MultiPlayerMatch> {
         val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
-        if (match.player1 != userId && match.player2 != userId)
+        if (match.user1 != userId && match.user2 != userId)
             return failure(ApiError.USER_NOT_IN_THIS_MATCH)
 
         cancelTurnTimer(matchId)
@@ -157,8 +162,8 @@ class MatchService(private val matchRepository: MatchRepository) {
         matchRepository.updateMatch(
             forfeitedMatch.id,
             forfeitedMatch.board,
-            forfeitedMatch.player1,
-            forfeitedMatch.player2,
+            forfeitedMatch.user1,
+            forfeitedMatch.user2,
             forfeitedMatch.matchType,
             forfeitedMatch.version,
             forfeitedMatch.state,
@@ -186,25 +191,33 @@ class MatchService(private val matchRepository: MatchRepository) {
         return success(forfeitedMatch)
     }
 
+    /**
+     * Responsible for canceling the search of the match.
+     * @param userId The id of the user canceling the search.
+     * @param matchId The id of the match to cancel.
+     */
     fun cancelSearch(userId:Int, matchId: Int): Either<ApiError, MatchCancel> {
         val match = matchRepository.getMatchById(matchId) ?: return failure(ApiError.MATCH_NOT_FOUND)
-        if (match.player1 != userId && match.player2 != userId) return failure(ApiError.USER_NOT_IN_THIS_MATCH)
+        if (match.user1 != userId && match.user2 != userId) return failure(ApiError.USER_NOT_IN_THIS_MATCH)
         if (match.state != MatchState.WAITING) return failure(ApiError.MATCH_NOT_IN_WAITING_STATE)
 
 
         return success(matchRepository.cancelSearch(userId, matchId))
     }
 
-    fun getRunningMatch(userId: Int): Either<ApiError, MultiPlayerMatch> {
-        val match = matchRepository.getRunningMatchByUser(userId)
-            ?: return failure(ApiError.MATCH_NOT_FOUND)
-        return success(match)
-    }
-
+    /**
+     * Responsible for getting the match statistics of a user.
+     * @param userId The id of the user to get the statistics of.
+     */
     fun getStatistics(userId: Int): List<MatchStats>{
         return matchRepository.getStatistics(userId)
     }
 
+    /**
+     * Private auxiliary function responsible for launching a turn timer.
+     * @param matchId The id of the match for the turn.
+     * @param userId The id of the user that owns the turn.
+     */
     private fun startTurnTimer(matchId: Int, userId:Int) {
         val turnTimeOut = 30_000L
 
@@ -224,6 +237,10 @@ class MatchService(private val matchRepository: MatchRepository) {
         turnTimers[matchId] = timerJob
     }
 
+    /**
+     * Private auxiliary function responsible for canceling the turn timer in a match.
+     * @param matchId The id of the match to cancel the timers of.
+     */
     private fun cancelTurnTimer(matchId: Int) {
         println("Cancelling turn timer for match $matchId")
         turnTimers[matchId]?.cancel()

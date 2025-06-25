@@ -1,5 +1,10 @@
 package com.crossBoard.domain
 
+import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardDraw
+import com.crossBoard.domain.board.BoardRun
+import com.crossBoard.domain.board.BoardWin
+
 /**
  * Constants representing the different states of a match.
  * @param WAITING_MATCH the match is waiting for a player.

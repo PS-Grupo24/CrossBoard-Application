@@ -1,12 +1,12 @@
-package com.crossBoard.domain
+package com.crossBoard.domain.position
 
-/**
- * Interface "Position" represents a position of the square in the game.
- * @property square the square of the position.
- */
-interface Position{
-    val square: Square
-}
+import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.Square
+import com.crossBoard.domain.toPlayer
+import com.crossBoard.domain.toSquare
+
+
 
 /**
  * Data class "TicPosition" represents a position in the game of TicTacToe.

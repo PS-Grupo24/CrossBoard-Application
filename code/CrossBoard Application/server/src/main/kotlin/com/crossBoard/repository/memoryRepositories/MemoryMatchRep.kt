@@ -1,8 +1,8 @@
 package com.crossBoard.repository.memoryRepositories
 
-import com.crossBoard.domain.Board
-import com.crossBoard.domain.BoardRun
-import com.crossBoard.domain.BoardWin
+import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardRun
+import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
@@ -15,7 +15,10 @@ import com.crossBoard.repository.interfaces.MatchRepository
  * @implements MatchRepository the match repository.
  */
 class MemoryMatchRep: MatchRepository {
-    //Value storing the list of matches of the application.
+
+    /**
+     * List of matches stored in memory.
+     */
     private val matches = mutableListOf<MultiPlayerMatch>()
 
     /**
@@ -34,7 +37,7 @@ class MemoryMatchRep: MatchRepository {
      * @return MultiPlayerMatch? the running match if found, null otherwise.
      */
     override fun getRunningMatchByUser(userId: Int): MultiPlayerMatch? =
-        matches.find { (it.player1 == userId || it.player2 == userId) && it.board is BoardRun }
+        matches.find { (it.user1 == userId || it.user2 == userId) && it.board is BoardRun }
 
     /**
      * Function "getMatchById" responsible to get the match by its id.
@@ -49,7 +52,7 @@ class MemoryMatchRep: MatchRepository {
      * @return MultiPlayerMatch? the waiting match if found, null otherwise.
      */
     override fun getWaitingMatch(matchType: MatchType): MultiPlayerMatch? {
-        return matches.find { match -> match.player2 == null && match.matchType == matchType }
+        return matches.find { match -> match.user2 == null && match.matchType == matchType }
     }
 
     /**
@@ -68,6 +71,11 @@ class MemoryMatchRep: MatchRepository {
         return match
     }
 
+    /**
+     * Function "cancelSearch" responsible for canceling a match.
+     * @param userId The id of the user canceling the search.
+     * @param matchId The id of the match to be canceled.
+     */
     override fun cancelSearch(userId: Int, matchId: Int): MatchCancel {
         matches.removeIf { it.id == matchId }
         return MatchCancel(
@@ -76,12 +84,16 @@ class MemoryMatchRep: MatchRepository {
         )
     }
 
+    /**
+     * Function "getStatistics" responsible for getting match statistics of a user.
+     * @param userId The id of the user to get the statistics of.
+     */
     override fun getStatistics(userId: Int): List<MatchStats> {
         val statsList = mutableListOf<MatchStats>()
         for (matchType in MatchType.entries) {
             val matchList = matches.filter {
                 it.matchType == matchType &&
-                        (it.player1 == userId || it.player2 == userId)
+                        (it.user1 == userId || it.user2 == userId)
             }
             val matchCount = matchList.size
             val drawCount = matchList.count { it.state == MatchState.DRAW }

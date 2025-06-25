@@ -1,6 +1,6 @@
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.TicTacToeBoardRun
-import com.crossBoard.domain.initialTicTacToePositions
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.initialTicTacToePositions
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
 

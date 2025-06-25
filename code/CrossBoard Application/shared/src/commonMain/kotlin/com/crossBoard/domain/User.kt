@@ -64,7 +64,14 @@ enum class UserState{
     BANNED, NORMAL
 }
 
-
+/**
+ * The minimal format for any user type.
+ * @param id The id of the user.
+ * @param username The username of the user.
+ * @param email The email of the user.
+ * @param password The password of the user.
+ * @param token The token of the user.
+ */
 interface User{
     val id: Int
     val username: Username
@@ -74,12 +81,13 @@ interface User{
 }
 
 /**
- * Data class "User" represents a user of the application.
+ * Data class `NormalUser` represents a normal user of the application.
  * @param id the id of the user.
  * @param username the username of the user.
  * @param email the email of the user.
  * @param password the password of the user.
  * @param token the token of the user.
+ * @param state The state of the user.
  */
 data class NormalUser(
     override val id:Int,
@@ -94,6 +102,14 @@ data class NormalUser(
     }
 }
 
+/**
+ * Data class `Admin` represents an administrator of the application.
+ * @param id the id of the user.
+ * @param username the username of the user.
+ * @param email the email of the user.
+ * @param password the password of the user.
+ * @param token the token of the user.
+ */
 data class Admin(
     override val id: Int,
     override val username: Username,
@@ -106,6 +122,14 @@ data class Admin(
     }
 }
 
+/**
+ * Data class `UserInfo` represents the format for the user excluding `Password`
+ * @param id The id of the user.
+ * @param token The token of the user.
+ * @param username The username of the user.
+ * @param email The email of the user.
+ * @param state The state of the user.
+ */
 data class UserInfo(
     val id: Int,
     val token: Token,
