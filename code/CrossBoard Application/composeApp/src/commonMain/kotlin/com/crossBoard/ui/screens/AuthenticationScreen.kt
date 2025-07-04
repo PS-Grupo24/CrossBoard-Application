@@ -17,6 +17,12 @@ import androidx.compose.ui.unit.sp
 import com.crossBoard.model.AuthState
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Screen responsible for displaying the elements used for the authentication.
+ * It analyzes the authentication state and when `AuthState.isLoginScreenVisible` is `True` calls for `LoginScreen`;
+ * When it is `False` calls for `RegisterScreen`.
+ * It is also responsible for displaying common information between those screens such as the tile and the `Play Button`.
+ */
 @Composable
 fun AuthenticationScreen(
     authState: AuthState,

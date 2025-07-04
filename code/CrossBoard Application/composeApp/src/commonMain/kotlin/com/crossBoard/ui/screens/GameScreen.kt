@@ -16,6 +16,19 @@ import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Screen responsible for the display of an ongoing or ended match.
+ * @param match The current match.
+ * @param currentUserId The id of the current logged user.
+ * @param player1Username The username of player1.
+ * @param player2Username The username of player2.
+ * @param onCellClick The action to perform when a `Cell` is clicked.
+ * @param onForfeitClick The action to perform when forfeit button is clicked.
+ * @param isLoading The Loading state.
+ * @param errorMessage The error message or `NULL` if there is none.
+ * @param onPlayAgainClick The action to perform when play again button is clicked.
+ * @param timeLeft The time left on the turn.
+ */
 @Composable
 fun GameScreen(
     match: MultiPlayerMatch,
@@ -26,7 +39,6 @@ fun GameScreen(
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
-    webSocketMessage: String?,
     onPlayAgainClick: () -> Unit,
     timeLeft: Int?
 ) {
@@ -77,7 +89,6 @@ fun GameScreen(
         GameActions(
             isLoading = isLoading,
             errorMessage = errorMessage,
-            webSocketMessage = webSocketMessage,
             isGameOver = isGameOver,
             onForfeitClick = onForfeitClick,
             onPlayAgainClick = onPlayAgainClick
@@ -85,6 +96,14 @@ fun GameScreen(
     }
 }
 
+/**
+ * Responsible for displaying the match, users and turn time information.
+ * @param matchId The match id.
+ * @param currentUserId The id of the logged user.
+ * @param user1Info The information of the user1.
+ * @param user2Info The information of the user2.
+ * @param timeLeft The remaining time for each turn.
+ */
 @Composable
 fun MatchInfoPanel(
     matchId: Int?,
@@ -115,6 +134,21 @@ fun MatchInfoPanel(
     }
 }
 
+/**
+ * Responsible for displaying the board and its interactions.
+ * It displays the current turn on the board when it is ongoing,
+ * the winner when the match is over or that the match ended in a draw.
+ * It is also responsible for calling the correct display for this type of match.
+ * Example: `tictactoeBoardView` for the `MatchType.TicTacToe`
+ * @param board The board to display.
+ * @param state The current match state.
+ * @param player1Type The type for player1.
+ * @param player1Symbol The symbol to display for player1.
+ * @param player2Symbol The symbol to display for player2.
+ * @param isGameOver The flag that indicates if the current match is over.
+ * @param isLoading The Loading state.
+ * @param onCellClick The action to perform when a cell is clicked.
+ */
 @Composable
 fun GameStatusAndBoard(
     board: Board,
@@ -134,8 +168,7 @@ fun GameStatusAndBoard(
             "Winner: $winner"
         }
         MatchState.DRAW -> "Draw"
-        MatchState.WAITING -> "Waiting for Opponent"
-        else -> "Unknown State"
+        else -> "ILLEGAL STATE"
     }
 
     Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
@@ -165,11 +198,20 @@ fun GameStatusAndBoard(
     }
 }
 
+/**
+ * Responsible for the extra match functionalities such as forfeiting when the match is ongoing
+ * or play again when the match is ended.
+ * If the forfeit button is clicked, an alert dialog will be used to confirm this action.
+ * @param isLoading The loading state.
+ * @param errorMessage The current error message: `NULL` if there is none.
+ * @param isGameOver The flag that indicates if a match is over.
+ * @param onForfeitClick The action to perform when the forfeit button is clicked.
+ * @param onPlayAgainClick The action to perform when the play again button is clicked.
+ */
 @Composable
 fun GameActions(
     isLoading: Boolean,
     errorMessage: String?,
-    webSocketMessage: String?,
     isGameOver: Boolean,
     onForfeitClick: () -> Unit,
     onPlayAgainClick: () -> Unit
@@ -203,16 +245,6 @@ fun GameActions(
                     Text(
                         text = it,
                         color = MaterialTheme.colors.error,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp).align(Alignment.Center)
-                    )
-                }
-            }
-            webSocketMessage?.let {
-                Box(modifier = Modifier.height(elementHeight)){
-                    Text(
-                        text = "Match Message: $it",
-                        color = CustomColor.LightBrown.value,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 16.dp).align(Alignment.Center)
                     )

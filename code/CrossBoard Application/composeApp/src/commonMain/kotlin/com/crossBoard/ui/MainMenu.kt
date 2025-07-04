@@ -22,6 +22,13 @@ import com.crossBoard.ui.viewModel.MainMenuViewModel
 import com.crossBoard.utils.CustomColor
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+/**
+ * Activity for the MainMenu.
+ * It allows for the user to navigate between the different app functionalities.
+ * @param client The client to perform requests.
+ * @param user The logged user.
+ * @param onLogout The action to perform on logout.
+ */
 @Composable
 @Preview
 fun MainMenu(
@@ -118,7 +125,7 @@ fun MainMenu(
                         )
                     }
                     MainScreen.GameFlow -> {
-                        GameFlow(
+                        MultiPlayerMatchFlow(
                             onFindMatch = vm::goToFindMatch,
                             onMatch = vm::goToMatch,
                             client = client,

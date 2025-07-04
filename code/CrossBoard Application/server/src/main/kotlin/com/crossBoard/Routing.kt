@@ -3,7 +3,6 @@ package com.crossBoard
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.MatchType
-import com.crossBoard.domain.Password
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.domain.toMatchOutput
@@ -88,7 +87,6 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 }
             }
         }
-
 
         //route to ban a user.
         route("/user/{userId}/ban"){
@@ -227,7 +225,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 runHttp(call){
                     val loginInfo = call.receive<UserLoginInput>()
 
-                    when(val logged = usersService.login(Username(loginInfo.username.trim()), Password(loginInfo.password))) {
+                    when(val logged = usersService.login(Username(loginInfo.username.trim()),loginInfo.password)) {
                         is Success -> {
                             val user = logged.value
                             if (user.state == UserState.BANNED.name)
@@ -348,13 +346,12 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                             val newUserInfo = call.receive<UserUpdateInput>()
                             val userName = if (newUserInfo.username != null) Username((newUserInfo.username) as String) else null
                             val email = if (newUserInfo.email != null) Email((newUserInfo.email) as String) else null
-                            val password = if (newUserInfo.password != null) Password((newUserInfo.password) as String) else null
                             when (val updatedUserResult =
                                 usersService.updateUser(
                                     result.value.id,
                                     username = userName,
                                     email = email,
-                                    password = password,
+                                    password = newUserInfo.password,
                                 )
                             ) {
                                 is Success -> {
@@ -396,7 +393,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                         val result = usersService.createUser(
                             Username(user.username.trim()),
                             Email(user.email.trim()),
-                            Password(user.password)
+                            user.password
                         )
                     ){
                         is Success -> {

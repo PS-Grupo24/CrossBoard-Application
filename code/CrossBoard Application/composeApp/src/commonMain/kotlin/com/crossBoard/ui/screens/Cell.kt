@@ -1,11 +1,8 @@
 package com.crossBoard.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -19,6 +16,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.crossBoard.utils.CustomColor
+
+/**
+ * Responsible for displaying the information of each cell.
+ * @param rowIndex The row index of this cell.
+ * @param colIndex The column index of this cell.
+ * @param playerSymbol The symbol of the player for this cell.
+ * @param onClick The action to perform when this cell is clicked.
+ * @param modifier The modifier elements.
+ * @param enabled The flag indicating if this cell is clickable or not.
+ * @param player1Symbol The symbol for the player1.
+ */
 @Composable
 fun Cell(
     rowIndex: Int,

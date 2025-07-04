@@ -76,7 +76,7 @@ interface User{
     val id: Int
     val username: Username
     val email: Email
-    val password: Password
+    val password: String
     val token: Token
 }
 
@@ -93,7 +93,7 @@ data class NormalUser(
     override val id:Int,
     override val username: Username,
     override val email: Email,
-    override val password: Password,
+    override val password: String,
     override val token: Token,
     val state: UserState
 ):User{
@@ -114,7 +114,7 @@ data class Admin(
     override val id: Int,
     override val username: Username,
     override val email: Email,
-    override val password: Password,
+    override val password: String,
     override val token: Token,
 ): User{
     companion object{

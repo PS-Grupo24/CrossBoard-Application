@@ -7,6 +7,9 @@ import io.ktor.client.engine.js.*
 import kotlinx.browser.document
 import com.crossBoard.utils.createHttpClient
 
+/**
+ * Main function to launch the app for browser.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val host = getHost()

@@ -5,6 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Element responsible for the alert dialog.
+ * @param onDismissRequest The action to perform on dismiss request.
+ * @param title The alert title.
+ * @param text The alert text description.
+ * @param onConfirm The action to perform when the alert is confirmed.
+ * @param confirmText The description of the action to perform on the confirmation.
+ * @param onDismiss The action to perform when the alert is dismissed.
+ * @param dismissText The description of the action to perform when dismissed.
+ */
 @Composable
 fun MyAlertDialog(
     onDismissRequest: () -> Unit,

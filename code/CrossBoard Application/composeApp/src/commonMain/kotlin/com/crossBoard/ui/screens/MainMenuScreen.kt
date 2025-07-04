@@ -13,6 +13,15 @@ import com.crossBoard.domain.User
 import com.crossBoard.utils.CustomColor
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+/**
+ * Responsible for the display of the main menu elements.
+ * It displays a button to navigate to each of the functionalities.
+ * @param user The current logged user.
+ * @param onSinglePlayerClicked The action to perform when the single player button is clicked.
+ * @param onFindMatchClicked The action to perform when the multiplayer button is clicked.
+ * @param onCheckStatsClicked The action to perform when the check statistics button is clicked.
+ * @param onAdminPanelClicked The action to perform when the admin panel button is clicked.
+ */
 @Composable
 fun MainMenuScreen(
     user: User,

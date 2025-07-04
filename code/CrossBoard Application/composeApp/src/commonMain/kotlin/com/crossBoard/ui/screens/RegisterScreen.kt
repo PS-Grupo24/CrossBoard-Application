@@ -15,6 +15,17 @@ import androidx.compose.ui.unit.sp
 import com.crossBoard.model.AuthState
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Screen responsible for the display of the registration elements.
+ * @param authState The current authentication state.
+ * @param onRegisterPasswordChange The action to perform when the password text field updates.
+ * @param onRegisterUsernameChange The action to perform when the username text field updates.
+ * @param onRegisterEmailChange The action to perform when the email text field updates.
+ * @param textFieldColors The `TextFieldColors` to be used in each `TextField`.
+ * @param onRegisterClick The action to perform when the registration button is clicked.
+ * @param onSwitchScreen The action to perform when switching screens.
+ * @param onMaintainSession The action to perform when the maintain session check box is clicked.21
+ */
 @Composable
 fun RegisterScreen(
     authState: AuthState,
@@ -102,6 +113,13 @@ fun RegisterScreen(
     }
 }
 
+/**
+ * Auxiliary function that displays a password requirement
+ * and indicates if the requirement is met by the color shown.
+ * `DarkBrown` when the requirement is met; `Red` when it is not met.
+ * @param text The text description for the requirement.
+ * @param isMet The flag indicating if the requirement is met.
+ */
 @Composable
 private fun PasswordRequirement(
     text: String,

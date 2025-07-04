@@ -19,7 +19,7 @@ sealed interface Move {
 }
 
 /**
- * Function "moveToString" responsible to pass a move information to String.
+ * Function "moveToString" responsible to pass move information to String.
  * @param move the move to be converted to String.
  * @return String the String representation of the move.
  */

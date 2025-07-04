@@ -61,7 +61,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
                 val player2 = if (plyr2Value == 0) null else plyr2Value
                 val winnerValue = rs.getInt("winner")
                 val winner = if (winnerValue == 0) null else winnerValue
-                     return@transaction MultiPlayerMatch(
+                return@transaction MultiPlayerMatch(
                         board,
                         rs.getInt("id"),
                          state,

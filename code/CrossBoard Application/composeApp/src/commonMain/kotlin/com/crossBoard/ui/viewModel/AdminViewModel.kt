@@ -20,15 +20,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * viewModel responsible for implementing the admin panel functionalities.
+ * @param client The `APIClient` responsible for performing server requests.
+ * @param user The admin user.
+ * @param mainDispatcher The coroutine Dispatcher; `Dispatcher.Main` by default.
+ */
 class AdminViewModel (
     val client: ApiClient,
     val user: Admin,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ): Clearable {
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
-    private val _adminState = MutableStateFlow(AdminState()) // Initial state
+    private val _adminState = MutableStateFlow(AdminState())
     val adminState: StateFlow<AdminState> = _adminState.asStateFlow()
 
+    /**
+     * Responsible for updating the username search query.
+     * If the query has a length > 2, the search is automatically made.
+     * @param query The new username query.
+     */
     fun updateSearchQuery(query: String) {
         _adminState.update {
             it.copy(
@@ -39,6 +50,10 @@ class AdminViewModel (
         if (query.length > 2) performSearch()
     }
 
+    /**
+     * Responsible for performing the user search.
+     * It limits the maximum amount of users to search to 3.
+     */
     fun performSearch() {
         val currentState = _adminState.value
         val query = currentState.searchQuery.trim()
@@ -73,10 +88,17 @@ class AdminViewModel (
         }
     }
 
+    /**
+     * Responsible for highlighting a user in the list of found users.
+     * @param user The user to highlight.
+     */
     fun selectUser(user: UserInfo?) {
         _adminState.update { it.copy(selectedUser = user, modifyUserError = null, modifyUserSuccess = null) }
     }
 
+    /**
+     * Responsible for banning the highlighted user.
+     */
     fun banSelectedUser() {
         val currentState = _adminState.value
         val userToModify = currentState.selectedUser
@@ -116,6 +138,9 @@ class AdminViewModel (
         }
     }
 
+    /**
+     * Responsible for unbanning the highlighted user.
+     */
     fun unbanSelectedUser() {
         val currentState = _adminState.value
         val userToModify = currentState.selectedUser
@@ -157,6 +182,9 @@ class AdminViewModel (
         }
     }
 
+    /**
+     * Performs the viewModel cleanup by canceling the viewModel scope.
+     */
     override fun clear() {
         viewModelScope.cancel()
     }

@@ -18,6 +18,15 @@ import com.crossBoard.ui.screens.AuthenticationScreen
 import com.crossBoard.ui.viewModel.AuthViewModel
 import com.russhwolf.settings.Settings
 
+/**
+ * The activity for when the app is initially launched.
+ * It is responsible to check if there is already a saved session from previous app instances and directing to `MainMenu`,
+ * and if there isn't it manages the authentication process using `AuthViewModel`
+ * and `AuthenticationScreen` to display the authentication properties.
+ * It also allows for the user to play SinglePlayerMatch anonymously.
+ * @param client The client to perform server requests.
+ * @param settings The `Settings` used for session data storage.
+ */
 @Composable
 fun CrossBoardApplication(client: ApiClient, settings: Settings) {
     val authViewModel = remember { AuthViewModel(client, settings) }
@@ -55,7 +64,6 @@ fun CrossBoardApplication(client: ApiClient, settings: Settings) {
 
     }
     else{
-
         if (authState.playMatch) {
             SinglePlayerMatch(
                 null,

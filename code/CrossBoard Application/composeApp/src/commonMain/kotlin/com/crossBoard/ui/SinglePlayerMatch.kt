@@ -19,6 +19,12 @@ import com.crossBoard.ui.screens.SinglePlayerMatchScreen
 import com.crossBoard.ui.viewModel.SinglePlayerViewModel
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Activity responsible for the single player functionality.
+ * It uses `SinglePlayerViewModel`.
+ * @param user The logged user or null for an anonymous user.
+ * @param ongoBack The action to perform when goBack button is pressed.
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SinglePlayerMatch(
@@ -57,8 +63,8 @@ fun SinglePlayerMatch(
         if (match == null || player == null){
             FindMatchScreen(
                 selectedGameTypeValue = singleMatchState.value.matchTypeInput,
-                onGameTypeChange = vm::updateGameTypeInput,
-                onFindMatchClick = vm::startGame,
+                onGameTypeChange = vm::updateMatchTypeInput,
+                onFindMatchClick = vm::startMatch,
                 isLoading = false,
                 errorMessage = singleMatchState.value.errorMessage,
                 buttonMessage = "Start Game"
@@ -72,7 +78,7 @@ fun SinglePlayerMatch(
                 errorMessage = singleMatchState.value.errorMessage,
                 onMakeMove = vm::makeMove,
                 onForfeit = vm::forfeit,
-                onPlayAgain = vm::startGame,
+                onPlayAgain = vm::startMatch,
                 onGoBack = vm::stopMatch)
         }
 

@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.model.StatsState
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Screen responsible for displaying the match statistics of a user.
+ * @param stats The match statistics.
+ */
 @Composable
 fun StatisticsScreen(
     stats: StatsState

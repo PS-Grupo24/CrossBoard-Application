@@ -26,15 +26,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for managing the SinglePlayerMatch resources.
+ * Uses `SinglePlayerState` to manage the resources.
+ * @param mainDispatcher The coroutine Dispatcher; `Dispatchers.Main` by default.
+ */
 class SinglePlayerViewModel(
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ): Clearable {
 
+    /**
+     * The scope for this viewModel
+     */
     private val viewModelScope = CoroutineScope(SupervisorJob() + mainDispatcher)
     private val _singlePlayerMatch = MutableStateFlow(SinglePlayerState())
     val singlePlayerMatch: StateFlow<SinglePlayerState> = _singlePlayerMatch.asStateFlow()
 
-    fun startGame(){
+    /**
+     * Function "startMatch" responsible for updating the `SinglePlayerState` with a new Match.
+     * If the match starts with the Machine Turn it will generate a randomMove for it after 1 sec.
+     */
+    fun startMatch(){
         val currentState = _singlePlayerMatch.value
 
         if (currentState.matchTypeInput.isBlank()){
@@ -54,6 +66,11 @@ class SinglePlayerViewModel(
         }
     }
 
+    /**
+     * Function "makeMove" that performs a move to the match.
+     * After a move is made and the turn changes to the machine, it will generate a random machine move after 1 sec.
+     * @param move The move to be made in the match.
+     */
     fun makeMove(move: Move){
         try {
             val currentState = _singlePlayerMatch.value
@@ -88,6 +105,9 @@ class SinglePlayerViewModel(
         }
     }
 
+    /**
+     * Function "forfeit" performs a forfeit on the `SinglePlayerMatch`
+     */
     fun forfeit(){
         try {
             val currentState = _singlePlayerMatch.value
@@ -114,10 +134,16 @@ class SinglePlayerViewModel(
 
     }
 
+    /**
+     * Function "stopMatch" used to clear the match resources.
+     */
     fun stopMatch(){
         _singlePlayerMatch.update { it.copy(match = null, player = null, errorMessage = null) }
     }
 
+    /**
+     * Private Auxiliary Function "randomMachineMove" responsible for generating a random move for the machine.
+     */
     private fun randomMachineMove(){
         try {
             val currentState = _singlePlayerMatch.value
@@ -167,10 +193,18 @@ class SinglePlayerViewModel(
         }
     }
 
-    fun updateGameTypeInput(input: String){
+    /**
+     * Function "updateMatchTypeInput" responsible for updating the type of match to start.
+     * @param input The string input that represents the match type.
+     */
+    fun updateMatchTypeInput(input: String){
         _singlePlayerMatch.update { it.copy(matchTypeInput = input, errorMessage = null) }
     }
 
+    /**
+     * Function "clear" responsible for the cleanup of this viewModel.
+     * Clears the `SinglePlayerState` and cancels the viewModel scope.
+     */
     override fun clear() {
         _singlePlayerMatch.value = SinglePlayerState()
         viewModelScope.cancel()

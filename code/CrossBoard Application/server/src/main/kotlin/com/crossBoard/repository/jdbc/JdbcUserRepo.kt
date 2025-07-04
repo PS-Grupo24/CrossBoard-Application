@@ -2,7 +2,6 @@ package com.crossBoard.repository.jdbc
 
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.NormalUser
-import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.User
 import com.crossBoard.domain.UserInfo
@@ -10,7 +9,6 @@ import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.repository.interfaces.UserRepository
 import com.crossBoard.repository.interfaces.generateTokenValue
-import com.crossBoard.repository.interfaces.hashPassword
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -86,10 +84,10 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
      * @param userId the id of the user being updated.
      * @param username the new username of the user.
      * @param email the new email of the user.
-     * @param password the new password of the user.
+     * @param passwordHash the new password of the user.
      * @return UserProfileInfo the user profile information of the updated user.
      */
-    override fun updateUser(userId: Int, username: Username?, email: Email?, password: Password?, state: UserState?): UserInfo = transaction(jdbc) { connection ->
+    override fun updateUser(userId: Int, username: Username?, email: Email?, passwordHash: String?, state: UserState?): UserInfo = transaction(jdbc) { connection ->
         val selectPreparation = connection.prepareStatement("SELECT * FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
@@ -99,8 +97,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
 
             val username = username?.value ?: rs.getString("username")
             val email = email?.value ?: rs.getString("email")
-            val password = if(password != null) hashPassword(password.value)
-            else rs.getString("password")
+            val password = passwordHash ?: rs.getString("password")
             val state = state?.name ?: rs.getString("state")
             connection.prepareStatement("UPDATE users SET username = ?, email = ?, password = ?, state = ? where id = ?").apply {
                 setString(1, username)
@@ -126,23 +123,22 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
      * Function "addUser" responsible to add a new user to the list of users.
      * @param username the username of the new user.
      * @param email the email of the new user.
-     * @param password the password of the new user.
+     * @param passwordHash the password of the new user.
      * @return UserProfileInfo the user profile information of the new user.
      */
-    override fun addUser(username: Username, email: Email, password: Password): User = transaction(jdbc) { connection ->
+    override fun addUser(username: Username, email: Email, passwordHash: String): User = transaction(jdbc) { connection ->
         val token = generateTokenValue()
-        val hashPassword = hashPassword(password.value)
         val state = UserState.NORMAL.name
         val prepared = connection.prepareStatement("INSERT INTO users (token, username, email, password, state) values (?,?,?,?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
             setString(1, token)
             setString(2, username.value)
             setString(3, email.value)
-            setString(4, hashPassword)
+            setString(4, passwordHash)
             setString(5, state)
             executeUpdate()
         }
         val id = getIdStatement(prepared)
-        NormalUser(id.toInt(), username, email, password, Token(token), UserState.NORMAL)
+        NormalUser(id.toInt(), username, email, passwordHash, Token(token), UserState.NORMAL)
     }
 
     /**
@@ -162,10 +158,9 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     /**
      * Responsible for performing the login of a user.
      * @param username The username of the user to log in to.
-     * @param password The password of the user to log in to.
+     * @param passwordHash The password of the user to log in to.
      */
-    override fun login(username: Username, password: Password): UserInfo? = transaction(jdbc){ connection ->
-        val hashPassword = hashPassword(password.value)
+    override fun login(username: Username, passwordHash: String): UserInfo? = transaction(jdbc){ connection ->
         val prepared = connection.prepareStatement("SELECT * FROM USERS WHERE username = ?").apply {
             setString(1, username.value)
         }
@@ -173,7 +168,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
         prepared.executeQuery().use { rs ->
             if (rs.next()){
                 val actualPassword = rs.getString("password")
-                if (hashPassword == actualPassword){
+                if (passwordHash == actualPassword){
                      return@transaction userResult(rs)
                 }
             }

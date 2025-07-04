@@ -10,6 +10,10 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.User
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Screen responsible for the display of the user profile information.
+ * @param user The current logged user.
+ */
 @Composable
 fun ProfileScreen(
     user: User,

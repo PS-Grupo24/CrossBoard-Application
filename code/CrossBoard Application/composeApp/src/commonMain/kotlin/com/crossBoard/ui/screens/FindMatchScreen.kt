@@ -12,7 +12,16 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.MatchType
 import com.crossBoard.utils.CustomColor
 
-
+/**
+ * Screen responsible for displaying the elements used in searching for a match.
+ * Uses an `ExposedDropdownMenu` to display the multiple match types to select from.
+ * @param selectedGameTypeValue The current selected match type.
+ * @param onGameTypeChange The action to perform when a new match type is selected.
+ * @param onFindMatchClick The action to perform when the find match button is clicked.
+ * @param isLoading The current Loading state.
+ * @param errorMessage The current error message; `NULL` if there is no error message.
+ * @param buttonMessage The message to show in the button to get a match.
+ */
 @ExperimentalMaterialApi
 @Composable
 fun FindMatchScreen(

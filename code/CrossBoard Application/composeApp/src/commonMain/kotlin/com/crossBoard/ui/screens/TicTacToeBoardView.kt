@@ -11,6 +11,17 @@ import com.crossBoard.domain.Player
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.domain.board.TicTacToeBoard
 
+/**
+ * The view for the `TicTacToeBoard`.
+ * It is responsible for displaying board positions
+ * @param board The current board to display.
+ * @param onCellClick The action to perform when a `Cell` is clicked.
+ * @param modifier The elements modifier.
+ * @param enabled The flag indicating if the cells are enabled.
+ * @param player1Symbol The symbol to display for the player1.
+ * @param player2Symbol The symbol to display for the player2.
+ * @param player1Type The type for the player1.
+ */
 @Composable
 fun ticTacToeBoardView(
     board: Board,

@@ -22,6 +22,17 @@ import com.crossBoard.model.SinglePlayerMatch
 import com.crossBoard.utils.CustomColor
 import kotlin.Int.Companion.MAX_VALUE
 
+
+/**
+ * Screen responsible for the display of a single match.
+ * @param user The current logged user; `NULL` for an anonymous user.
+ * @param match The current single player match.
+ * @param player The player type of the user.
+ * @param errorMessage The current error message; `NULL` when there is no error message.
+ * @param onMakeMove The action to perform when making a move.
+ * @param onForfeit The action to perform when the forfeit button is clicked.
+ * @param onPlayAgain The action to perform when the play again button is clicked.
+ */
 @Composable
 fun SinglePlayerMatchScreen(
     user: User?,
@@ -120,7 +131,6 @@ fun SinglePlayerMatchScreen(
         GameActions(
             isLoading = false,
             errorMessage = errorMessage,
-            webSocketMessage = null,
             isGameOver = isMatchOver,
             onForfeitClick = onForfeit,
             onPlayAgainClick = onPlayAgain

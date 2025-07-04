@@ -43,6 +43,7 @@ kotlin {
             // put your Multiplatform dependencies here
             implementation(libs.bundles.ktorClient)
             implementation(libs.multiplatform.settings.v130)
+            implementation("com.squareup.okio:okio:3.7.0")
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

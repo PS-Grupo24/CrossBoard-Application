@@ -13,6 +13,16 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.model.AuthState
 import com.crossBoard.utils.CustomColor
 
+/**
+ * Responsible for the display of the login elements.
+ * @param authState The current authentication state.
+ * @param onLoginUsernameChange The action to perform when username text field is updated.
+ * @param textFieldColors The `TextFieldColors` for the Text field elements.
+ * @param onLoginPasswordChange The action to perform when the password text field is updated.
+ * @param onLoginClick The action to perform when the login button is clicked.
+ * @param onSwitchScreen The action to perform when switching between screens.
+ * @param onMaintainSession The action to perform when the maintain session check box is clicked.
+ */
 @Composable
 fun LoginScreen(
     authState: AuthState,

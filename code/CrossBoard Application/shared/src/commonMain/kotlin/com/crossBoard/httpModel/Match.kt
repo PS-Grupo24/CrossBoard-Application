@@ -32,12 +32,12 @@ data class MatchOutput(
  * Auxiliary function to convert the data in a `MatchOutput` format in an HTTP response into an actual match.
  * @return `MultiPlayerMatch` if the convertion is successful; `NULL` if there was an error in convertion.
  */
-fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch? {
+fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch {
     return MultiPlayerMatch(
         board.toBoard(matchType, user1Info.playerType, state),
         matchId,
         state.toMatchState(),
-        user1Info.userId ?: return null,
+        user1Info.userId ?: throw IllegalStateException("User1 ID must not be null"),
         user2Info.userId,
         matchType.toMatchType(),
         version,

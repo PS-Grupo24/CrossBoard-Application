@@ -4,6 +4,7 @@ import com.crossBoard.domain.Email
 import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.UserInfo
+import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.httpModel.ErrorMessage
 import com.crossBoard.httpModel.EventType
@@ -26,14 +27,14 @@ import io.ktor.http.*
 import io.ktor.util.network.*
 import kotlinx.serialization.SerializationException
 import com.crossBoard.util.Either
+import com.crossBoard.util.failure
+import com.crossBoard.util.success
 import com.crossBoard.utils.clientJson
 import io.ktor.client.plugins.sse.sse
 import io.ktor.client.statement.HttpResponse
-import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.sync.Mutex
 
 /**
  * class ApiClient, responsible for the requests to the server
@@ -43,13 +44,17 @@ class ApiClient(
     val host: Host,
     private val apiScope: CoroutineScope = CoroutineScope(SupervisorJob())
 ): Clearable {
+
+    /**
+     * Base URL where the server is hosted.
+     */
     private val baseUrl = "http://${host.address}:${host.port}"
 
     /**
      * Function "banUser", responsible for the request to ban a user.
      * @param userToken The token of the admin performing the ban.
      * @param userId The id of the user to forfeit.
-     * @return the error message in String if failure or UserInfo if success
+     * @return `String` with the error message on failure; `UserInfo` on Success.
      */
     suspend fun banUser(userToken: String, userId: Int): Either<String, UserInfo> {
         val response = try {
@@ -59,27 +64,27 @@ class ApiClient(
             }
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.message ?: "Something went wrong")
+            return failure(e.message ?: "Something went wrong")
         }
         return if (response.status.value in 200 .. 299){
             val body = response.body<UserProfileOutput>()
-            Either.Right(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
+            success(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
 
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
     /**
      * Function "unbanUser" responsible for unbanning a user.
-     * @param userToken The token of the admin performing unban.
+     * @param userToken The token of the admin performing the unban.
      * @param userId The id of the user to unban.
-     * @return the error message in String if failure or UserInfo if success
+     * @return `String` with the error message on failure; `UserInfo` on Success.
      */
     suspend fun unbanUser(userToken: String, userId: Int): Either<String, UserInfo> {
         val response = try {
@@ -89,21 +94,29 @@ class ApiClient(
             }
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.message ?: "Something went wrong")
+            return failure(e.message ?: "Something went wrong")
         }
         return if (response.status.value in 200 .. 299){
             val body = response.body<UserProfileOutput>()
-            Either.Right(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
+            success(UserInfo(body.id, Token(body.token), Username(body.username), Email(body.email), body.state))
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
+    /**
+     * Function "getUsersByName" responsible for getting a list of users that match a username sequence.
+     * @param userToken The token of the user performing the request.
+     * @param username The username sequence to match.
+     * @param skip The number of elements to skip; `NULL` if skipping not wanted.
+     * @param limit The maximum number of elements to get. `NULL` for no maximum.
+     * @return `String` with the error message on failure; `List<UserInfo>` on Success.
+     */
     suspend fun getUsersByName(userToken: String, username: String, skip: Int? = null, limit: Int? = null): Either<String, List<UserInfo>> {
         val response = try {
             client.get("$baseUrl/user/username/$username") {
@@ -114,10 +127,10 @@ class ApiClient(
             }
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+            return failure(e.cause?.message ?: e.message ?: "Something went wrong")
         }
 
         return if (response.status.value in 200 .. 299){
@@ -130,15 +143,21 @@ class ApiClient(
                     it.state
                 )
             }
-            Either.Right(users)
+            success(users)
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun login(username: String, password: String): Either<String, UserLoginOutput> {
+    /**
+     * Responsible for performing the log in for a user.
+     * @param username The username of the user to log in to.
+     * @param password The password of the user to log in to.
+     * @return `String` with the error message on failure; `UserInfo` on Success.
+     */
+    suspend fun login(username: String, password: String): Either<String, UserInfo> {
         val response = try {
             println(baseUrl)
             client.post("$baseUrl/user/login") {
@@ -147,23 +166,38 @@ class ApiClient(
             }
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+            return failure(e.cause?.message ?: e.message ?: "Something went wrong")
         }
 
         return if (response.status.value in 200 .. 299){
             val logged = response.body<UserLoginOutput>()
-            Either.Right(logged)
+            success(
+                UserInfo(
+                    logged.id,
+                    Token(logged.token),
+                    Username(username),
+                    Email(logged.email),
+                    logged.state
+                )
+            )
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun register(username: String, email: String, password: String): Either<String, UserCreationOutput> {
+    /**
+     * Responsible for creating a new user.
+     * @param username The username for the new user.
+     * @param email The email for the new user.
+     * @param password The password for the new user.
+     * @return `String` with the error message on failure; `UserInfo` on Success.
+     */
+    suspend fun register(username: String, email: String, password: String): Either<String, UserInfo> {
         val response = try {
             client.post("$baseUrl/user") {
                 contentType(ContentType.Application.Json)
@@ -171,95 +205,105 @@ class ApiClient(
             }
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+            return failure(e.cause?.message ?: e.message ?: "Something went wrong")
         }
 
         return if (response.status.value in 200 .. 299){
-            val logged = response.body<UserCreationOutput>()
-            Either.Right(logged)
+            val registered = response.body<UserCreationOutput>()
+            success(
+                UserInfo(
+                    registered.id,
+                    Token(registered.token),
+                    Username(username),
+                    Email(email),
+                    UserState.NORMAL.name,
+                )
+            )
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun getUserById(userId:Int): Either<String, UserProfileOutput> {
+    /**
+     * Responsible for getting a user by its id.
+     * @param userId The id of the user to find.
+     * @return `String` with the error message on failure; `UserInfo` on Success.
+     */
+    suspend fun getUserById(userId:Int): Either<String, UserInfo> {
         val response = try {
             client.get("$baseUrl/user/$userId"){
                 contentType(ContentType.Application.Json)
             }
         }
         catch (e: UnresolvedAddressException){
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
         catch (e: Exception){
-            return Either.Left(e.message ?: "Something went wrong")
+            return failure(e.message ?: "Something went wrong")
         }
 
         return if (response.status.value in 200 .. 299){
             val user = response.body<UserProfileOutput>()
-            Either.Right(user)
+            success(
+                UserInfo(
+                    user.id,
+                    Token(user.token),
+                    Username(user.username),
+                    Email(user.email),
+                    UserState.NORMAL.name,
+                )
+            )
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun getMatchByVersion(matchId: Int, version: Int): Either<String, MatchOutput> {
-        val response = try {
-            client.get("$baseUrl$matchId/$version"){
-                contentType(ContentType.Application.Json)
-            }
-        }
-        catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
-        }
-        catch (e: Exception) {
-            return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
-        }
-
-        return if (response.status.value in 200 .. 299){
-            val match = response.body<MatchOutput>()
-            Either.Right(match)
-        }
-        else {
-            val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
-        }
-    }
-
-    suspend fun enterMatch(userToken: String, gameType: String): Either<String, MatchOutput> {
+    /**
+     * Responsible for performing a request to the server to enter a match.
+     * @param userToken The token of the user to join a match.
+     * @param matchType The type of match to join to.
+     * @return `String` with the error message on failure; `MultiPlayerMatch` on Success.
+     */
+    suspend fun enterMatch(userToken: String, matchType: String): Either<String, MultiPlayerMatch> {
         val response = try {
             client.post(
-                urlString = "$baseUrl/match/$gameType",
+                urlString = "$baseUrl/match/$matchType",
             ){
                 contentType(ContentType.Application.Json)
                 header(HttpHeaders.Authorization, "Bearer $userToken")
             }
         }
         catch (e: SerializationException) {
-            return Either.Left(e.message ?: "Serialization exception")
+            return failure(e.message ?: "Serialization exception")
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
 
         return if (response.status.value in 200 .. 299){
             val match = response.body<MatchOutput>()
-            Either.Right(match)
+            success(match.toMultiplayerMatch())
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun forfeitMatch(userToken: String, matchId: Int): Either<String, MatchOutput>
+    /**
+     * Responsible for performing a request to the server to forfeit a match.
+     * @param userToken The token of the user performing the forfeit.
+     * @param matchId The id of the match to forfeit.
+     * @return `String` with the error message on failure; `MultiPlayerMatch` on Success.
+     */
+    suspend fun forfeitMatch(userToken: String, matchId: Int): Either<String, MultiPlayerMatch>
     {
         val response = try {
             client.post(
@@ -270,29 +314,30 @@ class ApiClient(
             }
         }
         catch (e: SerializationException) {
-            return Either.Left(e.message ?: "Serialization exception")
+            return failure(e.message ?: "Serialization exception")
         }
         catch (e: UnresolvedAddressException) {
-            return Either.Left(e.message ?: "No internet connection")
+            return failure(e.message ?: "No internet connection")
         }
 
         return if (response.status.value in 200 .. 299){
             val forfeitedMatch = response.body<MatchOutput>()
-            Either.Right(forfeitedMatch)
+            success(forfeitedMatch.toMultiplayerMatch())
         }
         else {
             val error = response.body<ErrorMessage>()
-            Either.Left(error.message)
+            failure(error.message)
         }
     }
 
-    suspend fun getMatch(matchId: Int): Either<String, MatchOutput> =
-        safeRequest<MatchOutput> {
-            client.get(
-                urlString = "$baseUrl/match/$matchId"
-            )
-        }
-
+    /**
+     * Responsible for performing a request to the server to make a play in a match.
+     * @param userToken The token of the user performing the play.
+     * @param matchId The id of the match to perform a play.
+     * @param version The version of the match to perform a play at.
+     * @param moveInput The move to perform.
+     * @return `String` with the error message on failure; `UserInfo` on Success.
+     */
     suspend fun playMatch(
         userToken: String,
         matchId: Int,
@@ -308,6 +353,12 @@ class ApiClient(
         }
     }
 
+    /**
+     * Responsible for performing a request to the server that cancels a match.
+     * @param userToken The token of the user cancelling a match.
+     * @param matchId The id of the match to cancel.
+     * @return `String` with the error message on failure; `MatchCancel` on Success.
+     */
     suspend fun cancelSearch(userToken: String, matchId: Int): Either<String, MatchCancel> =
         safeRequest<MatchCancel> { client.post(
             urlString = "$baseUrl/match/$matchId/cancel",
@@ -316,6 +367,12 @@ class ApiClient(
             header(HttpHeaders.Authorization, "Bearer $userToken")
         }}
 
+    /**
+     * Responsible for establishing a connection with the server for Server-Sent Events.
+     * This connection allows for the server to send the client updates to a match.
+     * @param userToken The token of the user establishing the connection.
+     * @return `Flow<MultiPlayerMatch>` a sequence of MultiPlayerMatch states.
+     */
     fun connectSSE(userToken: String): Flow<MultiPlayerMatch>{
         return callbackFlow {
             val collectJob = launch{
@@ -357,6 +414,11 @@ class ApiClient(
 
     }
 
+    /**
+     * Responsible for performing a request to the server to get the match statistics of a user.
+     * @param userToken The token of the user to get the statistics of.
+     * @return `String` with the error message on failure; `List<MatchStats>` on Success.
+     */
     suspend fun getMatchStatistics(userToken: String): Either<String, List<MatchStats>>
         = safeRequest<List<MatchStats>> {
             client.get("$baseUrl/user/statistics"){
@@ -365,26 +427,36 @@ class ApiClient(
             }
         }
 
+    /**
+     * Responsible for cleaning up APIClient.
+     * Performs a cancel of the apiScope.
+     */
     override fun clear() {
         apiScope.cancel()
     }
 }
 
+/**
+ * Private Auxiliary Function "safeRequest" that performs a block of code safely,
+ * by surrounding it with a try/catch block.
+ * @param block The block of code to run safely.
+ * @return `String` for the error message on failure; `T` on success.
+ */
 private suspend inline fun <reified T> safeRequest(
     block: suspend () -> HttpResponse
 ): Either<String, T> {
     val response = try {
         block()
     } catch (e: UnresolvedAddressException) {
-        return Either.Left(e.message ?: "No internet connection")
+        return failure(e.message ?: "No internet connection")
     } catch (e: Exception) {
-        return Either.Left(e.cause?.message ?: e.message ?: "Something went wrong")
+        return failure(e.cause?.message ?: e.message ?: "Something went wrong")
     }
 
     return if (response.status.isSuccess()) {
-        Either.Right(response.body())
+        success(response.body())
     } else {
         val error = response.body<ErrorMessage>()
-        Either.Left(error.message)
+        failure(error.message)
     }
 }

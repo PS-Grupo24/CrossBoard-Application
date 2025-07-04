@@ -1,7 +1,7 @@
 package com.crossBoard.ui.viewModel
 
 import com.crossBoard.httpModel.TicTacToeMoveInput
-import com.crossBoard.httpModel.toMultiplayerMatch
+
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
@@ -17,7 +17,14 @@ import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
 
-
+/**
+ * ViewModel responsible for managing the MultiPlayerMatch resources.
+ * Uses `MultiPlayerMatchUiState` to manage the match resources.
+ * @param client The `APIClient` responsible for the server requests.
+ * @param userToken The token of the logged user.
+ * @param currentUserId The id of the logged user.
+ * @param mainDispatcher The coroutine dispatcher; `Dispatchers.Main` by default.
+ */
 class MultiplayerMatchViewModel(
     private val client: ApiClient,
     private val userToken: String,
@@ -29,10 +36,20 @@ class MultiplayerMatchViewModel(
     private val _matchState = MutableStateFlow(MultiplayerMatchUiState())
     val matchState: StateFlow<MultiplayerMatchUiState> = _matchState.asStateFlow()
 
+    /**
+     * Job for the sse update collection.
+     */
     private var sseJob: Job? = null
 
+    /**
+     * Job for the turn timer countdown.
+     */
     private var timerJob: Job? = null
 
+    /**
+     * Function "startTurnTimer" responsible for creating a Job that counts down starting at a given duration.
+     * @param durationSeconds The duration in seconds for each turn.
+     */
     private fun startTurnTimer(durationSeconds: Int) {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -45,11 +62,17 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Function that cancels the timer job.
+     */
     private fun stopTurnTimer() {
         timerJob?.cancel()
         _matchState.update { it.copy(timeLeftSeconds = 0) }
     }
 
+    /**
+     * Function "startSSE" that launches the job for SSE update collection.
+     */
     private fun startSSE(){
 
         if (sseJob?.isActive == true) {
@@ -73,7 +96,7 @@ class MultiplayerMatchViewModel(
                         }
                     }
                     .catch { cause ->
-                        println("VM: SSE Flow caught error: ${cause?.message}")
+                        println("VM: SSE Flow caught error: ${cause.message}")
                         viewModelScope.launch {
                             println("VM: Attempting SSE reconnection in 5s...")
                             delay(5000)
@@ -94,16 +117,25 @@ class MultiplayerMatchViewModel(
 
     }
 
+    /**
+     * Function "disconnectSSE" responsible for canceling the sseJob.
+     */
     fun disconnectSSE(){
         println("VM: Disconnecting SSE...")
         sseJob?.cancel()
         sseJob = null
     }
 
-    fun updateGameTypeInput(input: String){
+    /**
+     * Function "updateMatchTypeInput" responsible for updating the type of the match to start.
+     */
+    fun updateMatchTypeInput(input: String){
         _matchState.update { it.copy(gameTypeInput = input, errorMessage = null) }
     }
 
+    /**
+     * Function "findMatch" responsible for using finding a match, calling `getPlayersUsernames` and `startSSE`.
+     */
     fun findMatch(){
         val currentState = _matchState.value
         if (userToken.isBlank()){
@@ -119,14 +151,12 @@ class MultiplayerMatchViewModel(
         viewModelScope.launch {
             _matchState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                println("TOKEN: $userToken")
                 when(val result = client.enterMatch(userToken, currentState.gameTypeInput)){
                     is Success -> {
-                        val match = result.value.toMultiplayerMatch()
+                        val match = result.value
                         _matchState.update { it.copy(isLoading = false, currentMatch = match) }
-                        if (match?.state == MatchState.RUNNING) { startTurnTimer(30)}
-                        getPlayersUsernames(match?.user1, match?.user2)
-                        //startPolling(result.value.matchId)
+                        if (match.state == MatchState.RUNNING) { startTurnTimer(30)}
+                        getPlayersUsernames(match.user1, match.user2)
                         startSSE()
                     }
 
@@ -141,6 +171,9 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Function `cancelSearch` responsible for canceling a match.
+     */
     fun cancelSearch(){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return
@@ -150,6 +183,12 @@ class MultiplayerMatchViewModel(
             doCancelSearch(match.id)
         }
     }
+
+    /**
+     * Function "makeMove" responsible for creating a move and performing it given the row index and column index.
+     * @param rowIndex The index of the row.
+     * @param columnIndex The index of the column.
+     */
     fun makeMove(rowIndex: Int, columnIndex: Int){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return
@@ -199,7 +238,7 @@ class MultiplayerMatchViewModel(
                         startTurnTimer(30)
                     }
                     is Failure -> {
-                        _matchState.update { it.copy(errorMessage = result.value, isLoading = false, webSocketMessage = null) }
+                        _matchState.update { it.copy(errorMessage = result.value, isLoading = false) }
                     }
                 }
             }
@@ -214,6 +253,9 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Function "forfeit" responsible for forfeiting the match.
+     */
     fun forfeit(){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return
@@ -222,19 +264,24 @@ class MultiplayerMatchViewModel(
             doForfeit(match)
         }
     }
+
+    /**
+     * Function "resetMatch" responsible for clearing the match resources and disconnect the SSE updates.
+     */
     fun resetMatch() {
-        //stopPolling()
         _matchState.update {
             it.copy(
                 currentMatch = null,
                 isLoading = false,
                 errorMessage = null,
-                webSocketMessage = null,
             )
         }
         disconnectSSE()
     }
 
+    /**
+     * Auxiliary function that gets the username information for the users.
+     */
     private fun getPlayersUsernames(player1Id:Int?, player2Id: Int?){
 
         viewModelScope.launch{
@@ -245,7 +292,7 @@ class MultiplayerMatchViewModel(
                 if (player1Id != null){
                     when(val player1Result = client.getUserById(player1Id)) {
                         is Success -> {
-                            _matchState.update { it.copy(player1Username = player1Result.value.username, isLoading = false) }
+                            _matchState.update { it.copy(player1Username = player1Result.value.username.value, isLoading = false) }
                         }
                         is Failure -> {
                             _matchState.update { it.copy(isLoading = false, errorMessage = player1Result.value) }
@@ -256,7 +303,7 @@ class MultiplayerMatchViewModel(
                 if (player2Id != null){
                     when(val player2Result = client.getUserById(player2Id)) {
                         is Success -> {
-                            _matchState.update { it.copy(player2Username = player2Result.value.username, isLoading = false) }
+                            _matchState.update { it.copy(player2Username = player2Result.value.username.value, isLoading = false) }
                         }
                         is Failure -> {
                             _matchState.update { it.copy(isLoading = false, errorMessage = player2Result.value) }
@@ -271,6 +318,9 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Auxiliary function that performs a match cancel.
+     */
     private suspend fun doCancelSearch(matchId: Int){
         _matchState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -290,6 +340,9 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Auxiliary function that performs a match forfeit.
+     */
     private suspend fun doForfeit(match: MultiPlayerMatch){
         _matchState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -299,10 +352,9 @@ class MultiplayerMatchViewModel(
 
             when(val result = client.forfeitMatch(userToken, match.id)){
                 is Success -> {
-                    //stopPolling()
                     disconnectSSE()
                     stopTurnTimer()
-                    _matchState.update { it.copy(isLoading = false, errorMessage = null, webSocketMessage = null) }
+                    _matchState.update { it.copy(isLoading = false, errorMessage = null) }
                 }
 
                 is Failure -> {
@@ -320,6 +372,12 @@ class MultiplayerMatchViewModel(
         }
     }
 
+    /**
+     * Function "clear" responsible for performing a cleanup of the viewModel when closed.
+     * It cancels the match if it's still WAITING for an opponent or forfeits if the match is ongoing
+     * and cancels the viewModel scope.
+     *
+     */
     override fun clear() {
         val match = _matchState.value.currentMatch
         val state = match?.state

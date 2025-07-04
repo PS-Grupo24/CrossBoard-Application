@@ -3,7 +3,6 @@ package com.crossBoard.repository.memoryRepositories
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.NormalUser
-import com.crossBoard.domain.Password
 import com.crossBoard.domain.Token
 import com.crossBoard.domain.User
 import com.crossBoard.domain.UserInfo
@@ -11,7 +10,7 @@ import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.repository.interfaces.UserRepository
 import com.crossBoard.repository.interfaces.generateTokenValue
-import com.crossBoard.repository.interfaces.hashPassword
+import com.crossBoard.util.hashPassword
 
 /**
  * Class "MemoryUserRep" represents the memory repository of the user.
@@ -23,9 +22,9 @@ class MemoryUserRep : UserRepository {
      * List of users stored in memory.
      */
     private val users = mutableListOf<User>(
-        Admin(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), Password("Aa12345!"), Token("1")),
-        Admin(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), Password("Aa12345!"), Token("2")),
-        Admin(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), Password("Aa12345!"), Token("3"))
+        Admin(1, Username("Rúben Louro"), Email("A48926@alunos.isel.pt"), hashPassword("Aa12345!"), Token("1")),
+        Admin(2, Username("Luís Reis"), Email("A48318@alunos.isel.pt"), hashPassword("Aa12345!"), Token("2")),
+        Admin(3, Username("Pedro Pereira"), Email("palex@cc.isel.ipl.pt"), hashPassword("Aa12345!"), Token("3"))
     )
 
     /**
@@ -97,13 +96,13 @@ class MemoryUserRep : UserRepository {
         userId: Int,
         username: Username?,
         email: Email?,
-        password: Password?,
+        passwordHash: String?,
         state: UserState?
     ): UserInfo {
         val user = getUserFullDetails(userId)!!
         val newName = username ?: user.username
         val newEmail = email ?: user.email
-        val newPassword = password ?: user.password
+        val newPassword = passwordHash ?: user.password
 
         val updatedUser = if(user is Admin) Admin(user.id, newName, newEmail, newPassword, user.token)
         else NormalUser(user.id, newName, newEmail, newPassword, user.token, state ?: (user as NormalUser).state)
@@ -129,17 +128,17 @@ class MemoryUserRep : UserRepository {
      * Function "addUser" responsible to add a new user to the list of users.
      * @param username the username of the new user.
      * @param email the email of the new user.
-     * @param password the password of the new user.
+     * @param passwordHash The hashed password of the new user.
      * @return UserProfileInfo the user profile information of the new user.
      */
     override fun addUser(
         username: Username,
         email: Email,
-        password: Password
+        passwordHash: String
     ): User {
         val lastId = if(users.isEmpty()) 0 else users.maxOf { it.id }
 
-        val newUser = NormalUser(lastId + 1, username, email, password, Token(generateTokenValue()), UserState.NORMAL)
+        val newUser = NormalUser(lastId + 1, username, email, passwordHash, Token(generateTokenValue()), UserState.NORMAL)
         users.add(newUser)
         return newUser
     }
@@ -162,12 +161,11 @@ class MemoryUserRep : UserRepository {
     /**
      * Responsible for performing the login of a user.
      * @param username The username of the user to log in to.
-     * @param password The password of the user to log in to.
+     * @param passwordHash The hashed password of the user to log in to.
      */
-    override fun login(username: Username, password: Password): UserInfo? {
-        val hashPassword = hashPassword(password.value)
+    override fun login(username: Username, passwordHash: String): UserInfo? {
         val u = users.find { it.username == username }!!
-        if (u.password.value != hashPassword) return null
+        if (u.password != passwordHash) return null
         return UserInfo(
             u.id,
             u.token,

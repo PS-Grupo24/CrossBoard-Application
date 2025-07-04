@@ -8,6 +8,9 @@ import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.ReversiMove
 import kotlin.random.Random
 
+/**
+ * SinglePlayerMatch replicates a MultiplayerMatch.
+ */
 class SinglePlayerMatch(
     val id: Int,
     val board: Board,

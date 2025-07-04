@@ -35,7 +35,7 @@ abstract class TicTacToeBoard: Board {
      * @param square the square to get the player.
      * @return Player the player at the square.
      */
-    override fun get(square: com.crossBoard.domain.Square): com.crossBoard.domain.Player? =
+    override fun get(square: Square): Player? =
         positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
 
     /**
@@ -73,8 +73,8 @@ class TicTacToeBoardRun(
 
     /**
      * Function "play" responsible to play a move on the board.
-     * @param move the move to be done in this play.
-     * @return Board the board after the move was played.
+     * @param move The move to be done in this play.
+     * @return `Board` - The board after the move was played.
      */
     override fun play(move: Move): Board {
         require(move is TicTacToeMove) {"Wrong move type"}

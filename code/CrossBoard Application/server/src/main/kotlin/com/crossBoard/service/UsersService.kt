@@ -21,23 +21,23 @@ class UsersService(private val userRepo: UserRepository) {
      * Responsible for creating a user.
      * @param username The username of the new user.
      * @param email The email of the new user.
-     * @param password The password of the new user
+     * @param passwordHash The hashed password of the new user
      */
-     fun createUser(username: Username, email: Email, password: Password): Either<ApiError, User> {
+     fun createUser(username: Username, email: Email, passwordHash: String): Either<ApiError, User> {
         if (userRepo.getUserProfileByName(username) != null) return failure(ApiError.USERNAME_ALREADY_EXISTS)
         if (userRepo.getUserProfileByEmail(email) != null) return failure(ApiError.EMAIL_ALREADY_EXISTS)
 
-        return success(userRepo.addUser(username, email, password))
+        return success(userRepo.addUser(username, email, passwordHash))
     }
 
     /**
      * Responsible for the login verification.
      * @param username The username of the user to login.
-     * @param password The password of the user to login.
+     * @param passwordHash The hashed password of the user to login.
      */
-    fun login(username: Username, password: Password): Either<ApiError, UserInfo> {
+    fun login(username: Username, passwordHash: String): Either<ApiError, UserInfo> {
         if (userRepo.getUserProfileByName(username) == null) return failure(ApiError.USER_NOT_FOUND)
-        return success(userRepo.login(username, password) ?: return failure(ApiError.WRONG_PASSWORD))
+        return success(userRepo.login(username, passwordHash) ?: return failure(ApiError.WRONG_PASSWORD))
     }
 
     /**
@@ -52,7 +52,7 @@ class UsersService(private val userRepo: UserRepository) {
         userId: Int,
         username: Username? = null,
         email: Email? = null,
-        password: Password? = null,
+        password: String? = null,
         state: UserState? = null
     ): Either<ApiError, UserInfo> {
         if (userRepo.getUserProfileById(userId) == null) return failure(ApiError.USER_NOT_FOUND)

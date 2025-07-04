@@ -7,9 +7,19 @@ import com.crossBoard.ui.screens.FindMatchScreen
 import com.crossBoard.ui.screens.GameFlowScreen
 import com.crossBoard.ui.viewModel.MultiplayerMatchViewModel
 
+/**
+ * Activity responsible for the MultiPlayerMatch functionality.
+ * Uses `MultiPlayerMatchViewModel` to manage the match resources and actions.
+ * Uses `FindMatchScreen` initially when there is no match and `GameFlowScreen when a match is found.
+ * @param client The client to perform requests.
+ * @param userToken The token of the logged user.
+ * @param currentUserId The id of the logged user.
+ * @param onFindMatch Action to perform when FindMatchScreen is to be called.
+ * @param onMatch Action to perform when a Match is found.
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun GameFlow(
+fun MultiPlayerMatchFlow(
     client: ApiClient,
     userToken: String,
     currentUserId: Int,
@@ -30,7 +40,7 @@ fun GameFlow(
             selectedGameTypeValue = matchUiState.gameTypeInput,
             isLoading = matchUiState.isLoading,
             errorMessage = matchUiState.errorMessage,
-            onGameTypeChange = vm::updateGameTypeInput,
+            onGameTypeChange = vm::updateMatchTypeInput,
             onFindMatchClick = vm::findMatch,
         )
     }
