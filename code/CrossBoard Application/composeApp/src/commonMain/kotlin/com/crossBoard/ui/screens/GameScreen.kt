@@ -8,11 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.crossBoard.domain.*
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.BoardWin
-import com.crossBoard.domain.MatchState
-import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.domain.Player
+import com.crossBoard.domain.board.ReversiBoard
+import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.utils.CustomColor
 
@@ -33,8 +33,18 @@ fun GameScreen(
     val board = match.board
     val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
 
-    val player1Symbol = "X"
-    val player2Symbol = "O"
+    val player1Symbol = when(match.matchType){
+        MatchType.TicTacToe -> "X"
+        MatchType.Reversi -> {
+            if(match.board.player1 == Player.BLACK) "B" else "W"
+        }
+    }
+    val player2Symbol = when(match.matchType){
+        MatchType.TicTacToe ->"O"
+        MatchType.Reversi -> {
+            if(match.board.player2 == Player.BLACK) "B" else "W"
+        }
+    }
 
     val player1Type = remember(match.user1) { match.getPlayerType(match.user1) }
 
@@ -130,14 +140,29 @@ fun GameStatusAndBoard(
 
     Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
     Spacer(Modifier.height(16.dp))
-    ticTacToeBoardView(
-        board = board,
-        onCellClick = { row, col -> if (!isGameOver) onCellClick(row, col) },
-        enabled = !isLoading && !isGameOver,
-        player1Type = player1Type,
-        player1Symbol = player1Symbol,
-        player2Symbol = player2Symbol,
-    )
+    when(board) {
+        is TicTacToeBoard -> {
+            ticTacToeBoardView(
+                board = board,
+                onCellClick = { row, col -> if (!isGameOver) onCellClick(row, col) },
+                enabled = !isLoading && !isGameOver,
+                player1Type = player1Type,
+                player1Symbol = player1Symbol,
+                player2Symbol = player2Symbol,
+            )
+        }
+        is ReversiBoard -> {
+            reversiBoardView(
+                board = board,
+                onClick = { row: Int, col: Int -> if (!isGameOver) onCellClick(row, col) },
+                enabled = !isLoading && !isGameOver,
+                player1Type = player1Type,
+                player1Symbol = player1Symbol,
+                player2Symbol = player2Symbol
+            )
+        }
+        else -> throw(IllegalArgumentException("Illegal Board Type: ${board::class.simpleName}"))
+    }
 }
 
 @Composable
@@ -194,7 +219,6 @@ fun GameActions(
                 }
             }
         }
-
 
         Box(modifier = Modifier.height(elementHeight)) {
             if (isGameOver) {

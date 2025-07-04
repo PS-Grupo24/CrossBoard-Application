@@ -1,6 +1,8 @@
 package com.crossBoard.httpModel
+import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
@@ -24,6 +26,12 @@ data class TicTacToeMoveInput(
     val square: String
 ): MoveInput
 
+@Serializable
+data class ReversiMoveInput(
+    val player: String,
+    val square: String
+): MoveInput
+
 /**
  * Auxiliary Function that converts a `MoveInput` into an actual `Move` format.
  */
@@ -34,6 +42,12 @@ fun MoveInput.toMove() : Move {
             val square = square.toSquare(TicTacToeBoard.BOARD_DIM)
 
             return TicTacToeMove(player, square)
+        }
+        is ReversiMoveInput -> {
+            val player = player.toPlayer()
+            val square = square.toSquare(ReversiBoard.BOARD_DIM)
+
+            return ReversiMove(player, square)
         }
     }
 }
@@ -56,11 +70,19 @@ data class TicTacToeMoveOutput(
     val square: String
 ) : MoveOutput
 
+@Serializable
+@SerialName("reversiMoveOutput")
+data class ReversiMoveOutput(
+    val player: String,
+    val square: String
+): MoveOutput
+
 /**
  * Auxiliary function that converts a `Move` object into a `MoveOutput` format.
  */
 fun Move.toMoveOutput() : MoveOutput {
     return when(this){
         is TicTacToeMove -> TicTacToeMoveOutput(player.toString(), square.toString())
+        is ReversiMove -> ReversiMoveOutput(player.toString(), square.toString())
     }
 }

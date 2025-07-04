@@ -22,16 +22,3 @@ data class TicPosition(val player: Player, override val square: Square) : Positi
      */
     override fun toString(): String = "${player},${square}"
 }
-
-/**
- * Function "toPosition" responsible to convert a String to a Position.
- * @param boardDim the dimension of the board.
- * @param matchType the type of the match.
- * @return Position the Position corresponding to the String and the type of the match.
- */
-fun String.toPosition(boardDim: Int, matchType: MatchType): Position {
-    val values = split(",")
-    return when(matchType){
-        MatchType.TicTacToe ->  TicPosition(values[0].toPlayer(), values[1].toSquare(boardDim))
-    }
-}

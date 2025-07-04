@@ -4,8 +4,12 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
+import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.move.possibleMoves
+import com.crossBoard.domain.position.Position
+import com.crossBoard.domain.position.ReversiPosition
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.SinglePlayerMatch
@@ -48,7 +52,6 @@ class SinglePlayerViewModel(
                 randomMachineMove()
             }
         }
-
     }
 
     fun makeMove(move: Move){
@@ -70,6 +73,7 @@ class SinglePlayerViewModel(
                 }
                 if (
                     newMatch.state == MatchState.RUNNING
+                    && newMatch.board.turn == newMatch.board.player2
                     ){
                     delay(1000L)
                     randomMachineMove()
@@ -130,18 +134,33 @@ class SinglePlayerViewModel(
                 _singlePlayerMatch.update { it.copy(errorMessage = "Not the machine's turn!") }
                 return
             }
-            if(match.matchType == MatchType.TicTacToe){
-                val position = match.board.positions.filter { (it as TicPosition).player == Player.EMPTY }.random()
-                _singlePlayerMatch.update { it.copy(
-                    match.makeMove(
-                        TicTacToeMove(
-                            match.board.player2,
-                            position.square,
+            when(match.matchType) {
+                MatchType.Reversi -> {
+                    val possibleSquares = possibleMoves(match.board.player2, match.board.positions as List<ReversiPosition>)
+                    val position = possibleSquares.random()
+                    val newMatch = match.makeMove(ReversiMove(match.board.player2, position))
+                    _singlePlayerMatch.update { it.copy(
+                        newMatch
+                    )}
+                    if(newMatch.board.turn == newMatch.board.player2) {
+                        viewModelScope.launch {
+                            delay(1000L)
+                            randomMachineMove()
+                        }
+                    }
+                }
+                MatchType.TicTacToe -> {
+                    val position = match.board.positions.filter { (it as TicPosition).player == Player.EMPTY }.random()
+                    _singlePlayerMatch.update { it.copy(
+                        match.makeMove(
+                            TicTacToeMove(
+                                match.board.player2,
+                                position.square,
+                            )
                         )
-                    )
-                )}
+                    )}
+                }
             }
-
         }
         catch (e: Exception){
             _singlePlayerMatch.update { it.copy(errorMessage = e.message ?: e.cause?.message) }

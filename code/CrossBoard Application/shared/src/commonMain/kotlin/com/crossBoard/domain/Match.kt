@@ -1,10 +1,8 @@
 package com.crossBoard.domain
 
-import com.crossBoard.domain.board.Board
-import com.crossBoard.domain.board.BoardWin
-import com.crossBoard.domain.board.TicTacToeBoardRun
-import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.moveToString
 import com.crossBoard.httpModel.BoardOutput
 import com.crossBoard.httpModel.MatchOutput
@@ -64,6 +62,26 @@ data class MultiPlayerMatch(
                     val p1 = Player.random()
                     val board = TicTacToeBoardRun(
                         initialTicTacToePositions(),
+                        emptyList(),
+                        Player.random(),
+                        p1,
+                        p1.other(),
+                    )
+                    MultiPlayerMatch(
+                        board,
+                        Random.nextInt(from = 1, Int.MAX_VALUE),
+                        MatchState.WAITING,
+                        player1,
+                        null,
+                        matchType,
+                        1,
+                        null
+                    )
+                }
+                MatchType.Reversi -> {
+                    val p1 = Player.random()
+                    val board = ReversiBoardRun(
+                        initialReversiPositions(),
                         emptyList(),
                         Player.random(),
                         p1,

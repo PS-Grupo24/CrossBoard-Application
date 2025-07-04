@@ -1,17 +1,15 @@
 package com.crossBoard.httpModel
 
-import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.board.*
 import com.crossBoard.domain.position.TicPosition
-import com.crossBoard.domain.board.TicTacToeBoard
-import com.crossBoard.domain.board.TicTacToeBoardDraw
-import com.crossBoard.domain.board.TicTacToeBoardRun
-import com.crossBoard.domain.board.TicTacToeBoardWin
+import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.domain.move.toMove
+import com.crossBoard.domain.position.ReversiPosition
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.position.toPosition
 import kotlinx.serialization.Serializable
@@ -46,7 +44,6 @@ fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): 
 
     when(val type = matchType.toMatchType()) {
         MatchType.TicTacToe -> {
-
             val pos = positions.map {
                 it.toPosition(TicTacToeBoard.BOARD_DIM, type) as TicPosition
             }
@@ -80,6 +77,48 @@ fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): 
                     player2,
                 )
                 MatchState.DRAW-> TicTacToeBoardDraw(
+                    pos,
+                    mov,
+                    tur,
+                    player1,
+                    player2,
+                )
+            }
+        }
+        MatchType.Reversi -> {
+            val pos = positions.map{
+                it.toPosition(ReversiBoard.BOARD_DIM, type) as ReversiPosition
+            }
+            val mov = moves.map { it.toMove(type) as ReversiMove }
+
+            return when(state.toMatchState()) {
+                MatchState.RUNNING -> {
+                    ReversiBoardRun(
+                        pos,
+                        mov,
+                        tur,
+                        player1,
+                        player2
+                    )
+                }
+                MatchState.WAITING -> {
+                    ReversiBoardRun(
+                        pos,
+                        mov,
+                        tur,
+                        player1,
+                        player2
+                    )
+                }
+                MatchState.WIN -> ReversiBoardWin(
+                    winner?.toPlayer() ?: throw IllegalArgumentException("Winner must not be null"),
+                    pos,
+                    mov,
+                    tur,
+                    player1,
+                    player2,
+                )
+                MatchState.DRAW -> ReversiBoardDraw(
                     pos,
                     mov,
                     tur,

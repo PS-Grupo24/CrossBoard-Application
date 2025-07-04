@@ -6,9 +6,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.move.toMove
 import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.httpModel.ReversiMoveInput
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -163,27 +166,25 @@ class MultiplayerMatchViewModel(
             return
         }
 
-        val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + columnIndex
-        if (positionIndex >= board.positions.size || positionIndex < 0){
-            _matchState.update { it.copy(errorMessage = "Invalid position Index: $positionIndex") }
-            return
+        val square = when(match.matchType){
+            MatchType.TicTacToe -> Square(Row(rowIndex, TicTacToeBoard.BOARD_DIM), Column('a' + columnIndex))
+            MatchType.Reversi -> Square(Row(rowIndex, ReversiBoard.BOARD_DIM), Column('a' + columnIndex))
+            else -> {
+                _matchState.update { it.copy(errorMessage = "Unsupported match type: ${match.matchType}") }
+                return
+            }
         }
 
-        if ((board.positions[positionIndex] as TicPosition).player != Player.EMPTY){
-            _matchState.update { it.copy(errorMessage = "This position is occupied!") }
+        if (match.board.get(square) != Player.EMPTY){
+            _matchState.update { it.copy(errorMessage = "Invalid move! Cell already occupied.") }
             return
         }
-
-        val rowNumber = TicTacToeBoard.BOARD_DIM - rowIndex
-        val columnChar = 'a' + columnIndex
 
         viewModelScope.launch {
             _matchState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val moveInput = TicTacToeMoveInput(
-                    playerType.toString(),
-                    "$rowNumber$columnChar",
-                )
+                val moveInput = getMoveInput(match.matchType, playerType, square.row.number, square.column.symbol)
+                
                 when(val result = client.playMatch(
                     userToken,
                     match.id,
@@ -328,5 +329,23 @@ class MultiplayerMatchViewModel(
             if (state == MatchState.RUNNING) doForfeit(match)
         }
         viewModelScope.cancel()
+    }
+}
+
+private fun getMoveInput(matchType: MatchType, playerType: Player, rowNumber: Int, columnChar: Char): MoveInput {
+    when(matchType) {
+        MatchType.TicTacToe -> {
+            return TicTacToeMoveInput(
+                playerType.toString(),
+                "$rowNumber$columnChar"
+            )
+        }
+        MatchType.Reversi -> {
+            return ReversiMoveInput(
+                playerType.toString(),
+                "$rowNumber$columnChar"
+            )
+        }
+        else -> throw IllegalArgumentException("Unsupported match type: $matchType")
     }
 }

@@ -9,18 +9,7 @@ import com.crossBoard.domain.Username
 import com.crossBoard.domain.toMatchOutput
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.domain.toPlayedMatch
-import com.crossBoard.httpModel.ErrorMessage
-import com.crossBoard.httpModel.MatchOutput
-import com.crossBoard.httpModel.MatchStats
-import com.crossBoard.httpModel.MoveInput
-import com.crossBoard.httpModel.TicTacToeMoveInput
-import com.crossBoard.httpModel.UserCreationInput
-import com.crossBoard.httpModel.UserCreationOutput
-import com.crossBoard.httpModel.UserLoginInput
-import com.crossBoard.httpModel.UserLoginOutput
-import com.crossBoard.httpModel.UserProfileOutput
-import com.crossBoard.httpModel.UserUpdateInput
-import com.crossBoard.httpModel.toMove
+import com.crossBoard.httpModel.*
 import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.request.*
@@ -778,4 +767,5 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
  */
 private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput = when(matchType){
     MatchType.TicTacToe -> call.receive<TicTacToeMoveInput>()
+    MatchType.Reversi -> call.receive<ReversiMoveInput>()
 }

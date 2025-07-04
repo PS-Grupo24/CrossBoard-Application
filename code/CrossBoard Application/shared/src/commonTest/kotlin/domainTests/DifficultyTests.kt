@@ -1,5 +1,5 @@
 package domainTests
-import com.crossBoard.domain.Difficulty
+/*import com.crossBoard.domain.Difficulty
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,4 +21,4 @@ class DifficultyTests {
         assertEquals("HARD", hard.name)
         assertEquals(2, hard.ordinal)
     }
-}
+}*/

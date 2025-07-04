@@ -1,12 +1,9 @@
 package com.crossBoard.repository.jdbc
 
-import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.domain.board.TicTacToeBoardDraw
-import com.crossBoard.domain.board.TicTacToeBoardRun
-import com.crossBoard.domain.board.TicTacToeBoardWin
+import com.crossBoard.domain.board.*
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import com.google.gson.Gson
@@ -234,6 +231,14 @@ private fun getBoard(matchType: MatchType, state: MatchState, serializedBoard: S
                 MatchState.RUNNING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
                 MatchState.DRAW -> Gson().fromJson(serializedBoard, TicTacToeBoardDraw::class.java)
                 MatchState.WIN -> Gson().fromJson(serializedBoard, TicTacToeBoardWin::class.java)
+            }
+        }
+        MatchType.Reversi -> {
+            return when(state){
+                MatchState.WAITING -> Gson().fromJson(serializedBoard, ReversiBoardRun::class.java)
+                MatchState.RUNNING -> Gson().fromJson(serializedBoard, ReversiBoardRun::class.java)
+                MatchState.DRAW -> Gson().fromJson(serializedBoard, ReversiBoardDraw::class.java)
+                MatchState.WIN -> Gson().fromJson(serializedBoard, ReversiBoardWin::class.java)
             }
         }
     }

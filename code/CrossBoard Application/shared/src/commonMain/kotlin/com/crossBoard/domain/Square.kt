@@ -1,5 +1,7 @@
 package com.crossBoard.domain
 
+import com.crossBoard.domain.board.ReversiBoard
+
 /**
  * Data class "Square" represents a square on the board of the game.
  * @param row the row of the square.
@@ -11,6 +13,17 @@ data class Square(val row: Row, val column: Column) {
      * @return String the string representation of the square.
      */
     override fun toString(): String = "${row.number}${column.symbol}"
+
+    fun adjust(direction: Direction): Square? {
+        val rowIndex = row.index
+        val columnIndex = column.index
+        val addedRow = rowIndex + direction.difRow
+        val addedColumn = columnIndex + direction.difCol
+        if(addedRow !in 0 until ReversiBoard.BOARD_DIM || addedColumn !in 0 until ReversiBoard.BOARD_DIM ) {
+            return null
+        }
+        return Square(Row(addedRow, ReversiBoard.BOARD_DIM), Column('a' + addedColumn))
+    }
 }
 
 /**

@@ -2,10 +2,12 @@ package com.crossBoard.domain.move
 
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
+import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.MoveOutput
+import com.crossBoard.httpModel.ReversiMoveOutput
 import com.crossBoard.httpModel.TicTacToeMoveOutput
 
 /**
@@ -25,6 +27,9 @@ fun moveToString(move: Move): String = when (move) {
         is TicTacToeMove -> {
             "${move.player},${move.square}"
         }
+        is ReversiMove -> {
+            "${move.player},${move.square}"
+        }
     }
 
 /**
@@ -37,6 +42,10 @@ fun String.toMove(matchType: MatchType): Move = when(matchType) {
             val values = split(",")
             TicTacToeMove(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
         }
+        MatchType.Reversi -> {
+            val values = split(",")
+            ReversiMove(values[0].toPlayer(), values[1].toSquare(ReversiBoard.BOARD_DIM))
+        }
     }
 
 /**
@@ -45,4 +54,5 @@ fun String.toMove(matchType: MatchType): Move = when(matchType) {
  */
 fun MoveOutput.toMove(): Move = when (this) {
         is TicTacToeMoveOutput -> TicTacToeMove(player.toPlayer(), square.toSquare(TicTacToeBoard.BOARD_DIM))
-    }
+        is ReversiMoveOutput -> ReversiMove(player.toPlayer(), square.toSquare(ReversiBoard.BOARD_DIM))
+}

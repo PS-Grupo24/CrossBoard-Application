@@ -4,7 +4,7 @@ package com.crossBoard.domain
  * Class "Column" represents the Column of the board.
  * @param symbol the symbol of the column.
  */
-class Column private constructor(val symbol: Char) {
+data class Column private constructor(val symbol: Char) {
     //The index of the column.
     val index = symbol - 'a'
 

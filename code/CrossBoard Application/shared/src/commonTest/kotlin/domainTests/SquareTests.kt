@@ -11,7 +11,6 @@ import kotlin.test.assertFailsWith
 class SquareTests {
     @Test fun squareWithSuccess() {
         val square = Square(Row(1, 3), Column('a'))
-
         assertEquals(2, square.row.number)
         assertEquals(1, square.row.index)
         assertEquals('a', square.column.symbol)
@@ -56,5 +55,13 @@ class SquareTests {
         assertFailsWith<IllegalArgumentException> {
             invalidString3.toSquare(3)
         }
+    }
+
+    @Test fun testEqualSquares(){
+        val square1 = Square(Row(1, 3), Column('a'))
+        val square2 = Square(Row(1, 3), Column('a'))
+
+        assertEquals(square1, square2)
+        assertEquals(square1.hashCode(), square2.hashCode())
     }
 }

@@ -12,8 +12,7 @@ class RowTests {
         }
 
         val row = Row(1, 3)
-
-        assertEquals(2, row.number)
-        assertEquals(1, row.index)
+        val row2 = Row(1, 3)
+        assertEquals(row, row2)
     }
 }

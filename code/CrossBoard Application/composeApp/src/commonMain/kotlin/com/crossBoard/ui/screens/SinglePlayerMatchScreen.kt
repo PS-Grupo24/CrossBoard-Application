@@ -12,18 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.crossBoard.domain.board.BoardDraw
-import com.crossBoard.domain.board.BoardRun
-import com.crossBoard.domain.board.BoardWin
-import com.crossBoard.domain.Column
-import com.crossBoard.domain.MatchState
+import com.crossBoard.domain.*
+import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.Player
-import com.crossBoard.domain.Row
-import com.crossBoard.domain.Square
-import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.User
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.model.SinglePlayerMatch
 import com.crossBoard.utils.CustomColor
@@ -41,8 +34,18 @@ fun SinglePlayerMatchScreen(
     onGoBack: () -> Unit,
 ){
     val isMatchOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
-    val player1Symbol = "X"
-    val player2Symbol = "O"
+    val player1Symbol = when(match.matchType){
+        MatchType.TicTacToe -> "X"
+        MatchType.Reversi -> {
+            if(match.board.player1 == Player.BLACK) "B" else "W"
+        }
+    }
+    val player2Symbol = when(match.matchType){
+        MatchType.TicTacToe ->"O"
+        MatchType.Reversi -> {
+            if(match.board.player2 == Player.BLACK) "B" else "W"
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,23 +76,46 @@ fun SinglePlayerMatchScreen(
         Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
         Spacer(Modifier.height(16.dp))
 
-        ticTacToeBoardView(
-            match.board,
-            onCellClick = { row, col ->
-                onMakeMove(
-                    TicTacToeMove(
-                        player,
-                        Square(
-                            Row(row, TicTacToeBoard.BOARD_DIM),
-                            Column('a' + col)
+        when(match.matchType) {
+            MatchType.TicTacToe -> {
+                ticTacToeBoardView(
+                    match.board,
+                    onCellClick = { row, col ->
+                        onMakeMove(
+                            TicTacToeMove(
+                                player,
+                                Square(
+                                    Row(row, TicTacToeBoard.BOARD_DIM),
+                                    Column('a' + col)
+                                )
+                            )
                         )
-                    )
+                    },
+                    player1Symbol = player1Symbol,
+                    player2Symbol = player2Symbol,
+                    player1Type = player
                 )
-            },
-            player1Symbol = player1Symbol,
-            player2Symbol = player2Symbol,
-            player1Type = player
-        )
+            }
+            MatchType.Reversi -> {
+                reversiBoardView(
+                    match.board,
+                    onClick = { row, col ->
+                        onMakeMove(
+                            ReversiMove(
+                                player,
+                                Square(
+                                    Row(row, ReversiBoard.BOARD_DIM),
+                                    Column('a' + col)
+                                )
+                            )
+                        )
+                    },
+                    player1Symbol = player1Symbol,
+                    player2Symbol = player2Symbol,
+                    player1Type = player
+                )
+            }
+        }
 
         GameActions(
             isLoading = false,
@@ -100,5 +126,4 @@ fun SinglePlayerMatchScreen(
             onPlayAgainClick = onPlayAgain
         )
     }
-
 }

@@ -2,6 +2,7 @@ package com.crossBoard.domain
 
 //Constant representing the type of the match.
 const val TIC_VALUE = "tic"
+const val REVERSI_VALUE = "reversi"
 
 /**
  * Enum class "MatchType" represents the type of the game.
@@ -9,7 +10,8 @@ const val TIC_VALUE = "tic"
  * @property TicTacToe represents the Tic Tac Toe game.
  */
 enum class MatchType(val value: String) {
-    TicTacToe(TIC_VALUE);
+    TicTacToe(TIC_VALUE),
+    Reversi(REVERSI_VALUE);
 
     override fun toString(): String = value
 }
@@ -21,5 +23,6 @@ enum class MatchType(val value: String) {
 fun String.toMatchType(): MatchType =
     when(this) {
         TIC_VALUE -> MatchType.TicTacToe
+        REVERSI_VALUE -> MatchType.Reversi
         else -> throw IllegalArgumentException("Wrong MatchType $this")
     }

@@ -1,15 +1,11 @@
 package com.crossBoard.model
 
-import com.crossBoard.domain.board.Board
-import com.crossBoard.domain.board.BoardDraw
-import com.crossBoard.domain.board.BoardRun
-import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.board.TicTacToeBoardRun
-import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.board.*
+import com.crossBoard.domain.move.ReversiMove
 import kotlin.random.Random
 
 class SinglePlayerMatch(
@@ -30,6 +26,23 @@ class SinglePlayerMatch(
                         Player.random(),
                         p1,
                         p1.other(),
+                    )
+                    SinglePlayerMatch(
+                        Random.nextInt(),
+                        board,
+                        MatchState.RUNNING,
+                        matchType,
+                        1
+                    )
+                }
+                MatchType.Reversi -> {
+                    val p1 = Player.random()
+                    val board = ReversiBoardRun(
+                        positions = initialReversiPositions(),
+                        moves = emptyList(),
+                        turn = Player.random(),
+                        player1 = p1,
+                        player2 = p1.other(),
                     )
                     SinglePlayerMatch(
                         Random.nextInt(),
