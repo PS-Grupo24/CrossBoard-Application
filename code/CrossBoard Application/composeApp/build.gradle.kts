@@ -82,7 +82,8 @@ kotlin {
             implementation (libs.slf4j.nop)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.multiplatform.settings.v130)
-            //implementation(libs.bundles.coil)
+            implementation(libs.bundles.coilBundle)
+            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)
@@ -92,6 +93,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.java)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
     }
 }

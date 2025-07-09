@@ -3,21 +3,21 @@ agp = "8.5.2"
 android-compileSdk = "35"
 android-minSdk = "25"
 android-targetSdk = "35"
-androidx-activityCompose = "1.9.3"
-androidx-appcompat = "1.7.0"
-androidx-constraintlayout = "2.2.0"
-androidx-core-ktx = "1.15.0"
+androidx-activityCompose = "1.10.1"
+androidx-appcompat = "1.7.1"
+androidx-constraintlayout = "2.2.1"
+androidx-core-ktx = "1.16.0"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
-compose-multiplatform = "1.7.3"
+compose-multiplatform = "1.8.2"
 jdbi3Core = "3.32.0"
 jdbi3Kotlin = "3.28.0"
 junit = "4.13.2"
 kotlin = "2.1.21-RC2"
-kotlinx-coroutines = "1.10.1"
-kotlinxBrowser = "0.2"
+kotlinx-coroutines = "1.10.2"
+kotlinxBrowser = "0.3"
 kotlinxSerializationJson = "1.8.0"
 ktor = "3.1.1"
 lifecycleViewmodelCompose = "2.8.2"
@@ -25,20 +25,15 @@ logback = "1.5.16"
 composeMaterial = "1.4.1"
 multiplatformSettingsVersion = "1.3.0"
 postgresql = "42.5.0"
-skikoMultiplatform = "0.8.0"
 slf4jNop = "2.0.7"
-uiTextAndroid = "1.7.8"
-foundationAndroid = "1.7.8"
-foundationLayoutAndroid = "1.7.8"
-uiAndroid = "1.7.8"
-uiToolingPreviewDesktop = "1.7.0"
-uiTooling = "1.8.0"
+androidUi = "1.8.3"
+
 ktorOpenAPIVersion = "5.0.2"
-coil = "3.2.0"
+coilComposeCore = "3.2.0"
 [libraries]
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-ui-tooling-preview-desktop = { module = "androidx.compose.ui:ui-tooling-preview-desktop", version.ref = "uiToolingPreviewDesktop" }
+androidx-ui-tooling-preview-desktop = { module = "androidx.compose.ui:ui-tooling-preview-desktop", version.ref = "androidUi" }
 jdbi3-core = { module = "org.jdbi:jdbi3-core", version.ref = "jdbi3Core" }
 jdbi3-kotlin = { module = "org.jdbi:jdbi3-kotlin", version.ref = "jdbi3Kotlin" }
 jdbi3-postgres = { module = "org.jdbi:jdbi3-postgres", version.ref = "jdbi3Core" }
@@ -68,6 +63,7 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-server-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "ktorOpenAPIVersion"}
 ktor-server-sse = { module = "io.ktor:ktor-server-sse", version.ref = "ktor"}
 
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor"}
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"}
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
@@ -78,21 +74,21 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor"}
 
 
-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coil" }
-coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coil" }
-coil-mp = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
+coil = { module = "io.coil-kt.coil3:coil", version.ref = "coilComposeCore" }
+coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilComposeCore" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilComposeCore" }
+coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilComposeCore" }
 
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
-androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "uiTextAndroid" }
-androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
-androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
-androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
+androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "androidUi" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "androidUi" }
+androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "androidUi" }
+androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "androidUi" }
 multiplatform-settings-v130 = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettingsVersion" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4jNop" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
+ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "androidUi" }
 
 
 [plugins]
@@ -106,10 +102,11 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [bundles]
-coil = [
-    "coil-compose",
+coilBundle = [
+    "coil",
+    "coil-network-ktor",
     "coil-compose-core",
-    "coil-mp"
+    "coil-compose"
 ]
 
 ktorServer = [
