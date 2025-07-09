@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -43,7 +44,8 @@ kotlin {
             // put your Multiplatform dependencies here
             implementation(libs.bundles.ktorClient)
             implementation(libs.multiplatform.settings.v130)
-            implementation("com.squareup.okio:okio:3.7.0")
+            implementation("com.squareup.okio:okio:3.10.2")
+
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

@@ -73,7 +73,6 @@ class AdminViewModel (
             try {
                 when (val result = client.getUsersByName(adminToken,query, 0, 3)) {
                     is Success -> {
-                        println(result)
                         _adminState.update { it.copy(searchResults = result.value, isSearching = false) }
                         println(_adminState.value.searchResults.map { it.username })
                     }

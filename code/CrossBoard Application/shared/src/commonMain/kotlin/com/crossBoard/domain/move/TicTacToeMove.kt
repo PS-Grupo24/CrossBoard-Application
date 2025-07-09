@@ -9,19 +9,4 @@ import com.crossBoard.domain.Square
  * @param square the square where the move was made.
  * @return `Move` - The general move.
  */
-data class TicTacToeMove(override val player: Player, val square: Square): Move {
-
-    /**
-     * Function "equals" responsible to compare two TicTacToeMove objects.
-     * @param other the other object to compare.
-     * @return `Boolean` - `True` if the objects are equal; `False` otherwise.
-     */
-    override fun equals(other: Any?): Boolean =
-        other is TicTacToeMove && other.player == player && other.square.row.number == square.row.number && other.square.column.symbol == square.column.symbol
-
-    /**
-     * Function "hashCode" responsible to generate a hash code for the TicTacToeMove object.
-     * @return `Int` - The hash code of the object.
-     */
-    override fun hashCode(): Int = player.hashCode() + square.hashCode()
-}
+data class TicTacToeMove(override val player: Player, val square: Square): Move

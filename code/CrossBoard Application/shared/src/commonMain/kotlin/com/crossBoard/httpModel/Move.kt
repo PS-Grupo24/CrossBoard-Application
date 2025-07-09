@@ -1,9 +1,14 @@
 package com.crossBoard.httpModel
+import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.matchModule.MatchModule
+import com.crossBoard.domain.matchModule.modules
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.position.Position
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import kotlinx.serialization.SerialName
@@ -35,21 +40,11 @@ data class ReversiMoveInput(
 /**
  * Auxiliary Function that converts a `MoveInput` into an actual `Move` format.
  */
-fun MoveInput.toMove() : Move {
-    when(this){
-        is TicTacToeMoveInput -> {
-            val player = player.toPlayer()
-            val square = square.toSquare(TicTacToeBoard.BOARD_DIM)
-
-            return TicTacToeMove(player, square)
-        }
-        is ReversiMoveInput -> {
-            val player = player.toPlayer()
-            val square = square.toSquare(ReversiBoard.BOARD_DIM)
-
-            return ReversiMove(player, square)
-        }
-    }
+@Suppress("UNCHECKED_CAST")
+fun MoveInput.toMove(matchType: MatchType) : Move {
+    val module = modules.find { it.matchType == matchType } ?:
+        throw IllegalArgumentException("Module for match type: $matchType not found")
+    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveInputToMove(this)
 }
 
 /**
@@ -77,12 +72,9 @@ data class ReversiMoveOutput(
     val square: String
 ): MoveOutput
 
-/**
- * Auxiliary function that converts a `Move` object into a `MoveOutput` format.
- */
-fun Move.toMoveOutput() : MoveOutput {
-    return when(this){
-        is TicTacToeMove -> TicTacToeMoveOutput(player.toString(), square.toString())
-        is ReversiMove -> ReversiMoveOutput(player.toString(), square.toString())
-    }
+@Suppress("UNCHECKED_CAST")
+fun Move.toMoveOutput(matchType: MatchType) : MoveOutput {
+    val module = modules.find{ it.matchType == matchType}
+        ?: throw IllegalArgumentException("Not found module: $matchType")
+    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveToMoveOutput(this)
 }

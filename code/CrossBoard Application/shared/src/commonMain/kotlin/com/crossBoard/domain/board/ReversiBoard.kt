@@ -1,13 +1,12 @@
 package com.crossBoard.domain.board
 
 import com.crossBoard.domain.Column
+import com.crossBoard.domain.Direction
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.Row
 import com.crossBoard.domain.Square
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.ReversiMove
-import com.crossBoard.domain.move.possibleMoves
-import com.crossBoard.domain.move.turningPieces
 import com.crossBoard.domain.position.ReversiPosition
 
 /**
@@ -31,7 +30,7 @@ abstract class ReversiBoard(): Board {
      * @return The player on the square, or null if the square is empty.
      */
     override fun get(square: Square): Player? =
-        positions.find {it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+        positions.find {it.square == square }?.player
 
     /**
      * Function "equals" to compare two ReversiBoard objects.
@@ -265,4 +264,86 @@ fun initialReversiPositions(): List<ReversiPosition> {
     return positions
 }
 
+/**
+ * Function `possibleMoves` calculates all possible moves for a player in a game of Reversi.
+ * @param player the player for whom to calculate possible moves.
+ * @param positions the current positions on the board, represented as a list of `ReversiPosition`.
+ * @return a list of `Square` objects representing all possible moves for the player.
+ */
+fun possibleMoves(player: Player, positions: List<ReversiPosition>): List<Square> {
+    val boardMap: Map<Square, Player> = positions.associate { it.square to it.player }
 
+    val possibleMovesSet: MutableSet<Square> = mutableSetOf()
+
+    val emptySquares = positions.filter { it.player == Player.EMPTY }.map { it.square }
+
+    emptySquares.forEach outer@{ emptySquare ->
+        Direction.entries.forEach inner@ { direction ->
+
+            var currentScanSquare: Square? = emptySquare.adjust(direction)
+            val flippedSquaresInLine = mutableListOf<Square>()
+
+            while (currentScanSquare != null && boardMap[currentScanSquare] == player.other()) {
+                flippedSquaresInLine.add(currentScanSquare)
+                currentScanSquare = currentScanSquare.adjust(direction)
+            }
+            if (flippedSquaresInLine.isNotEmpty() && currentScanSquare != null && boardMap[currentScanSquare] == player) {
+                possibleMovesSet.add(emptySquare)
+                return@inner
+            }
+        }
+    }
+    return possibleMovesSet.toList()
+}
+
+/**
+ * Function `turningPieces` calculates the new positions of pieces after a player makes a move in Reversi.
+ * @param player the player who made the move.
+ * @param finalSquare the square where the player made the move.
+ * @param positions the current positions on the board, represented as a list of `ReversiPosition`.
+ * @return a list of `ReversiPosition` objects representing the new state of the board after the move.
+ */
+fun turningPieces(player: Player, finalSquare: Square, positions: List<ReversiPosition>): List<ReversiPosition> {
+    val boardMap: Map<Square, Player> = positions.associate { it.square to it.player }
+
+    val squaresToFlip: MutableSet<Square> = mutableSetOf()
+
+    Direction.entries.forEach { direction ->
+
+        val potentialFlipsInDirection = mutableListOf<Square>()
+
+        var currentScanSquare: Square? = finalSquare.adjust(direction)
+
+        while (currentScanSquare != null) {
+            val playerAtScanSquare = boardMap[currentScanSquare]
+
+            when (playerAtScanSquare) {
+                player -> {
+                    if (potentialFlipsInDirection.isNotEmpty()) {
+                        squaresToFlip.addAll(potentialFlipsInDirection)
+                    }
+                    currentScanSquare = null
+                }
+                Player.EMPTY -> {
+                    currentScanSquare = null
+                }
+                null -> {
+                    currentScanSquare = null
+                }
+                else -> {
+                    potentialFlipsInDirection.add(currentScanSquare)
+                    currentScanSquare = currentScanSquare.adjust(direction)
+                }
+            }
+        }
+    }
+    val newPositions = positions.map { pos ->
+        when {
+            pos.square == finalSquare -> ReversiPosition(player, finalSquare)
+            squaresToFlip.contains(pos.square) -> ReversiPosition(player, pos.square)
+            else -> pos
+        }
+    }
+
+    return newPositions
+}

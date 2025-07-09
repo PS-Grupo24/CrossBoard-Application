@@ -1,13 +1,12 @@
 package com.crossBoard
 
+import com.crossBoard.callReceiver.callReceivers
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
-import com.crossBoard.domain.toMatchOutput
 import com.crossBoard.domain.toMatchType
-import com.crossBoard.domain.toPlayedMatch
 import com.crossBoard.httpModel.*
 import io.ktor.http.*
 import io.ktor.server.application.Application
@@ -25,6 +24,7 @@ import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktoropenapi.put
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.plugins.ContentTransformationException
 
 
 /**
@@ -620,7 +620,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                                 is Success -> {
                                     val matchType = match.value.matchType
                                     val moveInput = receiveMoveInput(call, matchType)
-                                    val move = moveInput.toMove()
+                                    val move = moveInput.toMove(matchType)
 
                                     when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
                                         is Success -> call.respond(updatedMatch.value.toPlayedMatch())
@@ -752,8 +752,15 @@ suspend fun handleFailure(call: ApplicationCall, error: ApiError) {
 private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     try {
         block()
-    } catch (e: Throwable) {
-        call.respond(HttpStatusCode.InternalServerError, ErrorMessage(e.cause?.message ?: e.message ?: "Unknown error"))
+    }
+    catch (e: IllegalArgumentException) {
+        call.respond(HttpStatusCode.BadRequest, ErrorMessage(e.message ?: "Bad request"))
+    }
+    catch (e: ContentTransformationException){
+        call.respond(HttpStatusCode.BadRequest, ErrorMessage(e.message ?: "Error deserializing the request body "))
+    }
+    catch (t: Throwable) {
+        call.respond(HttpStatusCode.InternalServerError, ErrorMessage(t.cause?.message ?: t.message ?: "Unknown error"))
     }
 }
 
@@ -762,7 +769,8 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
  * @param call The Routing call where that contains the data.
  * @param matchType The match type that determines which type of move input to use.
  */
-private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput = when(matchType){
-    MatchType.TicTacToe -> call.receive<TicTacToeMoveInput>()
-    MatchType.Reversi -> call.receive<ReversiMoveInput>()
+private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput {
+    val callReceiver = callReceivers.find { it.matchType == matchType }
+        ?: throw IllegalArgumentException("Not call receiver implementation for match type : $matchType")
+    return callReceiver.callReceive(call)
 }

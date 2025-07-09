@@ -4,11 +4,10 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
+import com.crossBoard.domain.board.possibleMoves
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.move.possibleMoves
-import com.crossBoard.domain.position.Position
 import com.crossBoard.domain.position.ReversiPosition
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.interfaces.Clearable

@@ -1,4 +1,4 @@
-package domainTests
+package com.crossBoard.domainTests
 import com.crossBoard.domain.*
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.TicTacToeMove
@@ -173,20 +173,26 @@ class MatchTests {
         val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
         val newMatch = match.join(2)
 
-        val boardOutput = BoardOutput(null, newMatch.board.turn.toString(), newMatch.board.positions.map {it.toString()}, newMatch.board.moves.map {
-            moveToString(it)
-        })
+        val boardOutput = BoardOutput(
+            newMatch.board.player1.toString(),
+            newMatch.board.player2.toString(),
+            null,
+            newMatch.board.turn.toString(),
+            newMatch.board.positions.map {it.toString()},
+            newMatch.board.moves.map {
+            moveToString(it, MatchType.TicTacToe) }
+        )
         val expectedMatchOutput = MatchOutput(
-            newMatch.id, PlayerOutput(1, newMatch.board.player1.name), PlayerOutput(2, newMatch.board.player2.name),
+            newMatch.id, 1, 2,
             boardOutput, newMatch.matchType.toString(), newMatch.version, newMatch.state.toString()
         )
 
         val result = newMatch.toMatchOutput()
 
         assertEquals(newMatch.id, result.matchId)
-        assertEquals(newMatch.user1, result.user1Info.userId)
-        assertEquals(newMatch.user2, result.user2Info.userId)
-        assertEquals("null", result.board.winner)
+        assertEquals(newMatch.user1, result.user1Info)
+        assertEquals(newMatch.user2, result.user2Info)
+        assertEquals(null, result.board.winner)
         assertEquals(expectedMatchOutput.board.turn, result.board.turn)
         assertEquals(expectedMatchOutput.board.moves, result.board.moves)
         assertEquals(expectedMatchOutput.board.positions, result.board.positions)
@@ -207,12 +213,12 @@ class MatchTests {
 
         val updatedMatch = newMatch.play(move)
 
-        val expectedResult = MatchPlayedOutput(move.toMoveOutput(), 3)
+        val expectedResult = MatchPlayedOutput(move.toMoveOutput(MatchType.TicTacToe), 3)
 
         val result = updatedMatch.toPlayedMatch()
 
         assertEquals(expectedResult, result)
         assertEquals(updatedMatch.version, result.version)
-        assertEquals(updatedMatch.board.moves[0].toMoveOutput(), result.move)
+        assertEquals(updatedMatch.board.moves[0].toMoveOutput(MatchType.TicTacToe), result.move)
     }
 }

@@ -6,10 +6,13 @@ import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
-import com.google.gson.Gson
+import com.crossBoard.httpModel.BoardOutput
 import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchStats
+import com.crossBoard.httpModel.toBoard
+import com.crossBoard.httpModel.toBoardOutput
 import com.crossBoard.repository.interfaces.MatchRepository
+import kotlinx.serialization.json.Json
 import javax.sql.DataSource
 import java.sql.ResultSet
 import java.sql.Statement
@@ -26,7 +29,8 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
      * @return Int the match id that was added.
      */
     override fun addMatch(match: MultiPlayerMatch): Int = transaction(jdbc) { connection ->
-        val serializedBoard = Gson().toJson(match.board)
+        val winner = if (match.board is BoardWin) (match.board as BoardWin).winner else null
+        val serializedBoard = Json.encodeToString<BoardOutput>(match.board.toBoardOutput(winner, match.matchType))
         val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state, winner) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?, null)", Statement.RETURN_GENERATED_KEYS).apply {
             setInt(1, match.id)
             setString(2, serializedBoard)
@@ -56,7 +60,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
             if(rs.next()) {
                 val gameType = rs.getString("match_type").toMatchType()
                 val state = rs.getString("state").toMatchState()
-                val board = getBoard(gameType, state, rs.getString("board"))
+                val board = getBoard(gameType.toString(), state.toString(), rs.getString("board"))
                 val plyr2Value = rs.getInt("player2")
                 val player2 = if (plyr2Value == 0) null else plyr2Value
                 val winnerValue = rs.getInt("winner")
@@ -115,7 +119,11 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
      * @param matchType the type of the game.
      */
     override fun updateMatch(matchId: Int, board: Board, player1: Int, player2: Int?, matchType: MatchType, version: Int, state: MatchState, winner: Int?): MultiPlayerMatch = transaction(jdbc) { connection ->
-        val serializedBoard = Gson().toJson(board)
+        val winnerType = if (board is BoardWin) board.winner else null
+        val serializedBoard = Json.encodeToString(
+            board.toBoardOutput(winnerType, matchType)
+        )
+
         connection.prepareStatement("UPDATE match SET board = CAST(? AS jsonb), state = ? ,player1 = ?, player2 = ?, match_type = ?, version = ?, winner = ? WHERE id = ?").apply {
             setString(1, serializedBoard)
             setString(2, state.toString())
@@ -165,7 +173,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
         for (matchType in MatchType.entries) {
             val matches = mutableListOf<MultiPlayerMatch>()
             val prepared = connection.prepareStatement("SELECT * FROM match WHERE match_type = ? AND (player1 = ? OR player2 = ?)").apply {
-                setString(1, matchType.value)
+                setString(1, matchType.toString())
                 setInt(2, userId)
                 setInt(3, userId)
             }
@@ -200,7 +208,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
 private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
     val matchType = rs.getString("match_type").toMatchType()
     val state = rs.getString("state").toMatchState()
-    val board = getBoard(matchType, state, rs.getString("board"))
+    val board = getBoard(matchType.toString(), state.toString(), rs.getString("board"))
     val p2Value = rs.getInt("player2")
     val player2 = if (p2Value == 0) null else p2Value
     val winnerValue = rs.getInt("winner")
@@ -223,23 +231,9 @@ private fun multiplayerMatchResult(rs: ResultSet): MultiPlayerMatch {
  * @param state The state of the match to deserialize into.
  * @param serializedBoard The serialized board.
  */
-private fun getBoard(matchType: MatchType, state: MatchState, serializedBoard: String): Board {
-    when(matchType) {
-        MatchType.TicTacToe -> {
-            return when(state){
-                MatchState.WAITING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
-                MatchState.RUNNING -> Gson().fromJson(serializedBoard, TicTacToeBoardRun::class.java)
-                MatchState.DRAW -> Gson().fromJson(serializedBoard, TicTacToeBoardDraw::class.java)
-                MatchState.WIN -> Gson().fromJson(serializedBoard, TicTacToeBoardWin::class.java)
-            }
-        }
-        MatchType.Reversi -> {
-            return when(state){
-                MatchState.WAITING -> Gson().fromJson(serializedBoard, ReversiBoardRun::class.java)
-                MatchState.RUNNING -> Gson().fromJson(serializedBoard, ReversiBoardRun::class.java)
-                MatchState.DRAW -> Gson().fromJson(serializedBoard, ReversiBoardDraw::class.java)
-                MatchState.WIN -> Gson().fromJson(serializedBoard, ReversiBoardWin::class.java)
-            }
-        }
-    }
+private fun getBoard(matchType: String, state: String, serializedBoard: String): Board {
+    return Json.decodeFromString<BoardOutput>(serializedBoard).toBoard(
+        matchType,
+        state
+    )
 }

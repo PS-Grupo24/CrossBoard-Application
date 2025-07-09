@@ -1,6 +1,8 @@
 package com.crossBoard.httpModel
 
+import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MultiPlayerMatch
+import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
 import kotlinx.serialization.Serializable
@@ -19,8 +21,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MatchOutput(
     val matchId: Int,
-    val user1Info: PlayerOutput,
-    val user2Info: PlayerOutput,
+    val user1Info: Int,
+    val user2Info: Int?,
     val board: BoardOutput,
     val matchType: String,
     val version: Int,
@@ -34,16 +36,51 @@ data class MatchOutput(
  */
 fun MatchOutput.toMultiplayerMatch() : MultiPlayerMatch {
     return MultiPlayerMatch(
-        board.toBoard(matchType, user1Info.playerType, state),
+        board.toBoard(matchType, state),
         matchId,
         state.toMatchState(),
-        user1Info.userId ?: throw IllegalStateException("User1 ID must not be null"),
-        user2Info.userId,
+        user1Info,
+        user2Info,
         matchType.toMatchType(),
         version,
         winner
     )
 }
+
+/**
+ * Function to convert a MultiPlayerMatch to a MatchOutput.
+ * @return `MatchOutput` The match output.
+ */
+fun MultiPlayerMatch.toMatchOutput(): MatchOutput {
+    val winner = if (board is BoardWin) board.winner else null
+    val winnerId = when(state){
+        MatchState.WIN -> {
+            val player1Type = getPlayerType(user1)
+            if(winner == player1Type)
+                user1
+            else
+                user2
+        }
+        else -> null
+    }
+    return MatchOutput(
+        id,
+        user1,
+        user2,
+        board.toBoardOutput(winner, matchType)
+        ,
+        matchType.toString(),
+        version,
+        state.toString(),
+        winnerId
+    )
+}
+
+/**
+ * Function to convert a MultiPlayerMatch to a MatchPlayedOutput.
+ * @return MatchPlayedOutput the match played output.
+ */
+fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(matchType), this.version)
 
 /**
  * Data class MatchPlayedOutput represents information to be sent in an HTTP response when a move is made in a match.

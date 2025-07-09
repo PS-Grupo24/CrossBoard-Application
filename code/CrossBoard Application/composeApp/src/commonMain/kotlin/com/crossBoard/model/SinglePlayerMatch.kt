@@ -5,6 +5,7 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
+import com.crossBoard.domain.matchModule.modules
 import com.crossBoard.domain.move.ReversiMove
 import kotlin.random.Random
 
@@ -20,48 +21,21 @@ class SinglePlayerMatch(
 ) {
     companion object {
         fun startGame(matchType: MatchType): SinglePlayerMatch {
-            return when (matchType) {
-                MatchType.TicTacToe -> {
-                    val p1 = Player.random()
-                    val board = TicTacToeBoardRun(
-                        initialTicTacToePositions(),
-                        emptyList(),
-                        Player.random(),
-                        p1,
-                        p1.other(),
-                    )
-                    SinglePlayerMatch(
-                        Random.nextInt(),
-                        board,
-                        MatchState.RUNNING,
-                        matchType,
-                        1
-                    )
-                }
-                MatchType.Reversi -> {
-                    val p1 = Player.random()
-                    val board = ReversiBoardRun(
-                        positions = initialReversiPositions(),
-                        moves = emptyList(),
-                        turn = Player.random(),
-                        player1 = p1,
-                        player2 = p1.other(),
-                    )
-                    SinglePlayerMatch(
-                        Random.nextInt(),
-                        board,
-                        MatchState.RUNNING,
-                        matchType,
-                        1
-                    )
-                }
-            }
+            val module = modules.find { it.matchType == matchType } ?:
+                throw IllegalArgumentException("No module found for match type : $matchType")
+            val board = module.getInitialBoard()
+            return SinglePlayerMatch(
+                Random.nextInt(),
+                board,
+                MatchState.RUNNING,
+                matchType,
+                1
+            )
         }
     }
 
     fun makeMove(move: Move): SinglePlayerMatch{
         val newBoard = board.play(move)
-
         return SinglePlayerMatch(
             id,
             newBoard,

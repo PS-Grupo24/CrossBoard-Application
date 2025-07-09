@@ -5,10 +5,10 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.MultiPlayerMatch
-import com.crossBoard.domain.toMatchOutput
 import com.crossBoard.httpModel.EventType
 import com.crossBoard.httpModel.MatchCancel
 import com.crossBoard.httpModel.MatchStats
+import com.crossBoard.httpModel.toMatchOutput
 import com.crossBoard.json
 import com.crossBoard.repository.interfaces.MatchRepository
 import com.crossBoard.sendEventToUser

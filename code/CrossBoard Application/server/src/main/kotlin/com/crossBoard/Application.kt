@@ -7,6 +7,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import com.crossBoard.repository.jdbc.JdbcMatchRepo
 import com.crossBoard.repository.jdbc.JdbcUserRepo
 import com.crossBoard.repository.memoryRepositories.MemoryMatchRep
+import com.crossBoard.repository.memoryRepositories.MemoryUserRep
 import com.crossBoard.service.MatchService
 import com.crossBoard.service.UsersService
 
@@ -32,7 +33,17 @@ fun Application.module() {
     val matchService = MatchService(JdbcMatchRepo(jdbc))
 
     configureOpenAPI()
-    //configureWebSocket(matchService, userService)
+    configureServerSentEvents(userService)
+    configureCors()
+    configureSerialization()
+    configureRouting(userService, matchService)
+}
+
+fun Application.testModule(){
+    val userService = UsersService(MemoryUserRep())
+    val matchService = MatchService(MemoryMatchRep())
+
+    configureOpenAPI()
     configureServerSentEvents(userService)
     configureCors()
     configureSerialization()

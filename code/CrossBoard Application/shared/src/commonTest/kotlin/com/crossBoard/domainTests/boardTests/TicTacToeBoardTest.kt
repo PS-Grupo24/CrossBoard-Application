@@ -1,9 +1,17 @@
-package domainTests
+package com.crossBoard.domainTests.boardTests
 
-import com.crossBoard.domain.*
+import com.crossBoard.domain.Column
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.Row
+import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.BoardDraw
 import com.crossBoard.domain.board.BoardRun
 import com.crossBoard.domain.board.BoardWin
+import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.board.TicTacToeBoardDraw
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.TicTacToeBoardWin
+import com.crossBoard.domain.board.initialTicTacToePositions
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.position.TicPosition
 import kotlin.test.Test
@@ -12,14 +20,15 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class TicTacToeBoardTest {
-    @Test fun creatingTicTacToeBoardRun() {
+    @Test
+    fun creatingTicTacToeBoardRun() {
 
         val positions = emptyList<TicPosition>()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
         val player2 = Player.WHITE
 
-        val board = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardRun(
+        val board = TicTacToeBoardRun(
             positions,
             moves,
             player1,
@@ -27,7 +36,7 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
         assertEquals(moves, board.moves)
@@ -37,14 +46,15 @@ class TicTacToeBoardTest {
         assertEquals(player1, board.turn)
     }
 
-    @Test fun playingTicTacToeBoardRunWithoutSuccess() {
+    @Test
+    fun playingTicTacToeBoardRunWithoutSuccess() {
 
-        val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
+        val positions = initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
         val player2 = Player.WHITE
 
-        val board = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardRun(
+        val board = TicTacToeBoardRun(
             positions,
             moves,
             player1,
@@ -52,29 +62,30 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
         assertFailsWith<IllegalArgumentException> {
-            val move = TicTacToeMove(player2, Square(Row(0, 3), Column('a')))
+            val move = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('a')))
             board.play(move)
         }
 
         assertFailsWith<IllegalArgumentException> {
-            val move1 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+            val move1 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
             val newBoard = board.play(move1)
-            val move2 = TicTacToeMove(player2, Square(Row(0, 3), Column('a')))
+            val move2 = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('a')))
             newBoard.play(move2)
         }
     }
 
-    @Test fun playingTicTacToeBoardRunWithSuccess() {
-        val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
+    @Test
+    fun playingTicTacToeBoardRunWithSuccess() {
+        val positions = initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
         val player2 = Player.WHITE
 
-        val board = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardRun(
+        val board = TicTacToeBoardRun(
             positions,
             moves,
             player1,
@@ -82,25 +93,25 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
-        val move = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val finalBoard = board.play(move)
 
-        assertTrue(finalBoard is com.crossBoard.domain.board.TicTacToeBoardRun)
+        assertTrue(finalBoard is TicTacToeBoardRun)
         assertTrue(finalBoard is BoardRun)
 
         val finalPositions = listOf<TicPosition>(
-            TicPosition(player1, Square(Row(0, 3), Column('a'))),
-            TicPosition(Player.EMPTY, Square(Row(0, 3), Column('b'))),
-            TicPosition(Player.EMPTY, Square(Row(0, 3), Column('c'))),
-            TicPosition(Player.EMPTY, Square(Row(1, 3), Column('a'))),
-            TicPosition(Player.EMPTY, Square(Row(1, 3), Column('b'))),
-            TicPosition(Player.EMPTY, Square(Row(1, 3), Column('c'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('a'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('b'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('c')))
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('a'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(0, 3), Column.Companion('b'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(0, 3), Column.Companion('c'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(1, 3), Column.Companion('a'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(1, 3), Column.Companion('b'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(1, 3), Column.Companion('c'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('a'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('b'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('c')))
         )
 
         finalPositions.forEachIndexed { index, ticPosition ->
@@ -109,8 +120,8 @@ class TicTacToeBoardTest {
             assertEquals(ticPosition.square.column.symbol, finalBoard.positions[index].square.column.symbol)
         }
 
-        val finalMoves = listOf<TicTacToeMove>(
-            TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val finalMoves = listOf(
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         )
 
         assertEquals(finalMoves, finalBoard.moves)
@@ -120,13 +131,14 @@ class TicTacToeBoardTest {
         assertEquals(player2, finalBoard.player2)
     }
 
-    @Test fun playingTicTacToeBoardRunToWin() {
-        val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
+    @Test
+    fun playingTicTacToeBoardRunToWin() {
+        val positions = initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
         val player2 = Player.WHITE
 
-        val board = _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoardRun(
+        val board = TicTacToeBoardRun(
             positions,
             moves,
             player1,
@@ -134,33 +146,33 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
-        val move1 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move1 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val board1 = board.play(move1)
-        val move2 = TicTacToeMove(player2, Square(Row(1, 3), Column('a')))
+        val move2 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('a')))
         val board2 = board1.play(move2)
-        val move3 = TicTacToeMove(player1, Square(Row(0, 3), Column('b')))
+        val move3 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('b')))
         val board3 = board2.play(move3)
-        val move4 = TicTacToeMove(player2, Square(Row(1, 3), Column('b')))
+        val move4 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b')))
         val board4 = board3.play(move4)
-        val move5 = TicTacToeMove(player1, Square(Row(0, 3), Column('c')))
+        val move5 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('c')))
         val finalBoard = board4.play(move5)
 
-        assertTrue(finalBoard is com.crossBoard.domain.board.TicTacToeBoardWin)
+        assertTrue(finalBoard is TicTacToeBoardWin)
         assertTrue(finalBoard is BoardWin)
 
         val finalPositions: List<TicPosition> = listOf<TicPosition>(
-            TicPosition(player1, Square(Row(0, 3), Column('a'))),
-            TicPosition(player1, Square(Row(0, 3), Column('b'))),
-            TicPosition(player1, Square(Row(0, 3), Column('c'))),
-            TicPosition(player2, Square(Row(1, 3), Column('a'))),
-            TicPosition(player2, Square(Row(1, 3), Column('b'))),
-            TicPosition(Player.EMPTY, Square(Row(1, 3), Column('c'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('a'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('b'))),
-            TicPosition(Player.EMPTY, Square(Row(2, 3), Column('c')))
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('a'))),
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('b'))),
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('c'))),
+            TicPosition(player2, Square(Row.Companion(1, 3), Column.Companion('a'))),
+            TicPosition(player2, Square(Row.Companion(1, 3), Column.Companion('b'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(1, 3), Column.Companion('c'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('a'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('b'))),
+            TicPosition(Player.EMPTY, Square(Row.Companion(2, 3), Column.Companion('c')))
         )
 
         finalPositions.forEachIndexed { index, ticPosition ->
@@ -170,11 +182,11 @@ class TicTacToeBoardTest {
         }
 
         val finalMoves = listOf<TicTacToeMove>(
-            TicTacToeMove(player1, Square(Row(0, 3), Column('a'))),
-            TicTacToeMove(player2, Square(Row(1, 3), Column('a'))),
-            TicTacToeMove(player1, Square(Row(0, 3), Column('b'))),
-            TicTacToeMove(player2, Square(Row(1, 3), Column('b'))),
-            TicTacToeMove(player1, Square(Row(0, 3), Column('c')))
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a'))),
+            TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('a'))),
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('b'))),
+            TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b'))),
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('c')))
         )
 
         assertEquals(finalMoves, finalBoard.moves)
@@ -185,7 +197,8 @@ class TicTacToeBoardTest {
         assertEquals(player2, finalBoard.player2)
     }
 
-    @Test fun playingTicTacToeBoardRunToDraw() {
+    @Test
+    fun playingTicTacToeBoardRunToDraw() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -199,37 +212,41 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
-        val move1 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move1 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val board1 = board.play(move1)
-        val move2 = TicTacToeMove(player2, Square(Row(1, 3), Column('a')))
+        val move2 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('a')))
         val board2 = board1.play(move2)
-        val move3 = TicTacToeMove(player1, Square(Row(0, 3), Column('b')))
+        val move3 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('b')))
         val board3 = board2.play(move3)
-        val move4 = TicTacToeMove(player2, Square(Row(1, 3), Column('b')))
+        val move4 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b')))
         val board4 = board3.play(move4)
-        val move5 = TicTacToeMove(player1, Square(Row(1, 3), Column('c')))
+        val move5 = TicTacToeMove(player1, Square(Row.Companion(1, 3), Column.Companion('c')))
         val board5 = board4.play(move5)
-        val move6 = TicTacToeMove(player2, Square(Row(0, 3), Column('c')))
+        val move6 = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('c')))
         val board6 = board5.play(move6)
-        val move7 = TicTacToeMove(player1, Square(Row(2, 3), Column('a')))
+        val move7 = TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('a')))
         val board7 = board6.play(move7)
-        val move8 = TicTacToeMove(player2, Square(Row(2, 3), Column('b')))
+        val move8 = TicTacToeMove(player2, Square(Row.Companion(2, 3), Column.Companion('b')))
         val board8 = board7.play(move8)
-        val move9 = TicTacToeMove(player1, Square(Row(2, 3), Column('c')))
+        val move9 = TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('c')))
         val finalBoard = board8.play(move9)
 
-        assertTrue(finalBoard is com.crossBoard.domain.board.TicTacToeBoardDraw)
+        assertTrue(finalBoard is TicTacToeBoardDraw)
         assertTrue(finalBoard is BoardDraw)
 
         val finalPositions: List<TicPosition> = listOf<TicPosition>(
-            TicPosition(player1, Square(Row(0, 3), Column('a'))),
-            TicPosition(player1, Square(Row(0, 3), Column('b'))), TicPosition(player2, Square(Row(0, 3), Column('c'))),
-            TicPosition(player2, Square(Row(1, 3), Column('a'))), TicPosition(player2, Square(Row(1, 3), Column('b'))),
-            TicPosition(player1, Square(Row(1, 3), Column('c'))), TicPosition(player1, Square(Row(2, 3), Column('a'))),
-            TicPosition(player2, Square(Row(2, 3), Column('b'))), TicPosition(player1, Square(Row(2, 3), Column('c')))
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('a'))),
+            TicPosition(player1, Square(Row.Companion(0, 3), Column.Companion('b'))),
+            TicPosition(player2, Square(Row.Companion(0, 3), Column.Companion('c'))),
+            TicPosition(player2, Square(Row.Companion(1, 3), Column.Companion('a'))),
+            TicPosition(player2, Square(Row.Companion(1, 3), Column.Companion('b'))),
+            TicPosition(player1, Square(Row.Companion(1, 3), Column.Companion('c'))),
+            TicPosition(player1, Square(Row.Companion(2, 3), Column.Companion('a'))),
+            TicPosition(player2, Square(Row.Companion(2, 3), Column.Companion('b'))),
+            TicPosition(player1, Square(Row.Companion(2, 3), Column.Companion('c')))
         )
 
         finalPositions.forEachIndexed { index, ticPosition ->
@@ -239,15 +256,15 @@ class TicTacToeBoardTest {
         }
 
         val finalMoves = listOf<TicTacToeMove>(
-            TicTacToeMove(player1, Square(Row(0, 3), Column('a'))),
-            TicTacToeMove(player2, Square(Row(1, 3), Column('a'))),
-            TicTacToeMove(player1, Square(Row(0, 3), Column('b'))),
-            TicTacToeMove(player2, Square(Row(1, 3), Column('b'))),
-            TicTacToeMove(player1, Square(Row(1, 3), Column('c'))),
-            TicTacToeMove(player2, Square(Row(0, 3), Column('c'))),
-            TicTacToeMove(player1, Square(Row(2, 3), Column('a'))),
-            TicTacToeMove(player2, Square(Row(2, 3), Column('b'))),
-            TicTacToeMove(player1, Square(Row(2, 3), Column('c')))
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a'))),
+            TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('a'))),
+            TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('b'))),
+            TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b'))),
+            TicTacToeMove(player1, Square(Row.Companion(1, 3), Column.Companion('c'))),
+            TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('c'))),
+            TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('a'))),
+            TicTacToeMove(player2, Square(Row.Companion(2, 3), Column.Companion('b'))),
+            TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('c')))
         )
 
         assertEquals(finalMoves, finalBoard.moves)
@@ -257,7 +274,8 @@ class TicTacToeBoardTest {
         assertEquals(player2, finalBoard.player2)
     }
 
-    @Test fun forfeitingTicTacToeBoardRun() {
+    @Test
+    fun forfeitingTicTacToeBoardRun() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -271,24 +289,25 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
-        val move = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val newBoard = board.play(move)
 
-        assertTrue(newBoard is com.crossBoard.domain.board.TicTacToeBoardRun)
+        assertTrue(newBoard is TicTacToeBoardRun)
         assertTrue(newBoard is BoardRun)
 
         val finalBoard = newBoard.forfeit(player1)
 
-        assertTrue(finalBoard is com.crossBoard.domain.board.TicTacToeBoardWin)
+        assertTrue(finalBoard is TicTacToeBoardWin)
         assertTrue(finalBoard is BoardWin)
 
         assertEquals(player2, finalBoard.winner)
     }
 
-    @Test fun verifyWinnerTicTacToeBoardWin() {
+    @Test
+    fun verifyWinnerTicTacToeBoardWin() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -302,56 +321,57 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardRun)
 
-        val move1 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move1 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val board1 = board.play(move1)
-        val move2 = TicTacToeMove(player2, Square(Row(1, 3), Column('a')))
+        val move2 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('a')))
         val board2 = board1.play(move2)
-        val move3 = TicTacToeMove(player1, Square(Row(0, 3), Column('b')))
+        val move3 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('b')))
         val board3 = board2.play(move3)
-        val move4 = TicTacToeMove(player2, Square(Row(1, 3), Column('b')))
+        val move4 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b')))
         val board4 = board3.play(move4)
-        val move5 = TicTacToeMove(player1, Square(Row(0, 3), Column('c')))
+        val move5 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('c')))
         val finalBoard1 = board4.play(move5)
 
-        assertTrue(finalBoard1 is com.crossBoard.domain.board.TicTacToeBoardWin)
+        assertTrue(finalBoard1 is TicTacToeBoardWin)
         assertTrue(finalBoard1 is BoardWin)
         assertEquals(player1, finalBoard1.winner)
 
-        val move6 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move6 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val board6 = board.play(move6)
-        val move7 = TicTacToeMove(player2, Square(Row(0, 3), Column('b')))
+        val move7 = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('b')))
         val board7 = board6.play(move7)
-        val move8 = TicTacToeMove(player1, Square(Row(1, 3), Column('a')))
+        val move8 = TicTacToeMove(player1, Square(Row.Companion(1, 3), Column.Companion('a')))
         val board8 = board7.play(move8)
-        val move9 = TicTacToeMove(player2, Square(Row(1, 3), Column('b')))
+        val move9 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('b')))
         val board9 = board8.play(move9)
-        val move10 = TicTacToeMove(player1, Square(Row(2, 3), Column('a')))
+        val move10 = TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('a')))
         val finalBoard2 = board9.play(move10)
 
-        assertTrue(finalBoard2 is com.crossBoard.domain.board.TicTacToeBoardWin)
+        assertTrue(finalBoard2 is TicTacToeBoardWin)
         assertTrue(finalBoard2 is BoardWin)
         assertEquals(player1, finalBoard2.winner)
 
-        val move11 = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+        val move11 = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
         val board11 = board.play(move11)
-        val move12 = TicTacToeMove(player2, Square(Row(0, 3), Column('b')))
+        val move12 = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('b')))
         val board12 = board11.play(move12)
-        val move13 = TicTacToeMove(player1, Square(Row(1, 3), Column('b')))
+        val move13 = TicTacToeMove(player1, Square(Row.Companion(1, 3), Column.Companion('b')))
         val board13 = board12.play(move13)
-        val move14 = TicTacToeMove(player2, Square(Row(1, 3), Column('c')))
+        val move14 = TicTacToeMove(player2, Square(Row.Companion(1, 3), Column.Companion('c')))
         val board14 = board13.play(move14)
-        val move15 = TicTacToeMove(player1, Square(Row(2, 3), Column('c')))
+        val move15 = TicTacToeMove(player1, Square(Row.Companion(2, 3), Column.Companion('c')))
         val finalBoard3 = board14.play(move15)
 
-        assertTrue(finalBoard3 is com.crossBoard.domain.board.TicTacToeBoardWin)
+        assertTrue(finalBoard3 is TicTacToeBoardWin)
         assertTrue(finalBoard3 is BoardWin)
         assertEquals(player1, finalBoard3.winner)
     }
 
-    @Test fun createTicTacToeBoardWin() {
+    @Test
+    fun createTicTacToeBoardWin() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -366,7 +386,7 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardWin)
 
         assertEquals(player1, board.winner)
@@ -377,7 +397,8 @@ class TicTacToeBoardTest {
         assertEquals(player1, board.turn)
     }
 
-    @Test fun playTicTacToeBoardWin() {
+    @Test
+    fun playTicTacToeBoardWin() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -392,16 +413,17 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardWin)
 
         assertFailsWith<IllegalStateException> {
-            val move = TicTacToeMove(player2, Square(Row(0, 3), Column('a')))
+            val move = TicTacToeMove(player2, Square(Row.Companion(0, 3), Column.Companion('a')))
             board.play(move)
         }
     }
 
-    @Test fun forfeitTicTacToeBoardWin() {
+    @Test
+    fun forfeitTicTacToeBoardWin() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -416,7 +438,7 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardWin)
 
         assertFailsWith<IllegalStateException> {
@@ -424,7 +446,8 @@ class TicTacToeBoardTest {
         }
     }
 
-    @Test fun createTicTacToeBoardDraw() {
+    @Test
+    fun createTicTacToeBoardDraw() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -438,7 +461,7 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardDraw)
 
         assertEquals(moves, board.moves)
@@ -448,7 +471,8 @@ class TicTacToeBoardTest {
         assertEquals(player1, board.turn)
     }
 
-    @Test fun playTicTacToeBoardDraw() {
+    @Test
+    fun playTicTacToeBoardDraw() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -462,16 +486,17 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardDraw)
 
         assertFailsWith<IllegalStateException> {
-            val move = TicTacToeMove(player1, Square(Row(0, 3), Column('a')))
+            val move = TicTacToeMove(player1, Square(Row.Companion(0, 3), Column.Companion('a')))
             board.play(move)
         }
     }
 
-    @Test fun forfeitTicTacToeBoardDraw() {
+    @Test
+    fun forfeitTicTacToeBoardDraw() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
         val moves = emptyList<TicTacToeMove>()
         val player1 = Player.BLACK
@@ -485,7 +510,7 @@ class TicTacToeBoardTest {
             player2
         )
 
-        assertTrue(board is com.crossBoard.domain.board.TicTacToeBoard)
+        assertTrue(board is TicTacToeBoard)
         assertTrue(board is BoardDraw)
 
         assertFailsWith<IllegalStateException> {
@@ -493,15 +518,24 @@ class TicTacToeBoardTest {
         }
     }
 
-    @Test fun initialTicTacToePositionsTest() {
+    @Test
+    fun initialTicTacToePositionsTest() {
         val positions = _root_ide_package_.com.crossBoard.domain.board.initialTicTacToePositions()
 
         assertEquals(9, positions.size)
 
         positions.forEachIndexed { index, position ->
             assertEquals(Player.EMPTY, position.player)
-            assertEquals(Row(index / _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoard.BOARD_DIM, _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoard.BOARD_DIM).number, position.square.row.number)
-            assertEquals(Column('a' + index % _root_ide_package_.com.crossBoard.domain.board.TicTacToeBoard.BOARD_DIM).symbol, position.square.column.symbol)
+            assertEquals(
+                Row.Companion(
+                    index / TicTacToeBoard.Companion.BOARD_DIM,
+                    TicTacToeBoard.Companion.BOARD_DIM
+                ).number, position.square.row.number
+            )
+            assertEquals(
+                Column.Companion('a' + index % TicTacToeBoard.Companion.BOARD_DIM).symbol,
+                position.square.column.symbol
+            )
         }
     }
 }

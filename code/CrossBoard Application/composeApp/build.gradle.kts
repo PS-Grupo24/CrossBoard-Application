@@ -1,5 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinxSerialization)
+    //id("org.jetbrains.compose")
     //id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha09"
 }
 /*
@@ -67,6 +68,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ui.tooling.preview)
+            implementation(libs.ktor.client.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -80,7 +82,7 @@ kotlin {
             implementation (libs.slf4j.nop)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.multiplatform.settings.v130)
-            //implementation("org.jetbrains.skiko:skiko:0.9.21")
+            //implementation(libs.bundles.coil)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)
@@ -89,6 +91,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.client.java)
         }
     }
 }

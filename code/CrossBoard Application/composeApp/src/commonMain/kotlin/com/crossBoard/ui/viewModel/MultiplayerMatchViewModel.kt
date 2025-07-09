@@ -6,11 +6,17 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.matchModule.MatchModule
+import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.toMove
+import com.crossBoard.domain.position.Position
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.httpModel.MoveOutput
 import com.crossBoard.httpModel.ReversiMoveInput
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
@@ -189,11 +195,11 @@ class MultiplayerMatchViewModel(
      * @param rowIndex The index of the row.
      * @param columnIndex The index of the column.
      */
+    @Suppress("UNCHECKED_CAST")
     fun makeMove(rowIndex: Int, columnIndex: Int){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return
         val board = match.board
-
         val playerType = match.getPlayerType(currentUserId)
 
         if (match.user2 == null){
@@ -205,14 +211,10 @@ class MultiplayerMatchViewModel(
             return
         }
 
-        val square = when(match.matchType){
-            MatchType.TicTacToe -> Square(Row(rowIndex, TicTacToeBoard.BOARD_DIM), Column('a' + columnIndex))
-            MatchType.Reversi -> Square(Row(rowIndex, ReversiBoard.BOARD_DIM), Column('a' + columnIndex))
-            else -> {
-                _matchState.update { it.copy(errorMessage = "Unsupported match type: ${match.matchType}") }
-                return
-            }
-        }
+        val module = modules.find { it.matchType == it.matchType }
+            ?: _matchState.update { it.copy(errorMessage = "No module found for match type : ${match.matchType}") }
+        val square = (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).getSquare(rowIndex, columnIndex)
+
 
         if (match.board.get(square) != Player.EMPTY){
             _matchState.update { it.copy(errorMessage = "Invalid move! Cell already occupied.") }
@@ -232,7 +234,7 @@ class MultiplayerMatchViewModel(
                 )
                 ){
                     is Success -> {
-                        val move = result.value.move.toMove()
+                        val move = result.value.move.toMove(match.matchType)
                         val newMatch = match.play(move)
                         _matchState.update { it.copy(currentMatch = newMatch) }
                         startTurnTimer(30)
@@ -390,20 +392,10 @@ class MultiplayerMatchViewModel(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 private fun getMoveInput(matchType: MatchType, playerType: Player, rowNumber: Int, columnChar: Char): MoveInput {
-    when(matchType) {
-        MatchType.TicTacToe -> {
-            return TicTacToeMoveInput(
-                playerType.toString(),
-                "$rowNumber$columnChar"
-            )
-        }
-        MatchType.Reversi -> {
-            return ReversiMoveInput(
-                playerType.toString(),
-                "$rowNumber$columnChar"
-            )
-        }
-        else -> throw IllegalArgumentException("Unsupported match type: $matchType")
-    }
+    val module = modules.find { it.matchType == matchType }
+        ?: throw IllegalArgumentException("Cannot find module for match type $matchType")
+
+    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).getMoveInput(playerType, rowNumber, columnChar)
 }

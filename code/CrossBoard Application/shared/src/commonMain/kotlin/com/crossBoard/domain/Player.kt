@@ -2,7 +2,6 @@ package com.crossBoard.domain
 
 /**
  * Enum class "Player" represents the Player in the application of the game.
- * TODO("Remove Empty to use null instead")
  */
 enum class Player {
     WHITE,
@@ -30,20 +29,11 @@ enum class Player {
      * Function "toString" used to get the String representation of the player.
      * @return String, the String representation of the player.
      */
-    override fun toString(): String = when(this) {
-            WHITE -> "WHITE"
-            BLACK -> "BLACK"
-            EMPTY -> "EMPTY"
-    }
+    override fun toString(): String = name
 }
 
 /**
  * Function to convert a String to a Player.
  * @return Player the Player corresponding to the String.
  */
-fun String.toPlayer() : Player = when(this) {
-        "BLACK" -> Player.BLACK
-        "WHITE" -> Player.WHITE
-        "EMPTY" -> Player.EMPTY
-        else -> throw IllegalArgumentException("Unknown player $this")
-}
+fun String.toPlayer() : Player = Player.valueOf(this)

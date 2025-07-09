@@ -1,0 +1,86 @@
+package com.crossBoard.domain
+
+import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.board.TicTacToeBoardRun
+import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.move.TicTacToeMove
+import com.crossBoard.domain.position.TicPosition
+import com.crossBoard.httpModel.*
+import kotlin.test.*
+
+class MatchTests {
+
+    private val user1Id = 1
+    private val user2Id = 2
+    private val move = TicTacToeMove(Player.BLACK, Square(Row(0, TicTacToeBoard.BOARD_DIM), Column('a' + 0)))
+    private val board = TicTacToeBoardRun(
+        positions = initialTicTacToePositions(),
+        moves = listOf(move),
+        turn = Player.BLACK,
+        player1 = Player.BLACK,
+        player2 = Player.WHITE
+    )
+
+    private val match = MultiPlayerMatch(
+        board = board,
+        id = 123,
+        state = MatchState.RUNNING,
+        user1 = user1Id,
+        user2 = user2Id,
+        matchType = MatchType.TicTacToe,
+        version = 5,
+        winner = null
+    )
+
+    @Test
+    fun `toMatchOutput should produce expected MatchOutput`() {
+        val output = match.toMatchOutput()
+
+        assertEquals(match.id, output.matchId)
+        assertEquals("TicTacToe", output.matchType)
+        assertEquals("RUNNING", output.state)
+        assertEquals(user1Id, output.user1Info)
+        assertEquals(user2Id, output.user2Info)
+        assertEquals(match.version, output.version)
+        assertEquals(null, output.winner)
+        assertNotNull(output.board)
+    }
+
+    @Test
+    fun `toMultiplayerMatch should convert MatchOutput back to MultiPlayerMatch`() {
+        val matchOutput = match.toMatchOutput()
+        val result = matchOutput.toMultiplayerMatch()
+
+        assertEquals(match.id, result.id)
+        assertEquals(match.version, result.version)
+        assertEquals(match.user1, result.user1)
+        assertEquals(match.user2, result.user2)
+        assertEquals(match.matchType, result.matchType)
+        assertEquals(match.state, result.state)
+        assertEquals(match.winner, result.winner)
+        assertEquals(match.getPlayerType(user1Id), result.getPlayerType(user1Id))
+    }
+
+    @Test
+    fun `toPlayedMatch should return MatchPlayedOutput with correct move`() {
+        val playedOutput = match.toPlayedMatch()
+
+        assertEquals(match.version, playedOutput.version)
+
+        val moveOutput = playedOutput.move as TicTacToeMoveOutput
+        assertEquals("BLACK", moveOutput.player)
+        assertEquals("3a", moveOutput.square)
+    }
+
+    @Test fun `Test`(){
+        val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
+        val joined = match.join(2)
+
+        val matchOutput = joined.toMatchOutput()
+        val result = matchOutput.toMultiplayerMatch()
+        val module = modules.find { it.matchType == MatchType.TicTacToe }
+        assertNotNull(module)
+        assertEquals(Player.EMPTY,result.board.get(module.getSquare(0,0)) )
+    }
+}

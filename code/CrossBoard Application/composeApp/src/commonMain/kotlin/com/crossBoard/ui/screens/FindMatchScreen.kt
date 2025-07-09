@@ -60,7 +60,7 @@ fun FindMatchScreen(
             modifier = Modifier.fillMaxWidth(),
         ) {
             OutlinedTextField(
-                value = gameTypes.find { it.value == selectedGameTypeValue }?.name ?: "Select...",
+                value = gameTypes.find { it.toString() == selectedGameTypeValue }?.name ?: "Select...",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Game Type") },
@@ -78,7 +78,7 @@ fun FindMatchScreen(
                 gameTypes.forEach { selectionOption: MatchType ->
                     DropdownMenuItem(
                         onClick = {
-                            onGameTypeChange(selectionOption.value)
+                            onGameTypeChange(selectionOption.toString())
                             expanded = false
                         },
                         enabled = !isLoading

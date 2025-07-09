@@ -77,7 +77,7 @@ class MemoryMatchRep: MatchRepository {
      * @param matchId The id of the match to be canceled.
      */
     override fun cancelSearch(userId: Int, matchId: Int): MatchCancel {
-        matches.removeIf { it.id == matchId }
+        matches.removeIf { it.id == matchId && it.user1 == userId}
         return MatchCancel(
             userId,
             matchId
@@ -93,7 +93,7 @@ class MemoryMatchRep: MatchRepository {
         for (matchType in MatchType.entries) {
             val matchList = matches.filter {
                 it.matchType == matchType &&
-                        (it.user1 == userId || it.user2 == userId)
+                        (it.user1 == userId || it.user2 == userId) && (it.state != MatchState.RUNNING && it.state != MatchState.WAITING)
             }
             val matchCount = matchList.size
             val drawCount = matchList.count { it.state == MatchState.DRAW }

@@ -28,8 +28,9 @@ data class Square(val row: Row, val column: Column) {
 
 /**
  * Function "toSquare" responsible to convert a String to a Square.
+ * Note: The first char of the string must be the `Number` of the row, not the `Index`.
  * @param boardDim the dimension of the board.
- * @return Square the Square corresponding to the String.
+ * @return `Square` the Square corresponding to the String.
  */
 fun String.toSquare(boardDim: Int): Square {
     require(this.length == 2) {"The square input must have 2 characters."}

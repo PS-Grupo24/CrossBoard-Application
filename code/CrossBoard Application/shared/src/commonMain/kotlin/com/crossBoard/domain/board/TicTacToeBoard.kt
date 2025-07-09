@@ -36,7 +36,7 @@ abstract class TicTacToeBoard: Board {
      * @return Player the player at the square.
      */
     override fun get(square: Square): Player? =
-        positions.find { it.square.row.number == square.row.number && it.square.column.symbol == square.column.symbol }?.player
+        positions.find { it.square == square }?.player
 
     /**
      * Function "equals" responsible to compare two TicTacToeBoard objects.

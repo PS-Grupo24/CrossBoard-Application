@@ -1,14 +1,8 @@
 package com.crossBoard.domain
 
 import com.crossBoard.domain.board.*
+import com.crossBoard.domain.matchModule.modules
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.move.ReversiMove
-import com.crossBoard.domain.move.moveToString
-import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.MatchOutput
-import com.crossBoard.httpModel.MatchPlayedOutput
-import com.crossBoard.httpModel.PlayerOutput
-import com.crossBoard.httpModel.toMoveOutput
 import kotlin.random.Random
 
 /**
@@ -57,51 +51,21 @@ data class MultiPlayerMatch(
         fun startGame(player1: Int, matchType: MatchType): MultiPlayerMatch {
             require(player1 > 0) { "player1 must be greater than 0" }
             require(MatchType.entries.toTypedArray().contains(matchType)) { "matchType must be a valid match type" }
-            return when(matchType) {
-                MatchType.TicTacToe -> {
-                    val p1 = Player.random()
-                    val board = TicTacToeBoardRun(
-                        initialTicTacToePositions(),
-                        emptyList(),
-                        Player.random(),
-                        p1,
-                        p1.other(),
-                    )
-                    MultiPlayerMatch(
-                        board,
-                        Random.nextInt(from = 1, Int.MAX_VALUE),
-                        MatchState.WAITING,
-                        player1,
-                        null,
-                        matchType,
-                        1,
-                        null
-                    )
-                }
-                MatchType.Reversi -> {
-                    val p1 = Player.random()
-                    val board = ReversiBoardRun(
-                        initialReversiPositions(),
-                        emptyList(),
-                        Player.random(),
-                        p1,
-                        p1.other(),
-                    )
-                    MultiPlayerMatch(
-                        board,
-                        Random.nextInt(from = 1, Int.MAX_VALUE),
-                        MatchState.WAITING,
-                        player1,
-                        null,
-                        matchType,
-                        1,
-                        null
-                    )
-                }
-            }
+            val module = modules.find{ it.matchType == matchType} ?: throw IllegalArgumentException("Not found module: $matchType")
+            val board = module.getInitialBoard()
+            return MultiPlayerMatch(
+                board = board,
+                Random.nextInt(from = 1, Int.MAX_VALUE),
+                MatchState.WAITING,
+                player1,
+                null,
+                matchType,
+                1,
+                null
+            )
+
         }
     }
-
     /**
      * Function join responsible to a player to join a match.
      * @param userId2 the second player.
@@ -212,48 +176,5 @@ data class MultiPlayerMatch(
     }
 }
 
-/**
- * Function to convert a MultiPlayerMatch to a MatchOutput.
- * @return `MatchOutput` The match output.
- */
-fun MultiPlayerMatch.toMatchOutput(): MatchOutput {
-    val winner = if (board is BoardWin) board.winner else null
-    val winnerId = when(state){
-        MatchState.WIN -> {
-            val player1Type = getPlayerType(user1)
-            if(winner == player1Type)
-                user1
-            else
-                user2
-        }
-        else -> null
-    }
-    return MatchOutput(
-        id,
-        PlayerOutput(
-            user1,
-            getPlayerType(user1).toString()
-        ),
-        PlayerOutput(
-            user2,
-            getPlayerType(user1).other().toString()
-        ),
-        BoardOutput(
-            winner.toString(),
-            board.turn.toString(),
-            board.positions.map { it.toString() },
-            board.moves.map { moveToString(it) },
-        ),
-        matchType.toString(),
-        version,
-        state.toString(),
-        winnerId
-    )
-}
 
-/**
- * Function to convert a MultiPlayerMatch to a MatchPlayedOutput.
- * @return MatchPlayedOutput the match played output.
- */
-fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(), this.version)
 

@@ -1,17 +1,13 @@
 package com.crossBoard.httpModel
 
-import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
-import com.crossBoard.domain.position.TicPosition
-import com.crossBoard.domain.move.ReversiMove
-import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.toMatchState
-import com.crossBoard.domain.toMatchType
-import com.crossBoard.domain.move.toMove
-import com.crossBoard.domain.position.ReversiPosition
-import com.crossBoard.domain.toPlayer
-import com.crossBoard.domain.position.toPosition
+import com.crossBoard.domain.matchModule.MatchModule
+import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.move.moveToString
+import com.crossBoard.domain.position.Position
 import kotlinx.serialization.Serializable
 
 /**
@@ -23,6 +19,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class BoardOutput(
+    val player1: String,
+    val player2: String,
     val winner: String?,
     val turn: String,
     val positions: List<String>,
@@ -30,102 +28,28 @@ data class BoardOutput(
 )
 
 /**
+ * Function `toBoardOutput` converts a Board into its output format for an http response.
+ * @param winner The winner.
+ */
+fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput = BoardOutput(
+    player1.toString(),
+    player2.toString(),
+    winner?.toString(),
+    turn.toString(),
+    positions.map { it.toString() },
+    moves.map { moveToString(it, matchType = matchType ) },
+)
+
+/**
  * Function "toBoard" responsible to convert a BoardOutput object to a Board object.
  * @param matchType the type of the match played.
- * @param player1Type the type of the first player.
  * @param state the state of the match.
  * @return `Board` object corresponding to the `BoardOutput` object.
  */
-fun BoardOutput.toBoard(matchType: String, player1Type: String, state: String): Board {
+@Suppress("UNCHECKED_CAST")
+fun BoardOutput.toBoard(matchType: String, state: String): Board {
+    val module = modules.find{ it.matchType == MatchType.valueOf(matchType) }
+        ?: throw IllegalArgumentException("Module for match type : $matchType not found")
 
-    val tur = turn.toPlayer()
-    val player1 = player1Type.toPlayer()
-    val player2 = player1.other()
-
-    when(val type = matchType.toMatchType()) {
-        MatchType.TicTacToe -> {
-            val pos = positions.map {
-                it.toPosition(TicTacToeBoard.BOARD_DIM, type) as TicPosition
-            }
-            val mov = moves.map { it.toMove(type) as TicTacToeMove }
-
-            return when(state.toMatchState()){
-                MatchState.RUNNING -> {
-                    TicTacToeBoardRun(
-                        pos,
-                        mov,
-                        tur,
-                        player1,
-                        player2
-                    )
-                }
-                MatchState.WAITING -> {
-                    TicTacToeBoardRun(
-                        pos,
-                        mov,
-                        tur,
-                        player1,
-                        player2
-                    )
-                }
-                MatchState.WIN -> TicTacToeBoardWin(
-                    winner?.toPlayer() ?: throw IllegalArgumentException("Winner must not be null"),
-                    pos,
-                    mov,
-                    tur,
-                    player1,
-                    player2,
-                )
-                MatchState.DRAW-> TicTacToeBoardDraw(
-                    pos,
-                    mov,
-                    tur,
-                    player1,
-                    player2,
-                )
-            }
-        }
-        MatchType.Reversi -> {
-            val pos = positions.map{
-                it.toPosition(ReversiBoard.BOARD_DIM, type) as ReversiPosition
-            }
-            val mov = moves.map { it.toMove(type) as ReversiMove }
-
-            return when(state.toMatchState()) {
-                MatchState.RUNNING -> {
-                    ReversiBoardRun(
-                        pos,
-                        mov,
-                        tur,
-                        player1,
-                        player2
-                    )
-                }
-                MatchState.WAITING -> {
-                    ReversiBoardRun(
-                        pos,
-                        mov,
-                        tur,
-                        player1,
-                        player2
-                    )
-                }
-                MatchState.WIN -> ReversiBoardWin(
-                    winner?.toPlayer() ?: throw IllegalArgumentException("Winner must not be null"),
-                    pos,
-                    mov,
-                    tur,
-                    player1,
-                    player2,
-                )
-                MatchState.DRAW -> ReversiBoardDraw(
-                    pos,
-                    mov,
-                    tur,
-                    player1,
-                    player2,
-                )
-            }
-        }
-    }
+    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).boardOutputToBoard(this, state)
 }
