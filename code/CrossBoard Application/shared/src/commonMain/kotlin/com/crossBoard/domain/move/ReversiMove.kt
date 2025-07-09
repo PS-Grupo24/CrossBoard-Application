@@ -8,6 +8,8 @@ import com.crossBoard.domain.position.ReversiPosition
  * @param player the player who made the move.
  * @param square the square where the move was made.
  */
-data class ReversiMove(override val player: Player, val square: Square): Move
+data class ReversiMove(override val player: Player, val square: Square): Move{
+    override fun toString(): String = "$player,$square"
+}
 
 

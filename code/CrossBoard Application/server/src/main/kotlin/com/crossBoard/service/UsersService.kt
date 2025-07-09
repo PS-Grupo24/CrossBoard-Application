@@ -56,6 +56,8 @@ class UsersService(private val userRepo: UserRepository) {
         state: UserState? = null
     ): Either<ApiError, UserInfo> {
         if (userRepo.getUserProfileById(userId) == null) return failure(ApiError.USER_NOT_FOUND)
+        if (username !=null && userRepo.getUserProfileByName(username) != null) return failure(ApiError.USERNAME_ALREADY_EXISTS)
+        if (email != null && userRepo.getUserProfileByEmail(email) != null) return failure(ApiError.EMAIL_ALREADY_EXISTS)
         return success(userRepo.updateUser(userId, username, email, password, state))
     }
 

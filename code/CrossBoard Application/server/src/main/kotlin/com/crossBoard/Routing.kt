@@ -281,7 +281,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                 description = "Gets a user"
                 tags = listOf("Users")
                 request {
-                    headerParameter<String>("Authorization") { // Documenting the auth header
+                    headerParameter<String>("Authorization") {
                         description = "Bearer token"
                         required = true
                     }
@@ -412,7 +412,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
             }
         }
         //route to get a user by id.
-        route("user/{userId}"){
+        route("/user/{userId}"){
             get({
                 summary = "Gets a user by id"
                 description = "Gets a user by its id"
@@ -740,7 +740,6 @@ suspend fun handleFailure(call: ApplicationCall, error: ApiError) {
         ApiError.VERSION_MISMATCH -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Version mismatch"))
         ApiError.WRONG_PASSWORD -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Wrong password"))
         ApiError.MATCH_NOT_IN_WAITING_STATE -> call.respond(HttpStatusCode.Conflict, ErrorMessage("Match not in waiting state"))
-        else -> call.respond(HttpStatusCode.InternalServerError, ErrorMessage("Unexpected error"))
     }
 }
 

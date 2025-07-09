@@ -39,7 +39,7 @@ class ReversiMoveTests {
     @Test
     fun `ReversiMove toString is meaningful`() {
         val move = ReversiMove(Player.WHITE, "5d".toSquare(boardDim))
-        val expected = "ReversiMove(player=WHITE, square=5d)"
+        val expected = "WHITE,5d"
 
         assertEquals(expected, move.toString())
     }

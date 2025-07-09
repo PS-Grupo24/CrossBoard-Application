@@ -14,8 +14,8 @@ import kotlin.test.assertIs
 import kotlin.test.assertFailsWith
 
 class ReversiModuleTest {
-
     private val module = ReversiModule()
+    private val boardDim = 8
 
     @Test
     fun `matchType should be Reversi`() {
@@ -26,19 +26,18 @@ class ReversiModuleTest {
     fun `moveInputToMove should convert correctly`() {
         val input = ReversiMoveInput("BLACK", "3c")
         val move = module.moveInputToMove(input)
-
         assertEquals(Player.BLACK, move.player)
-        assertEquals(2, move.square.row.index)
+        assertEquals(5, move.square.row.index)
         assertEquals('c', move.square.column.symbol)
     }
 
     @Test
     fun `moveToMoveOutput should convert correctly`() {
-        val move = ReversiMove(Player.WHITE, module.getSquare(5, 2))
+        val move = ReversiMove(Player.WHITE, module.getSquare(3, 2))
         val output = module.moveToMoveOutput(move)
 
         assertEquals("WHITE", output.player)
-        assertEquals("6c", output.square)
+        assertEquals("5c", output.square)
     }
 
     @Test
@@ -47,7 +46,7 @@ class ReversiModuleTest {
         val move = module.moveOutputToMove(output)
 
         assertEquals(Player.WHITE, move.player)
-        assertEquals(3, move.square.row.index)
+        assertEquals(4, move.square.row.index)
         assertEquals('d', move.square.column.symbol)
     }
 
@@ -65,7 +64,7 @@ class ReversiModuleTest {
     fun `getInitialBoard should return ReversiBoardRun`() {
         val board = module.getInitialBoard()
         assertIs<ReversiBoardRun>(board)
-        assertEquals(4, board.positions.size)
+        assertEquals(boardDim * boardDim, board.positions.size)
     }
 
     @Test
@@ -74,7 +73,7 @@ class ReversiModuleTest {
         val pos = module.stringToPosition(input)
 
         assertEquals(Player.BLACK, pos.player)
-        assertEquals(2, pos.square.row.index)
+        assertEquals(5, pos.square.row.index)
         assertEquals('c', pos.square.column.symbol)
     }
 

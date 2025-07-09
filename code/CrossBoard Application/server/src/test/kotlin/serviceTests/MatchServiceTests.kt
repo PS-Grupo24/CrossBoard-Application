@@ -129,7 +129,6 @@ class MatchServiceTests {
         val match = (matchService.enterMatch(1, MatchType.TicTacToe) as Success).value
         val user1PlayerType = match.getPlayerType(1)
         val started = (matchService.enterMatch(2, MatchType.TicTacToe) as Success).value
-        val turn = match.board.turn
         val wrongMove = TicTacToeMove(user1PlayerType.other(), Square(Row(0, TicTacToeBoard.BOARD_DIM), Column('a' + 0)))
         val result = matchService.playMatch(started.id, started.user1, wrongMove, started.version)
         assertTrue(result is Failure)
