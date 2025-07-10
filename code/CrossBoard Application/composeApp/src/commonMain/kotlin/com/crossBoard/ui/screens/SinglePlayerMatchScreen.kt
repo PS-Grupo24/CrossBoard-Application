@@ -97,6 +97,7 @@ fun SinglePlayerMatchScreen(
             MatchType.Reversi -> {
                 reversiBoardView(
                     match.board,
+                    myPlayerType = player,
                     onClick = { row, col ->
                         onMakeMove(
                             ReversiMove(

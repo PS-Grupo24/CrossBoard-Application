@@ -176,6 +176,7 @@ fun GameStatusAndBoard(
             reversiBoardView(
                 board = board,
                 onClick = { row: Int, col: Int -> if (!isGameOver) onCellClick(row, col) },
+                myPlayerType = myPlayerType,
                 enabled = !isLoading && !isGameOver
             )
         }
