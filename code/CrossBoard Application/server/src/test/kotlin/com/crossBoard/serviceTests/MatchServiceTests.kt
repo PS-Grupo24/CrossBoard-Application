@@ -1,4 +1,4 @@
-package serviceTests
+package com.crossBoard.serviceTests
 
 import com.crossBoard.domain.Column
 import com.crossBoard.domain.MatchState
@@ -12,16 +12,14 @@ import com.crossBoard.service.MatchService
 import com.crossBoard.util.ApiError
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 class MatchServiceTests {
     private lateinit var repo: MemoryMatchRep
     private lateinit var matchService: MatchService
 
-    @BeforeTest
+    @BeforeEach
     fun setup() {
         repo = MemoryMatchRep()
         matchService = MatchService(repo)

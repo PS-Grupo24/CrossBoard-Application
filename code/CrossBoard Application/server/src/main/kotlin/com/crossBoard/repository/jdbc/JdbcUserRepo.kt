@@ -87,7 +87,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
      * @param passwordHash the new password of the user.
      * @return UserProfileInfo the user profile information of the updated user.
      */
-    override fun updateUser(userId: Int, username: Username?, email: Email?, passwordHash: String?, state: UserState?): UserInfo = transaction(jdbc) { connection ->
+    override fun updateUser(userId: Int, username: Username?, email: Email?, passwordHash: String?, userState: UserState?): UserInfo = transaction(jdbc) { connection ->
         val selectPreparation = connection.prepareStatement("SELECT * FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
         }
@@ -98,7 +98,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
             val username = username?.value ?: rs.getString("username")
             val email = email?.value ?: rs.getString("email")
             val password = passwordHash ?: rs.getString("password")
-            val state = state?.name ?: rs.getString("state")
+            val state = userState?.name ?: rs.getString("state")
             connection.prepareStatement("UPDATE users SET username = ?, email = ?, password = ?, state = ? where id = ?").apply {
                 setString(1, username)
                 setString(2, email)

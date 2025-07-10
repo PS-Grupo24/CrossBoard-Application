@@ -1,3 +1,5 @@
+package com.crossBoard
+
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.UserState
@@ -11,7 +13,6 @@ import com.crossBoard.httpModel.UserLoginOutput
 import com.crossBoard.httpModel.UserProfileOutput
 import com.crossBoard.httpModel.UserUpdateInput
 import com.crossBoard.httpModel.toMultiplayerMatch
-import com.crossBoard.testModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -26,9 +27,8 @@ import io.ktor.client.request.header
 import io.ktor.client.request.put
 import io.ktor.server.testing.testApplication
 import org.junit.jupiter.api.assertNull
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 
 class RoutingTests {
     @Test

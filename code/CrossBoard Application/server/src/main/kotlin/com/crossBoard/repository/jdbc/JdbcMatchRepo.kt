@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import javax.sql.DataSource
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Types
 
 /**
  * Manages the transactions with the database for the Match entity.
@@ -31,13 +32,15 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
     override fun addMatch(match: MultiPlayerMatch): Int = transaction(jdbc) { connection ->
         val winner = if (match.board is BoardWin) (match.board as BoardWin).winner else null
         val serializedBoard = Json.encodeToString<BoardOutput>(match.board.toBoardOutput(winner, match.matchType))
-        val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state, winner) VALUES (?,CAST(? AS jsonb), ?, null, ?, ?, ?, null)", Statement.RETURN_GENERATED_KEYS).apply {
+        val user2 = match.user2
+        val prepared = connection.prepareStatement("INSERT INTO match (id ,board, player1, player2, match_type, version, state, winner) VALUES (?,CAST(? AS jsonb), ?, ?, ?, ?, ?, null)", Statement.RETURN_GENERATED_KEYS).apply {
             setInt(1, match.id)
             setString(2, serializedBoard)
             setInt(3, match.user1)
-            setString(4, match.matchType.toString())
-            setInt(5, match.version)
-            setString(6, match.state.toString())
+            if (user2 != null) setInt(4, user2) else setNull(4, Types.INTEGER)
+            setString(5, match.matchType.toString())
+            setInt(6, match.version)
+            setString(7, match.state.toString())
             executeUpdate()
         }
         return@transaction getIdStatement(prepared).toInt()

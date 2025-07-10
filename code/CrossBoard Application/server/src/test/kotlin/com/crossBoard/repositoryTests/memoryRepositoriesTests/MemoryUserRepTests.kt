@@ -1,14 +1,16 @@
-package com.crossBoard.repository.memoryRepositories.repositoryTests.memoryRepositoriesTests
+package com.crossBoard.repositoryTests.memoryRepositoriesTests
 
 import com.crossBoard.domain.*
 import com.crossBoard.repository.memoryRepositories.MemoryUserRep
-import kotlin.test.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 
 class MemoryUserRepTest {
 
     private lateinit var userRepo: MemoryUserRep
 
-    @BeforeTest
+    @BeforeEach
     fun setup() {
         userRepo = MemoryUserRep()
     }
@@ -26,9 +28,9 @@ class MemoryUserRepTest {
 
         val fetchedUser = userRepo.getUserProfileById(user.id)
         assertNotNull(fetchedUser)
-        assertEquals(user.id, fetchedUser.id)
-        assertEquals(username, fetchedUser.username)
-        assertEquals(email, fetchedUser.email)
+        assertEquals(user.id, fetchedUser?.id)
+        assertEquals(username, fetchedUser?.username)
+        assertEquals(email, fetchedUser?.email)
     }
 
     @Test
@@ -57,7 +59,7 @@ class MemoryUserRepTest {
         val user = userRepo.addUser(Username("findUser"), email, "pw")
         val fetchedUser = userRepo.getUserProfileByEmail(email)
         assertNotNull(fetchedUser)
-        assertEquals(user.id, fetchedUser.id)
+        assertEquals(user.id, fetchedUser?.id)
     }
 
     @Test

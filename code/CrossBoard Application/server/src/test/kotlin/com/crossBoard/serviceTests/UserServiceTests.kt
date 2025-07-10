@@ -1,4 +1,4 @@
-package serviceTests
+package com.crossBoard.serviceTests
 
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.UserState
@@ -9,15 +9,15 @@ import com.crossBoard.util.ApiError
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
 import junit.framework.TestCase.assertTrue
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 
 class UserServiceTests {
     private lateinit var userRepo: MemoryUserRep
     private lateinit var service: UsersService
 
-    @BeforeTest
+    @BeforeEach
     fun setup() {
         userRepo = MemoryUserRep()
         service = UsersService(userRepo)

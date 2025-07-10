@@ -28,6 +28,14 @@ dependencies {
     implementation(libs.ktor.server.sse)
     implementation(libs.ktor.client.content.negotiation)
     testImplementation(libs.ktor.server.tests)
-    testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.jetbrains.kotlin.test)
+    testImplementation("org.testcontainers:postgresql:1.19.7")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
