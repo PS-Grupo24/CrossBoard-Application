@@ -20,6 +20,7 @@ import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.model.SinglePlayerMatch
 import com.crossBoard.utils.CustomColor
+import ticTacToeBoardView
 import kotlin.Int.Companion.MAX_VALUE
 
 
@@ -45,18 +46,6 @@ fun SinglePlayerMatchScreen(
     onGoBack: () -> Unit,
 ){
     val isMatchOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
-    val player1Symbol = when(match.matchType){
-        MatchType.TicTacToe -> "X"
-        MatchType.Reversi -> {
-            if(match.board.player1 == Player.BLACK) "B" else "W"
-        }
-    }
-    val player2Symbol = when(match.matchType){
-        MatchType.TicTacToe ->"O"
-        MatchType.Reversi -> {
-            if(match.board.player2 == Player.BLACK) "B" else "W"
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,16 +57,16 @@ fun SinglePlayerMatchScreen(
         MatchInfoPanel(
             matchId = null,
             currentUserId = userId,
-            PlayerInfo(userId, user?.username?.value ?: "Anonymous", player1Symbol),
-            PlayerInfo(0, "Machine", player2Symbol),
+            PlayerInfo(userId, user?.username?.value ?: "Anonymous"),
+            PlayerInfo(0, "Machine"),
             null
         )
 
-        val turnSymbol = if (match.board.turn == player) player1Symbol else player2Symbol
+        val turnString = if (match.board.turn == player) "Your turn" else "Opponents turn"
         val status = when(match.board){
-            is BoardRun -> "Turn: $turnSymbol"
+            is BoardRun -> turnString
             is BoardWin -> {
-                val winner = if (match.board.winner == player) player1Symbol else player2Symbol
+                val winner = if (match.board.winner == player) "You Won" else "You Lost"
                 "Winner: $winner"
             }
             is BoardDraw -> "Draw"
@@ -91,6 +80,7 @@ fun SinglePlayerMatchScreen(
             MatchType.TicTacToe -> {
                 ticTacToeBoardView(
                     match.board,
+                    player,
                     onCellClick = { row, col ->
                         onMakeMove(
                             TicTacToeMove(
@@ -101,10 +91,7 @@ fun SinglePlayerMatchScreen(
                                 )
                             )
                         )
-                    },
-                    player1Symbol = player1Symbol,
-                    player2Symbol = player2Symbol,
-                    player1Type = player
+                    }
                 )
             }
             MatchType.Reversi -> {
@@ -120,10 +107,7 @@ fun SinglePlayerMatchScreen(
                                 )
                             )
                         )
-                    },
-                    player1Symbol = player1Symbol,
-                    player2Symbol = player2Symbol,
-                    player1Type = player
+                    }
                 )
             }
         }

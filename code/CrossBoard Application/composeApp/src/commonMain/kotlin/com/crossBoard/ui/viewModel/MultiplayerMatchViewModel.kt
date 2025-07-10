@@ -211,7 +211,7 @@ class MultiplayerMatchViewModel(
             return
         }
 
-        val module = modules.find { it.matchType == it.matchType }
+        val module = modules.find { it.matchType == match.matchType }
             ?: _matchState.update { it.copy(errorMessage = "No module found for match type : ${match.matchType}") }
         val square = (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).getSquare(rowIndex, columnIndex)
 

@@ -15,6 +15,7 @@ import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.utils.CustomColor
+import ticTacToeBoardView
 
 /**
  * Screen responsible for the display of an ongoing or ended match.
@@ -32,7 +33,7 @@ import com.crossBoard.utils.CustomColor
 @Composable
 fun GameScreen(
     match: MultiPlayerMatch,
-    currentUserId: Int?,
+    currentUserId: Int,
     player1Username: String,
     player2Username: String,
     onCellClick: (row: Int, col: Int) -> Unit,
@@ -45,21 +46,10 @@ fun GameScreen(
     val board = match.board
     val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
 
-    val player1Symbol = when(match.matchType){
-        MatchType.TicTacToe -> "X"
-        MatchType.Reversi -> {
-            if(match.board.player1 == Player.BLACK) "B" else "W"
-        }
-    }
-    val player2Symbol = when(match.matchType){
-        MatchType.TicTacToe ->"O"
-        MatchType.Reversi -> {
-            if(match.board.player2 == Player.BLACK) "B" else "W"
-        }
-    }
-
     val player1Type = remember(match.user1) { match.getPlayerType(match.user1) }
-
+    val myPlayerType = remember(match.user1) { match.getPlayerType(currentUserId) }
+    val myUsername = if (myPlayerType == player1Type) player1Username else player2Username
+    val opponentUsername = if (myUsername == player1Username) player2Username else player1Username
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,18 +59,18 @@ fun GameScreen(
     ) {
         MatchInfoPanel(
             matchId = match.id,
-            currentUserId = currentUserId?: 0,
-            PlayerInfo(match.user1, player1Username, player1Symbol),
-            PlayerInfo(match.user2, player2Username, player2Symbol),
+            currentUserId = currentUserId,
+            PlayerInfo(match.user1, player1Username),
+            PlayerInfo(match.user2, player2Username),
             timeLeft = timeLeft,
         )
 
         GameStatusAndBoard(
             board = board,
             match.state,
-            player1Type = player1Type,
-            player1Symbol = player1Symbol,
-            player2Symbol = player2Symbol,
+            match.getPlayerType(currentUserId),
+            myUsername = myUsername,
+            opponentUsername = opponentUsername,
             isGameOver = isGameOver,
             isLoading = isLoading,
             onCellClick = onCellClick
@@ -142,9 +132,9 @@ fun MatchInfoPanel(
  * Example: `tictactoeBoardView` for the `MatchType.TicTacToe`
  * @param board The board to display.
  * @param state The current match state.
- * @param player1Type The type for player1.
- * @param player1Symbol The symbol to display for player1.
- * @param player2Symbol The symbol to display for player2.
+ * @param myPlayerType The player typo of the current user.
+ * @param myUsername The username of the current user.
+ * @param opponentUsername The username of the opponent.
  * @param isGameOver The flag that indicates if the current match is over.
  * @param isLoading The Loading state.
  * @param onCellClick The action to perform when a cell is clicked.
@@ -153,18 +143,18 @@ fun MatchInfoPanel(
 fun GameStatusAndBoard(
     board: Board,
     state: MatchState,
-    player1Type: Player,
-    player1Symbol: String,
-    player2Symbol: String,
+    myPlayerType: Player,
+    myUsername: String,
+    opponentUsername: String,
     isGameOver: Boolean,
     isLoading: Boolean,
     onCellClick: (row: Int, col: Int) -> Unit
 ) {
-    val turnSymbol = if (board.turn == player1Type) player1Symbol else player2Symbol
+    val turnSymbol = if (board.turn == myPlayerType) myUsername else opponentUsername
     val status = when(state){
         MatchState.RUNNING -> "Turn: $turnSymbol"
         MatchState.WIN -> {
-            val winner = if ((board as BoardWin).winner == player1Type) player1Symbol else player2Symbol
+            val winner = if ((board as BoardWin).winner == myPlayerType) myUsername else opponentUsername
             "Winner: $winner"
         }
         MatchState.DRAW -> "Draw"
@@ -177,21 +167,16 @@ fun GameStatusAndBoard(
         is TicTacToeBoard -> {
             ticTacToeBoardView(
                 board = board,
+                myPlayerType,
                 onCellClick = { row, col -> if (!isGameOver) onCellClick(row, col) },
                 enabled = !isLoading && !isGameOver,
-                player1Type = player1Type,
-                player1Symbol = player1Symbol,
-                player2Symbol = player2Symbol,
             )
         }
         is ReversiBoard -> {
             reversiBoardView(
                 board = board,
                 onClick = { row: Int, col: Int -> if (!isGameOver) onCellClick(row, col) },
-                enabled = !isLoading && !isGameOver,
-                player1Type = player1Type,
-                player1Symbol = player1Symbol,
-                player2Symbol = player2Symbol
+                enabled = !isLoading && !isGameOver
             )
         }
         else -> throw(IllegalArgumentException("Illegal Board Type: ${board::class.simpleName}"))

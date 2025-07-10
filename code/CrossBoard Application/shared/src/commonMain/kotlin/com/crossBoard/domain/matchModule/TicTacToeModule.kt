@@ -6,7 +6,6 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.Row
 import com.crossBoard.domain.Square
-import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.board.TicTacToeBoardDraw
 import com.crossBoard.domain.board.TicTacToeBoardRun

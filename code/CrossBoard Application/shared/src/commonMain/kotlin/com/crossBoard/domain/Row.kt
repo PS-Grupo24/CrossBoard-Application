@@ -11,7 +11,7 @@ data class Row private constructor(val index: Int, val boardDim: Int) {
 
     companion object{
         operator fun invoke(i: Int, boardDim: Int): Row {
-            require(i in 0..<boardDim){"Index must be between 0 and Board Dimension."}
+            require(i in 0..<boardDim){"Index must be between 0 and Board Dimension and was $i"}
             return Row(i, boardDim)
         }
     }

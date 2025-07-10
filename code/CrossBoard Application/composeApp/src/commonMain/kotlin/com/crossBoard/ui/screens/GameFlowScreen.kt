@@ -18,7 +18,7 @@ import com.crossBoard.model.MultiplayerMatchUiState
 @Composable
 fun GameFlowScreen(
     multiplayerMatchUiState: MultiplayerMatchUiState,
-    currentUserId: Int?,
+    currentUserId: Int,
     onCancelSearch: () -> Unit,
     onMakeMove: (row:Int, column:Int) -> Unit,
     onForfeit: () -> Unit,

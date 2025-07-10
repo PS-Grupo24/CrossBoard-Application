@@ -32,9 +32,7 @@ val boardTextSize = 16.sp
  * @param board The Reversi board to display.
  * @param onClick Callback function to handle square clicks in the board.
  * @param modifier Modifier to apply to the board view.
- * @param player1Symbol Symbol for player 1, used to display the player's piece.
- * @param player2Symbol Symbol for player 2, used to display the player's piece.
- * @param player1Type Type of player 1, used to determine the player's type.
+
  */
 @Composable
 fun reversiBoardView(
@@ -42,9 +40,7 @@ fun reversiBoardView(
     onClick: (row: Int, col: Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    player1Symbol: String,
-    player2Symbol: String,
-    player1Type: Player
+
 ) =
     //Column representing the Reversi Board.
     Column(
