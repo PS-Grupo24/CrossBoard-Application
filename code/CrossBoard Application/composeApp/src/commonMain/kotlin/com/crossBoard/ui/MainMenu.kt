@@ -1,8 +1,6 @@
 package com.crossBoard.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.foundation.layout.Box
@@ -10,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -100,7 +97,6 @@ fun MainMenu(
                                 contentDescription = "Profile",
                                 tint = Color.Black
                             )
-                            //Text("Profile", color = Color.White)
                         }
                         Spacer(Modifier.width(8.dp))
                         IconButton(

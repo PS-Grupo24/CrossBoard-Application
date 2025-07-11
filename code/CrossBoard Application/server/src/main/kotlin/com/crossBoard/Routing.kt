@@ -1,6 +1,6 @@
 package com.crossBoard
 
-import com.crossBoard.callReceiver.callReceivers
+import com.crossBoard.callReceiver.CallReceiverProvider
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
 import com.crossBoard.domain.MatchType
@@ -769,7 +769,6 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
  * @param matchType The match type that determines which type of move input to use.
  */
 private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput {
-    val callReceiver = callReceivers.find { it.matchType == matchType }
-        ?: throw IllegalArgumentException("Not call receiver implementation for match type : $matchType")
+    val callReceiver = CallReceiverProvider.get(matchType)
     return callReceiver.callReceive(call)
 }

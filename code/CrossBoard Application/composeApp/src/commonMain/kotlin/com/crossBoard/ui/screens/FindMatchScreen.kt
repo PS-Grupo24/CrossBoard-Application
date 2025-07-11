@@ -110,7 +110,6 @@ fun FindMatchScreen(
                     contentDescription = buttonMessage,
                     tint = CustomColor.LightBrown.value,
                 )
-                //Text(buttonMessage, color = Color.White)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
