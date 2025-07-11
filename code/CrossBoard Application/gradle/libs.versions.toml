@@ -15,6 +15,7 @@ compose-multiplatform = "1.8.2"
 jdbi3Core = "3.32.0"
 jdbi3Kotlin = "3.28.0"
 junit = "4.13.2"
+junitJupiter = "1.19.7"
 kotlin = "2.1.21-RC2"
 kotlinx-coroutines = "1.10.2"
 kotlinxBrowser = "0.3"
@@ -31,13 +32,11 @@ androidUi = "1.8.3"
 ktorOpenAPIVersion = "5.0.2"
 coilComposeCore = "3.2.0"
 [libraries]
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-ui-tooling-preview-desktop = { module = "androidx.compose.ui:ui-tooling-preview-desktop", version.ref = "androidUi" }
 jdbi3-core = { module = "org.jdbi:jdbi3-core", version.ref = "jdbi3Core" }
 jdbi3-kotlin = { module = "org.jdbi:jdbi3-kotlin", version.ref = "jdbi3Kotlin" }
 jdbi3-postgres = { module = "org.jdbi:jdbi3-postgres", version.ref = "jdbi3Core" }
 jetbrains-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
+junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "junitJupiter" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -87,6 +86,7 @@ androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", vers
 multiplatform-settings-v130 = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettingsVersion" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4jNop" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "junitJupiter" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "androidUi" }
 

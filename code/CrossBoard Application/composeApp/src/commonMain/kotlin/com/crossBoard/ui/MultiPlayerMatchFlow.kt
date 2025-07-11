@@ -25,6 +25,7 @@ fun MultiPlayerMatchFlow(
     currentUserId: Int,
     onFindMatch: () -> Unit,
     onMatch: () -> Unit,
+    onMatchOver: () -> Unit,
 ){
     val vm = remember { MultiplayerMatchViewModel(client, userToken, currentUserId) }
     val matchUiState by vm.matchState.collectAsState()
@@ -50,9 +51,10 @@ fun MultiPlayerMatchFlow(
             multiplayerMatchUiState = matchUiState,
             currentUserId = currentUserId,
             onCancelSearch = vm::cancelSearch,
-            onMakeMove = { row, column -> vm.makeMove(row, column) },
+            onMakeMove = { move -> vm.makeMove(move) },
             onForfeit = vm::forfeit,
             onResetMatch = vm::resetMatch,
+            onMatchOver = onMatchOver,
         )
     }
 

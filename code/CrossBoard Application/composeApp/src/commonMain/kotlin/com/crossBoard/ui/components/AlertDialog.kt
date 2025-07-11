@@ -1,4 +1,4 @@
-package com.crossBoard.ui.screens
+package com.crossBoard.ui.components
 
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable

@@ -83,7 +83,7 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.multiplatform.settings.v130)
             implementation(libs.bundles.coilBundle)
-            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)

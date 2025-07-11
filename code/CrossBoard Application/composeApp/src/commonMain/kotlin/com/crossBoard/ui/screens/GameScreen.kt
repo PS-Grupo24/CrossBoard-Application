@@ -11,11 +11,11 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.*
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.BoardWin
-import com.crossBoard.domain.board.ReversiBoard
-import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.move.Move
 import com.crossBoard.model.PlayerInfo
+import com.crossBoard.ui.components.MyAlertDialog
+import com.crossBoard.ui.uiModule.UiModuleProvider
 import com.crossBoard.utils.CustomColor
-import ticTacToeBoardView
 
 /**
  * Screen responsible for the display of an ongoing or ended match.
@@ -23,7 +23,7 @@ import ticTacToeBoardView
  * @param currentUserId The id of the current logged user.
  * @param player1Username The username of player1.
  * @param player2Username The username of player2.
- * @param onCellClick The action to perform when a `Cell` is clicked.
+ * @param onMakeMove The action to perform when a `Cell` is clicked.
  * @param onForfeitClick The action to perform when forfeit button is clicked.
  * @param isLoading The Loading state.
  * @param errorMessage The error message or `NULL` if there is none.
@@ -36,12 +36,13 @@ fun GameScreen(
     currentUserId: Int,
     player1Username: String,
     player2Username: String,
-    onCellClick: (row: Int, col: Int) -> Unit,
+    onMakeMove: (move: Move) -> Unit,
     onForfeitClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
     onPlayAgainClick: () -> Unit,
-    timeLeft: Int?
+    timeLeft: Int?,
+    onMatchOver: () -> Unit,
 ) {
     val board = match.board
     val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
@@ -67,13 +68,14 @@ fun GameScreen(
 
         GameStatusAndBoard(
             board = board,
+            match.matchType,
             match.state,
             match.getPlayerType(currentUserId),
             myUsername = myUsername,
             opponentUsername = opponentUsername,
             isGameOver = isGameOver,
             isLoading = isLoading,
-            onCellClick = onCellClick
+            onMakeMove = onMakeMove
         )
 
         GameActions(
@@ -81,7 +83,8 @@ fun GameScreen(
             errorMessage = errorMessage,
             isGameOver = isGameOver,
             onForfeitClick = onForfeitClick,
-            onPlayAgainClick = onPlayAgainClick
+            onPlayAgainClick = onPlayAgainClick,
+            onMatchOver = onMatchOver
         )
     }
 }
@@ -115,7 +118,7 @@ fun MatchInfoPanel(
     ) {
         Text(me, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
 
-        if (timeLeft != null) {
+        if (timeLeft != null && timeLeft > 0) {
             Text("$timeLeft", style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
         }
 
@@ -137,18 +140,19 @@ fun MatchInfoPanel(
  * @param opponentUsername The username of the opponent.
  * @param isGameOver The flag that indicates if the current match is over.
  * @param isLoading The Loading state.
- * @param onCellClick The action to perform when a cell is clicked.
+ * @param onMakeMove The action to perform when a cell is clicked.
  */
 @Composable
 fun GameStatusAndBoard(
     board: Board,
+    matchType: MatchType,
     state: MatchState,
     myPlayerType: Player,
     myUsername: String,
     opponentUsername: String,
     isGameOver: Boolean,
     isLoading: Boolean,
-    onCellClick: (row: Int, col: Int) -> Unit
+    onMakeMove: (move: Move) -> Unit
 ) {
     val turnSymbol = if (board.turn == myPlayerType) myUsername else opponentUsername
     val status = when(state){
@@ -163,25 +167,14 @@ fun GameStatusAndBoard(
 
     Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
     Spacer(Modifier.height(16.dp))
-    when(board) {
-        is TicTacToeBoard -> {
-            ticTacToeBoardView(
-                board = board,
-                myPlayerType,
-                onCellClick = { row, col -> if (!isGameOver) onCellClick(row, col) },
-                enabled = !isLoading && !isGameOver,
-            )
-        }
-        is ReversiBoard -> {
-            reversiBoardView(
-                board = board,
-                onClick = { row: Int, col: Int -> if (!isGameOver) onCellClick(row, col) },
-                myPlayerType = myPlayerType,
-                enabled = !isLoading && !isGameOver
-            )
-        }
-        else -> throw(IllegalArgumentException("Illegal Board Type: ${board::class.simpleName}"))
-    }
+    UiModuleProvider
+        .getModule<Move>(matchType)
+        .BoardView(
+            board,
+            myPlayerType,
+            onMakeMove = onMakeMove,
+            enabled = !isLoading && !isGameOver
+        )
 }
 
 /**
@@ -200,7 +193,8 @@ fun GameActions(
     errorMessage: String?,
     isGameOver: Boolean,
     onForfeitClick: () -> Unit,
-    onPlayAgainClick: () -> Unit
+    onPlayAgainClick: () -> Unit,
+    onMatchOver: () -> Unit,
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -214,7 +208,7 @@ fun GameActions(
                 onForfeitClick()
             },
             confirmText = "Yes, Forfeit",
-            onDismiss = {showConfirmDialog = false},
+            onDismiss = { showConfirmDialog = false },
             dismissText = "Cancel",
         )
     }
@@ -240,7 +234,7 @@ fun GameActions(
 
         Box(modifier = Modifier.height(elementHeight)) {
             if (isGameOver) {
-
+                onMatchOver()
                 Button(
                     onClick = onPlayAgainClick,
                     modifier = Modifier.align(Alignment.Center),

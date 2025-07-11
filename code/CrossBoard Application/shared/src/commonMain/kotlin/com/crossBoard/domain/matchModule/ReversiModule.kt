@@ -90,10 +90,10 @@ class ReversiModule : MatchModule<
         return ReversiPosition(values[0].toPlayer(), values[1].toSquare(ReversiBoard.BOARD_DIM))
     }
 
-    override fun getMoveInput(playerType: Player, rowNumber: Int, columnChar: Char): ReversiMoveInput {
+    override fun moveToMoveInput(move: ReversiMove): ReversiMoveInput {
         return ReversiMoveInput(
-            player = playerType.toString(),
-            "$rowNumber$columnChar",
+            player = move.player.toString(),
+            "${move.square.row.number}${move.square.column.symbol}",
         )
     }
 

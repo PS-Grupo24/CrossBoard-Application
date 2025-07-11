@@ -1,12 +1,17 @@
 package com.crossBoard.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -16,7 +21,7 @@ import com.crossBoard.domain.User
 import com.crossBoard.model.MainScreen
 import com.crossBoard.model.SubScreen
 import com.crossBoard.ui.screens.MainMenuScreen
-import com.crossBoard.ui.screens.MyAlertDialog
+import com.crossBoard.ui.components.MyAlertDialog
 import com.crossBoard.ui.screens.ProfileScreen
 import com.crossBoard.ui.viewModel.MainMenuViewModel
 import com.crossBoard.utils.CustomColor
@@ -85,20 +90,30 @@ fun MainMenu(
                 else null,
                 actions = {
                     if (mainMenuState.currentSubScreen != SubScreen.Match){
-                        Button(
+                        IconButton(
                             onClick = {
                                 vm.goToProfile(user.username.value)
-                            },
-                            colors = ButtonDefaults.buttonColors(CustomColor.LightBrown.value)
+                            }
                         ) {
-                            Text("Profile", color = Color.White)
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profile",
+                                tint = Color.Black
+                            )
+                            //Text("Profile", color = Color.White)
                         }
                         Spacer(Modifier.width(8.dp))
-                        Button(
+                        IconButton(
                             onClick = {showConfirmDialog = true},
-                            colors = ButtonDefaults.textButtonColors(backgroundColor = CustomColor.LightBrown.value)
-                        ){ Text("Log out", color = Color.White) } }
-                    },
+                        ){
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                tint = Color.Black,
+                                contentDescription = "Logout",
+                            )
+                        }
+                    }
+                },
                 backgroundColor = CustomColor.DarkBrown.value
                 )
         }
@@ -131,6 +146,7 @@ fun MainMenu(
                             client = client,
                             userToken = user.token.value,
                             currentUserId = user.id,
+                            onMatchOver = vm::goToMatchOver
                         )
                     }
                     MainScreen.Statistics -> {

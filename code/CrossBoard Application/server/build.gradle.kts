@@ -29,8 +29,8 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.jetbrains.kotlin.test)
-    testImplementation("org.testcontainers:postgresql:1.19.7")
-    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.junit.jupiter)
 }
 
 tasks.withType<Test> {

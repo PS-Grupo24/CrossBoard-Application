@@ -3,14 +3,23 @@ package com.crossBoard.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.crossBoard.model.AuthState
+import com.crossBoard.ui.components.PasswordTextField
 import com.crossBoard.utils.CustomColor
 
 /**
@@ -33,7 +42,6 @@ fun LoginScreen(
     onSwitchScreen: (Boolean) -> Unit,
     onMaintainSession: (Boolean) -> Unit,
     ) {
-
         OutlinedTextField(
             value = authState.loginUsernameInput,
             onValueChange = onLoginUsernameChange,
@@ -43,15 +51,11 @@ fun LoginScreen(
             colors = textFieldColors,
         )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
+        PasswordTextField(
             value = authState.loginPasswordInput,
+            errorMessage = authState.errorMessage,
             onValueChange = onLoginPasswordChange,
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            isError = authState.errorMessage != null,
-            singleLine = true,
-            colors = textFieldColors
+            textFieldColors = textFieldColors
         )
         Spacer(Modifier.height(8.dp))
         Row(

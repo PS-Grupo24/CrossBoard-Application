@@ -8,10 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.Admin
-import com.crossBoard.domain.NormalUser
 import com.crossBoard.domain.User
 import com.crossBoard.utils.CustomColor
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
  * Responsible for the display of the main menu elements.

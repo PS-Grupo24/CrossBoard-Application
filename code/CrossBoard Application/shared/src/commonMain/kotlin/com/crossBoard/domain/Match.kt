@@ -1,7 +1,7 @@
 package com.crossBoard.domain
 
 import com.crossBoard.domain.board.*
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
 import kotlin.random.Random
 
@@ -51,7 +51,7 @@ data class MultiPlayerMatch(
         fun startGame(player1: Int, matchType: MatchType): MultiPlayerMatch {
             require(player1 > 0) { "player1 must be greater than 0" }
             require(MatchType.entries.toTypedArray().contains(matchType)) { "matchType must be a valid match type" }
-            val module = modules.find{ it.matchType == matchType} ?: throw IllegalArgumentException("Not found module: $matchType")
+            val module = ModuleProvider.getModule(matchType)
             val board = module.getInitialBoard()
             return MultiPlayerMatch(
                 board = board,

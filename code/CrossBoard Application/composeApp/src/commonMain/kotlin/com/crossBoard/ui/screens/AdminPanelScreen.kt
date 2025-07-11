@@ -20,10 +20,14 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,10 +75,9 @@ fun AdminPanelScreen(
                 )
             )
             Spacer(Modifier.width(8.dp))
-            Button(
+            IconButton(
                 onClick = adminViewModel::performSearch,
-                enabled = !adminState.isSearching,
-                colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.LightBrown.value)
+                enabled = !adminState.isSearching
             ) {
                 if (adminState.isSearching) {
                     CircularProgressIndicator(
@@ -83,7 +86,7 @@ fun AdminPanelScreen(
                         color = MaterialTheme.colors.onPrimary
                     )
                 } else {
-                    Text("Search", color = Color.White)
+                    Icon(Icons.Default.Search, contentDescription = "Search")
                 }
             }
         }

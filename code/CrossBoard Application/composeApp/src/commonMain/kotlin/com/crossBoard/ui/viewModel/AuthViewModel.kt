@@ -91,6 +91,11 @@ class AuthViewModel(
     fun showLoginScreen(show: Boolean) {
         _authState.update {
             it.copy(
+                registerUsernameInput = "",
+                registerEmailInput = "",
+                registerPasswordInput = "",
+                loginUsernameInput = "",
+                loginPasswordInput = "",
                 maintainSession = false,
                 isLoginScreenVisible = show,
                 errorMessage = null,

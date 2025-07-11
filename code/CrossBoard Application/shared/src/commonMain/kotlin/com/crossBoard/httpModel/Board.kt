@@ -3,11 +3,8 @@ package com.crossBoard.httpModel
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
-import com.crossBoard.domain.matchModule.MatchModule
-import com.crossBoard.domain.matchModule.modules
-import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.moveToString
-import com.crossBoard.domain.position.Position
 import kotlinx.serialization.Serializable
 
 /**
@@ -48,8 +45,6 @@ fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput = Bo
  */
 @Suppress("UNCHECKED_CAST")
 fun BoardOutput.toBoard(matchType: String, state: String): Board {
-    val module = modules.find{ it.matchType == MatchType.valueOf(matchType) }
-        ?: throw IllegalArgumentException("Module for match type : $matchType not found")
-
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).boardOutputToBoard(this, state)
+    val module = ModuleProvider.getModule(MatchType.valueOf(matchType))
+    return module.boardOutputToBoard(this, state)
 }

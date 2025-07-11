@@ -120,6 +120,14 @@ class MainMenuViewModel(
     }
 
     /**
+     * Function [goToMatchOver] indicates that the current [SubScreen] is [SubScreen.MatchOver]
+     * @param topBarMessage The message to be displayed in the top bar after the navigation.
+     */
+    fun goToMatchOver(topBarMessage: String? = null) {
+        if (topBarMessage != null) setTobBarMessage(topBarMessage)
+        navigateTo(SubScreen.MatchOver)
+    }
+    /**
      * Function "clear" responsible for the cleanup of the viewModel.
      * Cancels the viewModel scope;
      */

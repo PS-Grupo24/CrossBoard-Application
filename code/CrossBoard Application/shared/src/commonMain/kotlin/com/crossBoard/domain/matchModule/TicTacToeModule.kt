@@ -11,6 +11,7 @@ import com.crossBoard.domain.board.TicTacToeBoardDraw
 import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.board.TicTacToeBoardWin
 import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.move.toMove
 import com.crossBoard.domain.position.TicPosition
@@ -90,10 +91,10 @@ class TicTacToeModule : MatchModule<
         return TicPosition(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
     }
 
-    override fun getMoveInput(playerType: Player, rowNumber: Int, columnChar: Char): TicTacToeMoveInput {
+    override fun moveToMoveInput(move: TicTacToeMove): TicTacToeMoveInput {
         return TicTacToeMoveInput(
-            playerType.toString(),
-            "$rowNumber$columnChar",
+            move.player.toString(),
+            "${move.square.row.number}${move.square.column.symbol}",
         )
     }
 

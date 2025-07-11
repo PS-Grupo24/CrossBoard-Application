@@ -4,10 +4,8 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.matchModule.MatchModule
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.toPlayer
-import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.MoveInput
 import com.crossBoard.httpModel.MoveOutput
 
@@ -27,8 +25,6 @@ interface Position{
  */
 @Suppress("UNCHECKED_CAST")
 fun String.toPosition(matchType: MatchType): Position {
-    val module = modules.find{ it.matchType == matchType }
-        ?: throw IllegalArgumentException("No module found for match type $matchType")
-
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).stringToPosition(this)
+    val module = ModuleProvider.getModule(matchType)
+    return module.stringToPosition(this)
 }

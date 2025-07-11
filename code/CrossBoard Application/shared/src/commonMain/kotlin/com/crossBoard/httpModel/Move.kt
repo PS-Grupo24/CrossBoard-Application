@@ -5,7 +5,7 @@ import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.matchModule.MatchModule
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.position.Position
@@ -42,9 +42,8 @@ data class ReversiMoveInput(
  */
 @Suppress("UNCHECKED_CAST")
 fun MoveInput.toMove(matchType: MatchType) : Move {
-    val module = modules.find { it.matchType == matchType } ?:
-        throw IllegalArgumentException("Module for match type: $matchType not found")
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveInputToMove(this)
+    val module = ModuleProvider.getModule(matchType)
+    return module.moveInputToMove(this)
 }
 
 /**
@@ -74,7 +73,6 @@ data class ReversiMoveOutput(
 
 @Suppress("UNCHECKED_CAST")
 fun Move.toMoveOutput(matchType: MatchType) : MoveOutput {
-    val module = modules.find{ it.matchType == matchType}
-        ?: throw IllegalArgumentException("Not found module: $matchType")
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveToMoveOutput(this)
+    val module = ModuleProvider.getModule(matchType)
+    return module.moveToMoveOutput(this)
 }

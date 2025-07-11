@@ -15,12 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.*
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.move.ReversiMove
-import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.model.SinglePlayerMatch
+import com.crossBoard.ui.uiModule.UiModuleProvider
 import com.crossBoard.utils.CustomColor
-import ticTacToeBoardView
 import kotlin.Int.Companion.MAX_VALUE
 
 
@@ -66,8 +64,7 @@ fun SinglePlayerMatchScreen(
         val status = when(match.board){
             is BoardRun -> turnString
             is BoardWin -> {
-                val winner = if (match.board.winner == player) "You Won" else "You Lost"
-                "Winner: $winner"
+                if (match.board.winner == player) "You Won" else "You Lost"
             }
             is BoardDraw -> "Draw"
             else -> "Unknown State"
@@ -75,50 +72,20 @@ fun SinglePlayerMatchScreen(
 
         Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
         Spacer(Modifier.height(16.dp))
-
-        when(match.matchType) {
-            MatchType.TicTacToe -> {
-                ticTacToeBoardView(
-                    match.board,
-                    player,
-                    onCellClick = { row, col ->
-                        onMakeMove(
-                            TicTacToeMove(
-                                player,
-                                Square(
-                                    Row(row, TicTacToeBoard.BOARD_DIM),
-                                    Column('a' + col)
-                                )
-                            )
-                        )
-                    }
-                )
-            }
-            MatchType.Reversi -> {
-                reversiBoardView(
-                    match.board,
-                    myPlayerType = player,
-                    onClick = { row, col ->
-                        onMakeMove(
-                            ReversiMove(
-                                player,
-                                Square(
-                                    Row(row, ReversiBoard.BOARD_DIM),
-                                    Column('a' + col)
-                                )
-                            )
-                        )
-                    }
-                )
-            }
-        }
+        val module = UiModuleProvider.getModule<Move>(match.matchType)
+        module.BoardView(
+            match.board,
+            player,
+            onMakeMove,
+        )
 
         GameActions(
             isLoading = false,
             errorMessage = errorMessage,
             isGameOver = isMatchOver,
             onForfeitClick = onForfeit,
-            onPlayAgainClick = onPlayAgain
+            onPlayAgainClick = onPlayAgain,
+            onMatchOver = {}
         )
     }
 }

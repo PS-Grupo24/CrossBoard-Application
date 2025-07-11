@@ -3,17 +3,11 @@ package com.crossBoard.domain.move
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.Board
-import com.crossBoard.domain.board.ReversiBoard
-import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.matchModule.MatchModule
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.position.Position
-import com.crossBoard.domain.toPlayer
-import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.MoveInput
 import com.crossBoard.httpModel.MoveOutput
-import com.crossBoard.httpModel.ReversiMoveOutput
-import com.crossBoard.httpModel.TicTacToeMoveOutput
 
 /**
  * Interface "Move" represents a move in the game.
@@ -30,10 +24,8 @@ sealed interface Move {
  */
 @Suppress("UNCHECKED_CAST")
 fun moveToString(move: Move, matchType: MatchType): String {
-    val module = modules.find { it.matchType == matchType } ?:
-    throw IllegalArgumentException("No module found for $matchType")
-
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveToString(move)
+    val module = ModuleProvider.getModule(matchType)
+    return module.moveToString(move)
 }
 
 /**
@@ -43,10 +35,8 @@ fun moveToString(move: Move, matchType: MatchType): String {
  */
 @Suppress("UNCHECKED_CAST")
 fun String.toMove(matchType: MatchType): Move {
-    val module = modules.find { it.matchType == matchType }
-        ?: throw IllegalArgumentException("No module found for $matchType")
-
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).stringToMove(this)
+    val module = ModuleProvider.getModule(matchType)
+    return module.stringToMove(this)
 
 }
 
@@ -56,8 +46,7 @@ fun String.toMove(matchType: MatchType): Move {
  */
 @Suppress("UNCHECKED_CAST")
 fun MoveOutput.toMove(matchType: MatchType): Move {
-    val module = modules.find { it.matchType == matchType } ?:
-        throw IllegalArgumentException("Unknown move type for Math type : $matchType")
+    val module = ModuleProvider.getModule(matchType)
 
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).moveOutputToMove(this)
+    return module.moveOutputToMove(this)
 }

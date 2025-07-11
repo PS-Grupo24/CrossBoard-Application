@@ -25,12 +25,12 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("User ID", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
-        Text("${user.id}", style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        Text("${user.id}", style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
         Spacer(Modifier.height(16.dp))
         Text("Username", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
-        Text(user.username.value, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        Text(user.username.value, style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
         Spacer(Modifier.height(16.dp))
         Text("Email", style = MaterialTheme.typography.h5, color = CustomColor.DarkBrown.value)
-        Text(user.email.value, style = MaterialTheme.typography.body1, color = CustomColor.LightBrown.value)
+        Text(user.email.value, style = MaterialTheme.typography.h6, color = CustomColor.LightBrown.value)
     }
 }

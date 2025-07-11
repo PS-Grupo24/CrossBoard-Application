@@ -1,23 +1,13 @@
 package com.crossBoard.ui.viewModel
 
-import com.crossBoard.httpModel.TicTacToeMoveInput
-
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
-import com.crossBoard.domain.board.Board
-import com.crossBoard.domain.board.ReversiBoard
-import com.crossBoard.domain.board.TicTacToeBoard
-import com.crossBoard.domain.matchModule.MatchModule
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.toMove
-import com.crossBoard.domain.position.Position
-import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.MoveInput
-import com.crossBoard.httpModel.MoveOutput
-import com.crossBoard.httpModel.ReversiMoveInput
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -56,7 +46,7 @@ class MultiplayerMatchViewModel(
      * Function "startTurnTimer" responsible for creating a Job that counts down starting at a given duration.
      * @param durationSeconds The duration in seconds for each turn.
      */
-    private fun startTurnTimer(durationSeconds: Int) {
+    private fun startTurnTimer(durationSeconds: Int = 30) {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             var timeLeft = durationSeconds
@@ -96,9 +86,11 @@ class MultiplayerMatchViewModel(
                         _matchState.update{ it.copy(currentMatch = matchUpdate) }
                         if (currentMatch?.version == 1 && matchUpdate.version == 2){
                             viewModelScope.launch { getPlayersUsernames(matchUpdate.user1, matchUpdate.user2) }
+                            startTurnTimer()
                         }
                         if (matchUpdate.state == MatchState.WIN || matchUpdate.state == MatchState.DRAW){
                             disconnectSSE()
+                            stopTurnTimer()
                         }
                     }
                     .catch { cause ->
@@ -192,11 +184,10 @@ class MultiplayerMatchViewModel(
 
     /**
      * Function "makeMove" responsible for creating a move and performing it given the row index and column index.
-     * @param rowIndex The index of the row.
-     * @param columnIndex The index of the column.
+     * @param move The move to be made.
      */
     @Suppress("UNCHECKED_CAST")
-    fun makeMove(rowIndex: Int, columnIndex: Int){
+    fun makeMove(move: Move){
         val currentState = _matchState.value
         val match = currentState.currentMatch ?: return
         val board = match.board
@@ -211,21 +202,10 @@ class MultiplayerMatchViewModel(
             return
         }
 
-        val module = modules.find { it.matchType == match.matchType }
-            ?: _matchState.update { it.copy(errorMessage = "No module found for match type : ${match.matchType}") }
-        val square = (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).getSquare(rowIndex, columnIndex)
-
-
-        if (match.board.get(square) != Player.EMPTY){
-            _matchState.update { it.copy(errorMessage = "Invalid move! Cell already occupied.") }
-            return
-        }
-
         viewModelScope.launch {
             _matchState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val moveInput = getMoveInput(match.matchType, playerType, square.row.number, square.column.symbol)
-                
+                val moveInput = getMoveInput(match.matchType, move)
                 when(val result = client.playMatch(
                     userToken,
                     match.id,
@@ -237,7 +217,8 @@ class MultiplayerMatchViewModel(
                         val move = result.value.move.toMove(match.matchType)
                         val newMatch = match.play(move)
                         _matchState.update { it.copy(currentMatch = newMatch) }
-                        startTurnTimer(30)
+                        if (newMatch.state == MatchState.RUNNING) startTurnTimer(30)
+                        else stopTurnTimer()
                     }
                     is Failure -> {
                         _matchState.update { it.copy(errorMessage = result.value, isLoading = false) }
@@ -393,9 +374,7 @@ class MultiplayerMatchViewModel(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun getMoveInput(matchType: MatchType, playerType: Player, rowNumber: Int, columnChar: Char): MoveInput {
-    val module = modules.find { it.matchType == matchType }
-        ?: throw IllegalArgumentException("Cannot find module for match type $matchType")
-
-    return (module as MatchModule<Board, Move, Position, MoveInput, MoveOutput>).getMoveInput(playerType, rowNumber, columnChar)
+private fun getMoveInput(matchType: MatchType, move: Move): MoveInput {
+    val module = ModuleProvider.getModule(matchType)
+    return module.moveToMoveInput(move)
 }

@@ -3,6 +3,8 @@ package com.crossBoard.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,10 +93,9 @@ fun FindMatchScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
+        IconButton(
             onClick = onFindMatchClick,
             enabled = !isLoading && selectedGameTypeValue.isNotBlank(),
-            colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.LightBrown.value),
         ) {
             if(isLoading){
                 CircularProgressIndicator(
@@ -104,7 +105,12 @@ fun FindMatchScreen(
                 )
             }
             else {
-                Text(buttonMessage, color = Color.White)
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = buttonMessage,
+                    tint = CustomColor.LightBrown.value,
+                )
+                //Text(buttonMessage, color = Color.White)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

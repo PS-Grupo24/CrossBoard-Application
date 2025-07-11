@@ -2,6 +2,7 @@ package com.crossBoard.ui.screens
 
 import androidx.compose.runtime.Composable
 import com.crossBoard.domain.MatchState
+import com.crossBoard.domain.move.Move
 import com.crossBoard.model.MultiplayerMatchUiState
 
 /**
@@ -20,9 +21,10 @@ fun GameFlowScreen(
     multiplayerMatchUiState: MultiplayerMatchUiState,
     currentUserId: Int,
     onCancelSearch: () -> Unit,
-    onMakeMove: (row:Int, column:Int) -> Unit,
+    onMakeMove: (move: Move) -> Unit,
     onForfeit: () -> Unit,
     onResetMatch: () -> Unit,
+    onMatchOver: () -> Unit,
 ) {
     val currentMatch = multiplayerMatchUiState.currentMatch
     if (currentMatch != null) {
@@ -40,10 +42,11 @@ fun GameFlowScreen(
                 currentUserId = currentUserId,
                 isLoading = multiplayerMatchUiState.isLoading,
                 errorMessage = multiplayerMatchUiState.errorMessage,
-                onCellClick = onMakeMove,
+                onMakeMove = onMakeMove,
                 onForfeitClick = onForfeit,
                 onPlayAgainClick = onResetMatch,
-                timeLeft = multiplayerMatchUiState.timeLeftSeconds
+                timeLeft = multiplayerMatchUiState.timeLeftSeconds,
+                onMatchOver = onMatchOver
             )
     }
 }

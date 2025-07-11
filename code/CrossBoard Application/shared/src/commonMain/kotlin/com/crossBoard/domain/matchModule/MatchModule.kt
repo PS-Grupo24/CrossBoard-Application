@@ -1,7 +1,6 @@
 package com.crossBoard.domain.matchModule
 
 import com.crossBoard.domain.MatchType
-import com.crossBoard.domain.Player
 import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.move.Move
@@ -10,15 +9,7 @@ import com.crossBoard.httpModel.BoardOutput
 import com.crossBoard.httpModel.MoveInput
 import com.crossBoard.httpModel.MoveOutput
 
-/**
- * List of the currently available Match modules.
- * It is required for any future modules of new match types to be inserted in this list
- * so the implemented functions can find their respective handler for the new match type.
- */
-val modules: List<MatchModule<*, *, *, *, *>> = listOf(
-    TicTacToeModule(),
-    ReversiModule(),
-)
+
 
 /**
  * The `MatchModule` interface defines the core game-specific logic required to support a new match type
@@ -125,13 +116,10 @@ interface MatchModule<
 
     /**
      * Constructs a move input from the given player and board coordinates.
-     *
-     * @param playerType The player making the move.
-     * @param rowNumber The row number on the board.
-     * @param columnChar The column character (e.g., 'A', 'B', etc.).
+     * @param move The move [M] to convert into [MI]
      * @return The move input object.
      */
-    fun getMoveInput(playerType: Player, rowNumber: Int, columnChar: Char): MI
+    fun moveToMoveInput(move: M): MI
 
     /**
      * Converts a board output (typically from storage or network) into an actual board object.

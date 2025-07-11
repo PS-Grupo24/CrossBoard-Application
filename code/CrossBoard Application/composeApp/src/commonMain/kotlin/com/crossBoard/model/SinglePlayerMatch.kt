@@ -5,8 +5,7 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
-import com.crossBoard.domain.matchModule.modules
-import com.crossBoard.domain.move.ReversiMove
+import com.crossBoard.domain.matchModule.ModuleProvider
 import kotlin.random.Random
 
 /**
@@ -21,8 +20,7 @@ class SinglePlayerMatch(
 ) {
     companion object {
         fun startGame(matchType: MatchType): SinglePlayerMatch {
-            val module = modules.find { it.matchType == matchType } ?:
-                throw IllegalArgumentException("No module found for match type : $matchType")
+            val module = ModuleProvider.getModule(matchType)
             val board = module.getInitialBoard()
             return SinglePlayerMatch(
                 Random.nextInt(),
