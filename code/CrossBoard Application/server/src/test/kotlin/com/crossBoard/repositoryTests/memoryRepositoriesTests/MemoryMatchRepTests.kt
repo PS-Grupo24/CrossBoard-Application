@@ -101,7 +101,7 @@ class MemoryMatchRepTests {
         val statsBefore = matchRepo.getStatistics(1)
         val type = MatchType.TicTacToe
 
-        assertEquals(MatchType.entries.size, statsBefore.size)
+        assertEquals(MatchType.availableTypes.size, statsBefore.size)
         assertEquals(0, statsBefore.find { it.matchType == type.toString() }?.numberOfMatches)
 
         val match = MultiPlayerMatch.startGame(1, type)

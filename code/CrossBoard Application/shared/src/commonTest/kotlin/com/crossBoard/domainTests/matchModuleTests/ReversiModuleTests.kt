@@ -4,6 +4,7 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
+import com.crossBoard.domain.getSquare
 import com.crossBoard.domain.matchModule.ReversiModule
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.httpModel.BoardOutput
@@ -34,7 +35,7 @@ class ReversiModuleTest {
 
     @Test
     fun `moveToMoveOutput should convert correctly`() {
-        val move = ReversiMove(Player.WHITE, module.getSquare(3, 2))
+        val move = ReversiMove(Player.WHITE, getSquare(3, 2, ReversiBoard.BOARD_DIM))
         val output = module.moveToMoveHttp(move)
 
         assertEquals("WHITE", output.player)
@@ -70,7 +71,7 @@ class ReversiModuleTest {
 
     @Test
     fun `getMoveInput should format input properly`() {
-        val input = module.moveToMoveHttp(ReversiMove(Player.WHITE, module.getSquare(6, 5)))
+        val input = module.moveToMoveHttp(ReversiMove(Player.WHITE, getSquare(6, 5, ReversiBoard.BOARD_DIM)))
         assertEquals("WHITE", input.player)
         assertEquals("2f", input.square)
     }
@@ -81,7 +82,7 @@ class ReversiModuleTest {
             positions = listOf("BLACK,4d"),
             moves = listOf(module.moveToMoveHttp(
                 ReversiMove(
-                    Player.WHITE,module.getSquare(5, 2),))),
+                    Player.WHITE , getSquare(5, 2, ReversiBoard.BOARD_DIM),))),
             turn = "BLACK",
             player1 = "BLACK",
             winner = "WHITE",
@@ -103,7 +104,7 @@ class ReversiModuleTest {
             positions = listOf(module.stringToPosition("BLACK,4d").toString()),
             moves = listOf(module.moveToMoveHttp(
                 ReversiMove(
-                    Player.WHITE,module.getSquare(5, 2),))),
+                    Player.WHITE,getSquare(5, 2, ReversiBoard.BOARD_DIM),))),
             turn = "BLACK",
             player1 = "BLACK",
             winner = null,

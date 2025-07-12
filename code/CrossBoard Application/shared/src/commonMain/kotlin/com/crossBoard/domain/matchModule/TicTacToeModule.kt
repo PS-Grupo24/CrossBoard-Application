@@ -1,11 +1,8 @@
 package com.crossBoard.domain.matchModule
 
-import com.crossBoard.domain.Column
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.Row
-import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.board.TicTacToeBoardDraw
 import com.crossBoard.domain.board.TicTacToeBoardRun
@@ -52,6 +49,14 @@ class TicTacToeModule : MatchModule<
         return TicTacToeMove(move.player.toPlayer(), move.square.toSquare(TicTacToeBoard.BOARD_DIM))
     }
 
+    override fun stringToPosition(input: String): TicPosition {
+        val values = input.split(",")
+        return TicPosition(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
+    }
+
+    override fun positionToString(position: TicPosition): String {
+        return position.toString()
+    }
     override fun getInitialBoard(): TicTacToeBoard {
         val p1 = Player.random()
         return TicTacToeBoardRun(
@@ -62,18 +67,8 @@ class TicTacToeModule : MatchModule<
             p1.other(),
         )
     }
-    override fun getSquare(rowIndex: Int, columnIndex: Int): Square {
-        return Square(Row(rowIndex, TicTacToeBoard.BOARD_DIM), Column('a' + columnIndex))
-    }
 
-    override fun stringToPosition(input: String): TicPosition {
-        val values = input.split(",")
-        return TicPosition(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
-    }
 
-    override fun positionToString(position: TicPosition): String {
-        return position.toString()
-    }
 
     override fun getBoard(
         positions: List<TicPosition>,

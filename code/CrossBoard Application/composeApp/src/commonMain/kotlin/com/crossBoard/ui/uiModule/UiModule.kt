@@ -6,7 +6,6 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.position.Position
 
 /**
  * A contract for a self-contained UI module responsible for rendering a specific type of game

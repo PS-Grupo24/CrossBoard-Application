@@ -173,7 +173,7 @@ class JdbcMatchRepo(private val jdbc: DataSource): MatchRepository {
      */
     override fun getStatistics(userId: Int): List<MatchStats> = transaction(jdbc){ connection ->
         val statsList = mutableListOf<MatchStats>()
-        for (matchType in MatchType.entries) {
+        for (matchType in MatchType.availableTypes) {
             val matches = mutableListOf<MultiPlayerMatch>()
             val prepared = connection.prepareStatement("SELECT * FROM match WHERE match_type = ? AND (player1 = ? OR player2 = ?)").apply {
                 setString(1, matchType.toString())

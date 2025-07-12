@@ -1,11 +1,8 @@
 package com.crossBoard.domain.matchModule
 
-import com.crossBoard.domain.Column
 import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.Row
-import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.ReversiBoardDraw
 import com.crossBoard.domain.board.ReversiBoardRun
@@ -62,9 +59,7 @@ class ReversiModule : MatchModule<
     override fun moveToMoveHttp(move: ReversiMove): ReversiMoveHttp {
         return ReversiMoveHttp(move.player.toString(), move.square.toString())
     }
-    override fun getSquare(rowIndex: Int, columnIndex: Int): Square {
-        return Square(Row(rowIndex, ReversiBoard.BOARD_DIM), Column('a' + columnIndex))
-    }
+
 
     override fun stringToPosition(input: String): ReversiPosition {
         val values = input.split(",")
@@ -121,3 +116,4 @@ class ReversiModule : MatchModule<
         }
     }
 }
+

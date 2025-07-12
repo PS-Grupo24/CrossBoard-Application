@@ -1,9 +1,7 @@
 package com.crossBoard
 
-import com.crossBoard.callReceiver.CallReceiverProvider
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.Email
-import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Password
 import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
@@ -627,7 +625,8 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                                 is Failure -> handleFailure(call, match.value)
                                 is Success -> {
                                     val matchType = match.value.matchType
-                                    val moveInput = receiveMoveHttp(call, matchType)
+                                    val moveInput = call.receive<MoveHttp>()
+                                    //val moveInput = receiveMoveHttp(call, matchType)
                                     val move = moveInput.toMove(matchType)
 
                                     when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
@@ -769,14 +768,4 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
     catch (t: Throwable) {
         call.respond(HttpStatusCode.InternalServerError, ErrorMessage(t.cause?.message ?: t.message ?: "Unknown error"))
     }
-}
-
-/**
- * Responsible for the deserialization of the move input.
- * @param call The Routing call where that contains the data.
- * @param matchType The match type that determines which type of move input to use.
- */
-private suspend fun receiveMoveHttp(call: RoutingCall, matchType: MatchType): MoveHttp {
-    val callReceiver = CallReceiverProvider.get(matchType)
-    return callReceiver.callReceive(call)
 }

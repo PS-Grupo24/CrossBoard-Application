@@ -27,10 +27,7 @@ object UiModuleProvider {
     @Suppress("UNCHECKED_CAST") // This is now safe and necessary
     fun <B: Board, M : Move> getModule(matchType: MatchType): UiModule<B, M> {
         val module = uiModuleMap[matchType]
-            ?: throw IllegalArgumentException("No UIModule found for MatchType: $matchType")
-
-        // The unchecked cast warning is acceptable here because our internal map
-        // logic guarantees the type correlation.
+            ?: throw NoSuchElementException("No UIModule found for MatchType: $matchType")
         return module as UiModule<B, M>
     }
 }

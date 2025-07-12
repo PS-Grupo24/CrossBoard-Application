@@ -35,7 +35,7 @@ fun FindMatchScreen(
     buttonMessage: String = "Find Match",
 ){
     var expanded by remember { mutableStateOf(false) }
-    val gameTypes = remember { MatchType.entries.toTypedArray() }
+    val gameTypes = remember { MatchType.availableTypes.toTypedArray() }
 
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(
         unfocusedBorderColor = CustomColor.LightBrown.value,

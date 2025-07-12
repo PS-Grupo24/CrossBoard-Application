@@ -1,6 +1,7 @@
 package com.crossBoard.repositoryTests.jdbcTests
 
 import com.crossBoard.domain.*
+import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.matchModule.ReversiModule
 import com.crossBoard.domain.matchModule.TicTacToeModule
 import com.crossBoard.domain.move.TicTacToeMove
@@ -102,7 +103,7 @@ class JdbcMatchRepoTests {
         val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), Password("Aa12345!"))
         val initialMatch = MultiPlayerMatch(module.getInitialBoard(), 104, MatchState.WAITING, user1.id, null, MatchType.TicTacToe, 1, null)
         matchRepo.addMatch(initialMatch)
-        val played = initialMatch.play(TicTacToeMove(initialMatch.board.turn, module.getSquare(1, 1)))
+        val played = initialMatch.play(TicTacToeMove(initialMatch.board.turn, getSquare(1, 1, TicTacToeBoard.BOARD_DIM)))
 
         val finalBoard = played.board
         val updatedMatch = matchRepo.updateMatch(104, finalBoard, user1.id, user2.id, MatchType.TicTacToe, 2, MatchState.RUNNING, null)

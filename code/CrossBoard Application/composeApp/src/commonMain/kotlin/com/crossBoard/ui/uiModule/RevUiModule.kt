@@ -29,9 +29,8 @@ import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.board.possibleMoves
-import com.crossBoard.domain.matchModule.ModuleProvider
+import com.crossBoard.domain.getSquare
 import com.crossBoard.domain.move.ReversiMove
-import com.crossBoard.domain.position.ReversiPosition
 import crossboardapplication.composeapp.generated.resources.Res
 import crossboardapplication.composeapp.generated.resources.blackPiece
 import crossboardapplication.composeapp.generated.resources.whitePiece
@@ -63,7 +62,6 @@ class RevUiModule : UiModule<ReversiBoard,ReversiMove> {
         enabled: Boolean,
         modifier: Modifier
     ) {
-        val module = ModuleProvider.getModule(matchType)
         val mySymbol = if (myPlayerType == Player.BLACK) blackResource else whiteResource
 
         Column(
@@ -108,7 +106,14 @@ class RevUiModule : UiModule<ReversiBoard,ReversiMove> {
                         Text("${row + 1}", modifier = Modifier.background(Color.DarkGray).width(squareSize / 4).height(squareSize + 1.dp).padding(top = 23.dp, start = 4.dp), color = Color.White, fontSize = boardTextSize)
                         repeat(ReversiBoard.BOARD_DIM) {col ->
                             val square = Square(Row(row, ReversiBoard.BOARD_DIM), Column('a' + col))
-                            squareView(square, board) { onMakeMove(ReversiMove(myPlayerType, module.getSquare(row, col)))}
+                            squareView(square, board) {
+                                onMakeMove(
+                                    ReversiMove(
+                                        myPlayerType,
+                                        getSquare(row, col, ReversiBoard.BOARD_DIM),
+                                    )
+                                )
+                            }
                         }
                     }
                 }

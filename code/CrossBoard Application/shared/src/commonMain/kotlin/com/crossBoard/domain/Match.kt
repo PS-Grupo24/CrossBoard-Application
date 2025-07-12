@@ -50,7 +50,7 @@ data class MultiPlayerMatch(
          */
         fun startGame(player1: Int, matchType: MatchType): MultiPlayerMatch {
             require(player1 > 0) { "player1 must be greater than 0" }
-            require(MatchType.entries.toTypedArray().contains(matchType)) { "matchType must be a valid match type" }
+            require(MatchType.availableTypes.toTypedArray().contains(matchType)) { "matchType must be a valid match type" }
             val module = ModuleProvider.getModule(matchType)
             val board = module.getInitialBoard()
             return MultiPlayerMatch(

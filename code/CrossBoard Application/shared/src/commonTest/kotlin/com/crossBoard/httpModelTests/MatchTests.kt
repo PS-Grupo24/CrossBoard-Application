@@ -10,6 +10,7 @@ import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.board.initialTicTacToePositions
+import com.crossBoard.domain.getSquare
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.httpModel.*
@@ -88,6 +89,6 @@ class MatchTests {
         val result = matchOutput.toMultiplayerMatch()
         val module = ModuleProvider.getModule(match.matchType)
         assertNotNull(module)
-        assertEquals(Player.EMPTY,result.board.get(module.getSquare(0,0)) )
+        assertEquals(Player.EMPTY,result.board.get(getSquare(0,0, TicTacToeBoard.BOARD_DIM)) )
     }
 }

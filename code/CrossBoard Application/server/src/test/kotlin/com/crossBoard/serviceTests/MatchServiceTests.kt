@@ -177,8 +177,8 @@ class MatchServiceTests {
     @Test
     fun testGetStatisticsEmpty() {
         val stats = matchService.getStatistics(1)
-        assertTrue(stats.size == MatchType.entries.size)
-        for (type in MatchType.entries) {
+        assertTrue(stats.size == MatchType.availableTypes.size)
+        for (type in MatchType.availableTypes) {
             assertEquals(0, stats.find{it.matchType == type.toString()}?.numberOfMatches)
         }
     }

@@ -8,8 +8,15 @@ package com.crossBoard.domain
 enum class MatchType() {
     TicTacToe,
     Reversi;
-
     override fun toString(): String = name
+    companion object {
+        /**
+         * List of the currently implemented match types.
+         * Inserting a new match type before making sure all the steps towards implementing
+         * were completed may result in runtime errors.
+         */
+        val availableTypes = setOf(TicTacToe, Reversi)
+    }
 }
 
 /**

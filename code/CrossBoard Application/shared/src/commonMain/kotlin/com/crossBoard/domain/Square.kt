@@ -39,3 +39,16 @@ fun String.toSquare(boardDim: Int): Square {
 
     return Square(Row.invoke(boardDim - this[0].digitToInt(), boardDim), Column(this[1]))
 }
+
+/**
+ * Responsible for getting a [Square] given a row index, column index and the board dimensions.
+ *
+ * @param rowIndex The index of the row.
+ * @param columnIndex The index of the column.
+ * @param boardDim The dimension of the board to get the correct square visualization.
+ *
+ * @return [Square] The resultant square.
+ */
+fun getSquare(rowIndex: Int, columnIndex: Int, boardDim: Int): Square {
+    return Square(Row(rowIndex, boardDim), Column('a' + columnIndex))
+}

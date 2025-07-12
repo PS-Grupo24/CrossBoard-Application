@@ -90,7 +90,7 @@ class MemoryMatchRep: MatchRepository {
      */
     override fun getStatistics(userId: Int): List<MatchStats> {
         val statsList = mutableListOf<MatchStats>()
-        for (matchType in MatchType.entries) {
+        for (matchType in MatchType.availableTypes) {
             val matchList = matches.filter {
                 it.matchType == matchType &&
                         (it.user1 == userId || it.user2 == userId) && (it.state != MatchState.RUNNING && it.state != MatchState.WAITING)

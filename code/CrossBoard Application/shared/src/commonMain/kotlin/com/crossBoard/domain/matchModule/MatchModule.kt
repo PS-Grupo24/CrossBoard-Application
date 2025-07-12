@@ -58,16 +58,6 @@ interface MatchModule<
     fun getInitialBoard(): B
 
     /**
-     * Returns the `Square` at a specific board position.
-     *
-     * @param rowIndex The row index.
-     * @param columnIndex The column index.
-     * @return The [Square] at the given coordinates.
-     */
-    fun getSquare(rowIndex: Int, columnIndex: Int): Square
-
-
-    /**
      * Deserializes a string into a [Position] object.
      *
      * @param input The string representation of the position.

@@ -30,11 +30,11 @@ object ModuleProvider {
      *
      * @param matchType The type of game.
      * @return The corresponding UIModule.
-     * @throws IllegalArgumentException if no module is found for the given type.
+     * @throws NoSuchElementException if no module is found for the given type.
      */
     @Suppress("UNCHECKED_CAST")
     fun getModule(matchType: MatchType): MatchModule<Board, Move, Position, MoveHttp> {
         return (uiModuleMap[matchType]
-            ?: throw IllegalArgumentException("No UIModule found for MatchType: $matchType")) as MatchModule<Board, Move, Position, MoveHttp>
+            ?: throw NoSuchElementException("No UIModule found for MatchType: $matchType")) as MatchModule<Board, Move, Position, MoveHttp>
     }
 }

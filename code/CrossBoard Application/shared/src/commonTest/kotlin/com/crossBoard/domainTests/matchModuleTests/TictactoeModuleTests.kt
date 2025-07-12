@@ -70,7 +70,7 @@ class TictactoeModuleTests {
             player1 = "BLACK",
             player2 = "WHITE",
             positions = listOf("BLACK,1a"),
-            moves = listOf(TicTacToeMove(Player.BLACK, module.getSquare(1,1)).toMoveHttp(MatchType.TicTacToe)),
+            moves = listOf(TicTacToeMove(Player.BLACK, getSquare(1,1, TicTacToeBoard.BOARD_DIM)).toMoveHttp(MatchType.TicTacToe)),
             winner = null
         )
 
@@ -84,7 +84,7 @@ class TictactoeModuleTests {
 
     @Test
     fun `getSquare should return correct Square`() {
-        val square = module.getSquare(2, 0)
+        val square = getSquare(2, 0, TicTacToeBoard.BOARD_DIM)
 
         assertEquals(2, square.row.index)
         assertEquals('a', square.column.symbol)
@@ -92,7 +92,7 @@ class TictactoeModuleTests {
 
     @Test
     fun `getMoveInput should construct valid input`() {
-        val input = module.moveToMoveHttp(TicTacToeMove(Player.WHITE, module.getSquare(2, 3)))
+        val input = module.moveToMoveHttp(TicTacToeMove(Player.WHITE, getSquare(2, 3, TicTacToeBoard.BOARD_DIM)))
 
         assertEquals("WHITE", input.player)
         assertEquals("1d", input.square)

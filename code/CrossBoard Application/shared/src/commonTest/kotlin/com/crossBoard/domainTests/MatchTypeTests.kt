@@ -7,14 +7,14 @@ class MatchTypeTests {
 
     @Test
     fun `MatchType toString returns enum name`() {
-        for (type in MatchType.entries) {
+        for (type in MatchType.availableTypes) {
             assertEquals(type.name, type.toString())
         }
     }
 
     @Test
     fun `String toMatchType returns correct enum`() {
-        for (type in MatchType.entries) {
+        for (type in MatchType.availableTypes) {
             assertEquals(type, type.name.toMatchType())
         }
     }

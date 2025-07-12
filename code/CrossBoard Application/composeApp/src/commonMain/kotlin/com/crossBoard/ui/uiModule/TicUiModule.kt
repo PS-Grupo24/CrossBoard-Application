@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.getSquare
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.utils.CustomColor
@@ -53,7 +54,6 @@ class TicUiModule : UiModule<TicTacToeBoard, TicTacToeMove> {
         enabled: Boolean,
         modifier: Modifier
     ) {
-        val module = ModuleProvider.getModule(matchType)
         val blackResource = Res.drawable.crossSymbol
         val whiteResource = Res.drawable.circleSymbol
         val mySymbol = if (myPlayerType == Player.BLACK) blackResource else whiteResource
@@ -92,7 +92,7 @@ class TicUiModule : UiModule<TicTacToeBoard, TicTacToeMove> {
                             rowIndex = rowIndex,
                             colIndex = colIndex,
                             symbol = symbol,
-                            onClick = { onMakeMove(TicTacToeMove(myPlayerType, module.getSquare(rowIndex, colIndex))) },
+                            onClick = { onMakeMove(TicTacToeMove(myPlayerType, getSquare(rowIndex, colIndex, TicTacToeBoard.BOARD_DIM))) },
                             enabled = enabled && symbol == null,
                         )
                     }
