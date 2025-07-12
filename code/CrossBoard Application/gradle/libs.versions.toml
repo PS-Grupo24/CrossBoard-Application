@@ -31,6 +31,9 @@ androidUi = "1.8.3"
 voyager = "1.1.0-beta02"
 ktorOpenAPIVersion = "5.0.2"
 coilComposeCore = "3.2.0"
+uiTestJunit4Android = "1.8.3"
+uiTestJunit4Desktop = "1.7.0"
+composeTest = "1.6.8"
 [libraries]
 jdbi3-core = { module = "org.jdbi:jdbi3-core", version.ref = "jdbi3Core" }
 jdbi3-kotlin = { module = "org.jdbi:jdbi3-kotlin", version.ref = "jdbi3Kotlin" }
@@ -92,7 +95,9 @@ slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4jNop" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "junitJupiter" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "androidUi" }
-
+androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "composeTest" }
+androidx-ui-test-junit4-desktop = { group = "androidx.compose.ui", name = "ui-test-junit4-desktop", version.ref = "composeTest" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeTest" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -21,7 +21,6 @@ val clientJson = Json {
  * It also performs the configuration of the JSON serialization, Logging and SSE.
  */
 fun createHttpClient(engine: HttpClientEngine): HttpClient {
-
     return HttpClient(engine) {
         install(ContentNegotiation) {
             json(

@@ -14,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -30,7 +32,7 @@ fun PasswordTextField(
     OutlinedTextField(
         value =  value,
         onValueChange = onValueChange,
-        label = { Text("Password") },
+        label = { Text("Password", modifier = Modifier.testTag("PasswordTextField Label Test")) },
         visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         isError = errorMessage != null,
@@ -42,10 +44,11 @@ fun PasswordTextField(
 
             val description = if (passwordVisible) "Hide password" else "Show password"
 
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(imageVector = image, contentDescription = description)
+            IconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.testTag("PasswordTextField Icon Test")) {
+                Icon(imageVector = image, contentDescription = description, modifier = Modifier.testTag("PasswordTextField Icon Image Test"))
             }
         },
         colors = textFieldColors,
+        modifier = Modifier.testTag("PasswordTextField Test")
     )
 }

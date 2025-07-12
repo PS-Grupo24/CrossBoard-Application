@@ -2,7 +2,9 @@ package com.crossBoard.ui.components
 
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import com.crossBoard.utils.CustomColor
 
 /**
@@ -27,22 +29,24 @@ fun MyAlertDialog(
 ){
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(title, color = CustomColor.DarkBrown.value) },
-        text = { Text(text, color = CustomColor.LightBrown.value) },
+        title = { Text(title, color = CustomColor.DarkBrown.value, modifier = Modifier.testTag("Alert Dialog Title test"))},
+        text = { Text(text, color = CustomColor.LightBrown.value, modifier = Modifier.testTag("Alert Dialog Text test")) },
         confirmButton = {
             Button(
                 onClick = onConfirm,
+                modifier = Modifier.testTag("Confirm Button Test"),
                 colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.DarkBrown.value)
             ){
-                Text(confirmText, color = Color.White)
+                Text(confirmText, color = Color.White, modifier = Modifier.testTag("Confirm Button Text Test"))
             }
         },
         dismissButton = {
             Button(
                 onClick = onDismiss,
+                modifier = Modifier.testTag("Dismiss Button Test"),
                 colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.DarkBrown.value)
             ){
-                Text(dismissText, color = Color.White)
+                Text(dismissText, color = Color.White, modifier = Modifier.testTag("Dismiss Button Text Test"))
             }
         }
     )

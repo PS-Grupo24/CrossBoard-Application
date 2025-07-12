@@ -1,4 +1,5 @@
 import org.gradle.kotlin.dsl.implementation
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
@@ -101,6 +102,10 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(kotlin("test-annotations-common"))
+
+            @OptIn(ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
         }
     }
 }
@@ -135,6 +140,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.ui.test.junit4.android)
+    implementation(libs.androidx.ui.test.junit4.desktop)
     val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
