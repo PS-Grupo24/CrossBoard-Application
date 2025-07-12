@@ -234,6 +234,10 @@ class AuthViewModel(
         settings.remove(stateSettingsString)
     }
 
+    fun playMatch(play: Boolean){
+        _authState.update { it.copy(isLoading = true, errorMessage = null, playMatch = play) }
+    }
+
     /**
      * Responsible for checking if there is already session stored in `Settings` before the authentication begins.
      */

@@ -70,6 +70,7 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ui.tooling.preview)
             implementation(libs.ktor.client.android)
+            implementation(libs.androidx.ui.test.junit4.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -85,7 +86,6 @@ kotlin {
             implementation(libs.multiplatform.settings.v130)
             implementation(libs.bundles.coilBundle)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
-            implementation(libs.bundles.voyager)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)
@@ -95,6 +95,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.java)
+            implementation(libs.androidx.ui.test.junit4.desktop)
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
@@ -140,8 +141,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.ui.test.junit4.android)
-    implementation(libs.androidx.ui.test.junit4.desktop)
     val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)

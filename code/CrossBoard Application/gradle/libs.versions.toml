@@ -27,7 +27,7 @@ composeMaterial = "1.4.1"
 multiplatformSettingsVersion = "1.3.0"
 postgresql = "42.5.0"
 slf4jNop = "2.0.7"
-androidUi = "1.8.3"
+androidUi = "1.8.2"
 voyager = "1.1.0-beta02"
 ktorOpenAPIVersion = "5.0.2"
 coilComposeCore = "3.2.0"
@@ -95,9 +95,9 @@ slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4jNop" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "junitJupiter" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "androidUi" }
-androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "composeTest" }
-androidx-ui-test-junit4-desktop = { group = "androidx.compose.ui", name = "ui-test-junit4-desktop", version.ref = "composeTest" }
-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeTest" }
+androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "androidUi" }
+androidx-ui-test-junit4-desktop = { group = "androidx.compose.ui", name = "ui-test-junit4-desktop", version.ref = "uiTestJunit4Desktop" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidUi" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
