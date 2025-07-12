@@ -9,7 +9,12 @@ import com.crossBoard.domain.matchModule.ModuleProvider
 import kotlin.random.Random
 
 /**
- * SinglePlayerMatch replicates a MultiplayerMatch.
+ * Class ´SinglePlayerMatch´ responsible for the Singleplayer Match logic.
+ * @property id The id of the match.
+ * @property board The board of the match.
+ * @property state The state of the match.
+ * @property matchType The type of the match.
+ * @property version The version of the match, used to track changes.
  */
 class SinglePlayerMatch(
     val id: Int,
@@ -19,6 +24,12 @@ class SinglePlayerMatch(
     val version: Int
 ) {
     companion object {
+
+        /**
+         * Starts a new game with the given match type.
+         * @param matchType The type of the match to start.
+         * @return A new instance of SinglePlayerMatch for the new singleplayerMatch.
+         */
         fun startGame(matchType: MatchType): SinglePlayerMatch {
             val module = ModuleProvider.getModule(matchType)
             val board = module.getInitialBoard()
@@ -32,7 +43,12 @@ class SinglePlayerMatch(
         }
     }
 
-    fun makeMove(move: Move): SinglePlayerMatch{
+    /**
+     * Function ´makeMove´ responsible for making a move in the match.
+     * @param move The move to be made.
+     * @return A new instance of SinglePlayerMatch with the move made.
+     */
+    fun makeMove(move: Move): SinglePlayerMatch {
         val newBoard = board.play(move)
         return SinglePlayerMatch(
             id,
@@ -43,7 +59,12 @@ class SinglePlayerMatch(
         )
     }
 
-    fun forfeit(player: Player): SinglePlayerMatch{
+    /**
+     * Function ´forfeit´ responsible for forfeiting the match.
+     * @param player The player who is forfeiting the match.
+     * @return A new instance of SinglePlayerMatch with the match forfeited.
+     */
+    fun forfeit(player: Player): SinglePlayerMatch {
         val newBoard = board.forfeit(player)
         return SinglePlayerMatch(
             id,
@@ -54,16 +75,29 @@ class SinglePlayerMatch(
         )
     }
 
+    /**
+     * Function ´equals´ responsible for checking if two SinglePlayerMatch instances are equal.
+     * @param other The other instance to compare with.
+     * @return True if the instances are equal, false otherwise.
+     */
     override fun equals(other: Any?) = other is SinglePlayerMatch && id == other.id && other.version == version
 
+    /**
+     * Function ´hashCode´ responsible for generating a hash code for the SinglePlayerMatch instance.
+     * @return The hash code of the SinglePlayerMatch instance.
+     */
     override fun hashCode(): Int = id.hashCode() + version.hashCode()
 }
 
-private fun getMatchStateFromBoard(board: Board): MatchState{
-    return when(board){
+/**
+ * Function ´getMatchStateFromBoard´ responsible for getting the match state from the board.
+ * @param board The board of the match.
+ * @return The match state of the match based on the board.
+ * @throws IllegalArgumentException if the board is not a valid type.
+ */
+private fun getMatchStateFromBoard(board: Board): MatchState = when(board){
         is BoardRun -> MatchState.RUNNING
         is BoardWin -> MatchState.WIN
         is BoardDraw -> MatchState.DRAW
         else -> throw IllegalArgumentException("Invalid MatchState: $board")
-    }
 }

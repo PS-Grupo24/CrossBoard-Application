@@ -10,7 +10,5 @@ data class PlayerInfo(
     val username: String,
 
     ){
-    override fun toString(): String {
-        return username
-    }
+    override fun toString(): String = username
 }
