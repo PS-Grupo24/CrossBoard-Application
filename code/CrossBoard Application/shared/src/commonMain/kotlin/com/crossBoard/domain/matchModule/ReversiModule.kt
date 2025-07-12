@@ -16,15 +16,14 @@ import com.crossBoard.domain.position.ReversiPosition
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.moveInput.ReversiMoveInput
-import com.crossBoard.httpModel.moveOutput.ReversiMoveOutput
+import com.crossBoard.httpModel.moveHttp.ReversiMoveHttp
 
 /**
  * Implementation of the [MatchModule] interface for the Reversi game.
  *
  * This module encapsulates all Reversi-specific logic required to support match operations,
  * including conversion between domain types ([ReversiMove], [ReversiPosition], [ReversiBoard])
- * and HTTP layer representations ([ReversiMoveInput], [ReversiMoveOutput]),
+ * and HTTP layer representations [ReversiMoveHttp],
  * along with game state restoration and initial board setup.
  *
  * Responsibilities:
@@ -39,8 +38,7 @@ class ReversiModule : MatchModule<
         ReversiBoard,
         ReversiMove,
         ReversiPosition,
-        ReversiMoveInput,
-        ReversiMoveOutput
+        ReversiMoveHttp
         >
 {
     override val matchType: MatchType
@@ -57,16 +55,12 @@ class ReversiModule : MatchModule<
         )
     }
 
-    override fun moveInputToMove(input: ReversiMoveInput): ReversiMove {
-        return ReversiMove(input.player.toPlayer(), input.square.toSquare(ReversiBoard.BOARD_DIM))
-    }
-
-    override fun moveToMoveOutput(move: ReversiMove): ReversiMoveOutput {
-        return ReversiMoveOutput(move.player.toString(), move.square.toString())
-    }
-
-    override fun moveOutputToMove(move: ReversiMoveOutput): ReversiMove {
+    override fun moveHttpToMove(move: ReversiMoveHttp): ReversiMove {
         return ReversiMove(move.player.toPlayer(), move.square.toSquare(ReversiBoard.BOARD_DIM))
+    }
+
+    override fun moveToMoveHttp(move: ReversiMove): ReversiMoveHttp {
+        return ReversiMoveHttp(move.player.toString(), move.square.toString())
     }
     override fun getSquare(rowIndex: Int, columnIndex: Int): Square {
         return Square(Row(rowIndex, ReversiBoard.BOARD_DIM), Column('a' + columnIndex))
@@ -79,13 +73,6 @@ class ReversiModule : MatchModule<
 
     override fun positionToString(position: ReversiPosition): String {
         return position.toString()
-    }
-
-    override fun moveToMoveInput(move: ReversiMove): ReversiMoveInput {
-        return ReversiMoveInput(
-            player = move.player.toString(),
-            "${move.square.row.number}${move.square.column.symbol}",
-        )
     }
 
     override fun getBoard(

@@ -4,7 +4,7 @@ import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.httpModel.*
-import com.crossBoard.httpModel.moveOutput.toMoveOutput
+import com.crossBoard.httpModel.moveHttp.toMoveHttp
 import kotlin.test.*
 
 class MatchTests {
@@ -182,7 +182,7 @@ class MatchTests {
             newMatch.board.turn.toString(),
             newMatch.board.positions.map {it.toString()},
             newMatch.board.moves.map {
-            module.moveToMoveOutput(it) }
+            module.moveToMoveHttp(it) }
         )
         val expectedMatchOutput = MatchOutput(
             newMatch.id, 1, 2,
@@ -215,12 +215,12 @@ class MatchTests {
 
         val updatedMatch = newMatch.play(move)
 
-        val expectedResult = MatchPlayedOutput(move.toMoveOutput(MatchType.TicTacToe), 3)
+        val expectedResult = MatchPlayedOutput(move.toMoveHttp(MatchType.TicTacToe), 3)
 
         val result = updatedMatch.toPlayedMatch()
 
         assertEquals(expectedResult, result)
         assertEquals(updatedMatch.version, result.version)
-        assertEquals(updatedMatch.board.moves[0].toMoveOutput(MatchType.TicTacToe), result.move)
+        assertEquals(updatedMatch.board.moves[0].toMoveHttp(MatchType.TicTacToe), result.move)
     }
 }

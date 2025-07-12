@@ -4,8 +4,7 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.position.Position
-import com.crossBoard.httpModel.moveInput.MoveInput
-import com.crossBoard.httpModel.moveOutput.MoveOutput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
 
 
 /**
@@ -17,12 +16,12 @@ object ModuleProvider {
      * It is required for any future modules of new match types to be inserted in this list
      * so the implemented functions can find their respective handler for the new match type.
      */
-    private val modules: List<MatchModule<*, *, *, *, *>> = listOf(
+    private val modules: List<MatchModule<*, *, *, *>> = listOf(
         TicTacToeModule(),
         ReversiModule(),
     )
 
-    private val uiModuleMap: Map<MatchType, MatchModule<*, *, *, *, *>> by lazy {
+    private val uiModuleMap: Map<MatchType, MatchModule<*, *, *, *>> by lazy {
         modules.associateBy { it.matchType }
     }
 
@@ -34,8 +33,8 @@ object ModuleProvider {
      * @throws IllegalArgumentException if no module is found for the given type.
      */
     @Suppress("UNCHECKED_CAST")
-    fun getModule(matchType: MatchType): MatchModule<Board, Move, Position, MoveInput, MoveOutput> {
+    fun getModule(matchType: MatchType): MatchModule<Board, Move, Position, MoveHttp> {
         return (uiModuleMap[matchType]
-            ?: throw IllegalArgumentException("No UIModule found for MatchType: $matchType")) as MatchModule<Board, Move, Position, MoveInput, MoveOutput>
+            ?: throw IllegalArgumentException("No UIModule found for MatchType: $matchType")) as MatchModule<Board, Move, Position, MoveHttp>
     }
 }

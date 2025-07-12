@@ -46,7 +46,7 @@ class MemoryUserRepTest {
         val user = userRepo.addUser(Username("toUpdate"), Email("up@example.com"), Password("Aa12345!"))
         val newUsername = Username("updatedName")
         val newEmail = Email("updated@example.com")
-        val newPassword = Password("Aa12345?")
+        val newPassword = Password("Aa12345!")
 
         val updatedUser = userRepo.updateUser(user.id, newUsername, newEmail, newPassword, UserState.NORMAL)
         assertEquals(newUsername, updatedUser.username)
@@ -71,7 +71,7 @@ class MemoryUserRepTest {
         val success = userRepo.login(username, password)
         assertNotNull(success)
 
-        val fail = userRepo.login(username, Password("Aa12345??"))
+        val fail = userRepo.login(username, Password("Aa12345!!"))
         assertNull(fail)
     }
 

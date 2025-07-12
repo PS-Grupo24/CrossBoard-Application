@@ -9,8 +9,8 @@ import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.httpModel.*
-import com.crossBoard.httpModel.moveInput.MoveInput
-import com.crossBoard.httpModel.moveInput.toMove
+import com.crossBoard.httpModel.moveHttp.MoveHttp
+import com.crossBoard.httpModel.moveHttp.toMove
 import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.request.*
@@ -27,9 +27,6 @@ import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktoropenapi.put
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.http.content.CompressedFileType
-import io.ktor.server.http.content.default
-import io.ktor.server.http.content.preCompressed
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.ContentTransformationException
 import java.io.File
@@ -630,7 +627,7 @@ fun Application.configureRouting(usersService: UsersService, matchService: Match
                                 is Failure -> handleFailure(call, match.value)
                                 is Success -> {
                                     val matchType = match.value.matchType
-                                    val moveInput = receiveMoveInput(call, matchType)
+                                    val moveInput = receiveMoveHttp(call, matchType)
                                     val move = moveInput.toMove(matchType)
 
                                     when(val updatedMatch = matchService.playMatch(matchId, user.value.id, move, version)){
@@ -779,7 +776,7 @@ private suspend fun runHttp(call: RoutingCall, block: suspend () -> Unit) {
  * @param call The Routing call where that contains the data.
  * @param matchType The match type that determines which type of move input to use.
  */
-private suspend fun receiveMoveInput(call: RoutingCall, matchType: MatchType): MoveInput {
+private suspend fun receiveMoveHttp(call: RoutingCall, matchType: MatchType): MoveHttp {
     val callReceiver = CallReceiverProvider.get(matchType)
     return callReceiver.callReceive(call)
 }

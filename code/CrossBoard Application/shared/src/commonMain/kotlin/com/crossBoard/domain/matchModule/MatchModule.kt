@@ -5,10 +5,12 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.Board
+import com.crossBoard.domain.board.BoardRun
+import com.crossBoard.domain.board.BoardWin
+import com.crossBoard.domain.board.BoardDraw
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.position.Position
-import com.crossBoard.httpModel.moveInput.MoveInput
-import com.crossBoard.httpModel.moveOutput.MoveOutput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
 
 
 /**
@@ -29,54 +31,29 @@ import com.crossBoard.httpModel.moveOutput.MoveOutput
  * - Converting between API-level input/output and game logic
  *
  * Type Parameters:
- * @param B  Board type for the game (must implement `Board`)
- * @param M  Move type for the game (must implement `Move`)
- * @param P  Position type for the game (must implement `Position`)
- * @param MI Move input data structure (usually received from clients)
- * @param MO Move output data structure (usually returned to clients)
+ * @param B  [Board] type for the game.
+ * @param M  [Move] type for the move.
+ * @param P  [Position] type for the position.
+ * @param MH [MoveHttp] type move format to be sent in http messages.
  */
 interface MatchModule<
         B : Board,
         M : Move,
         P : Position,
-        MI : MoveInput,
-        MO : MoveOutput
+        MH: MoveHttp
         >
 {
     /**
      * The match type this module supports (e.g., TicTacToe, Reversi).
      */
     val matchType: MatchType
-
-    /**
-     * Converts a move input (e.g., from a client) into a move object.
-     *
-     * @param input The move input.
-     * @return The corresponding move.
-     */
-    fun moveInputToMove(input: MI): M
-
-
-    /**
-     * Converts a move object to its corresponding output format.
-     *
-     * @param move The move to convert.
-     * @return The move output (usually sent to clients).
-     */
-    fun moveToMoveOutput(move: M): MO
-
-    /**
-     * Converts a move output back to a move object.
-     *
-     * @param move The move output.
-     * @return The internal move representation.
-     */
-    fun moveOutputToMove(move: MO): M
-
     /**
      * Provides the initial board state for a new match.
      *
-     * @return The initialized board.
+     * It is required to return the [BoardRun] for this [MatchType] with
+     * the initial positions, moves, player types for player1, player2 and turn.
+     *
+     * @return The [BoardRun] for this new [MatchType].
      */
     fun getInitialBoard(): B
 
@@ -106,16 +83,16 @@ interface MatchModule<
      */
     fun positionToString(position: P): String
 
-    /**
-     * Constructs a move input from the given player and board coordinates.
-     * @param move The move [M] to convert into [MI]
-     * @return The [Move] input object.
-     */
-    fun moveToMoveInput(move: M): MI
+    fun moveToMoveHttp(move: M): MH
+
+    fun moveHttpToMove(move: MH): M
 
     /**
      * Converts a board output (typically from storage or network) into an actual board object.
      *
+     * When the state is [MatchState.RUNNING] or [MatchState.WAITING] should return the [BoardRun] of this [MatchType].
+     * When the state is [MatchState.WIN] should return the [BoardWin] of this [MatchType].
+     * When the state is [MatchState.DRAW] should return the [BoardDraw] of this [MatchType].
      * @param state The current match state (e.g., RUNNING, DRAW).
      * @return The reconstructed board.
      */

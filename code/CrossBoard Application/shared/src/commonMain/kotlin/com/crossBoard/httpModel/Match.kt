@@ -5,8 +5,8 @@ import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
-import com.crossBoard.httpModel.moveOutput.MoveOutput
-import com.crossBoard.httpModel.moveOutput.toMoveOutput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
+import com.crossBoard.httpModel.moveHttp.toMoveHttp
 import kotlinx.serialization.Serializable
 
 /**
@@ -82,7 +82,7 @@ fun MultiPlayerMatch.toMatchOutput(): MatchOutput {
  * Function to convert a MultiPlayerMatch to a MatchPlayedOutput.
  * @return MatchPlayedOutput the match played output.
  */
-fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveOutput(matchType), this.version)
+fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last().toMoveHttp(matchType), this.version)
 
 /**
  * Data class MatchPlayedOutput represents information to be sent in an HTTP response when a move is made in a match.
@@ -90,7 +90,7 @@ fun MultiPlayerMatch.toPlayedMatch() = MatchPlayedOutput(this.board.moves.last()
  * @param version The new version of the match after the move was made.
  */
 @Serializable
-data class MatchPlayedOutput(val move: MoveOutput, val version: Int)
+data class MatchPlayedOutput(val move: MoveHttp, val version: Int)
 
 /**
  * Data class MatchCancel represents the information to be sent in an HTTP response after a `Match` is canceled.

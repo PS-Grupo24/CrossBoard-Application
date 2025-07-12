@@ -6,24 +6,20 @@ import com.crossBoard.domain.Player
 import com.crossBoard.domain.Row
 import com.crossBoard.domain.Square
 import kotlin.test.*
-import com.crossBoard.httpModel.*
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.*
-import com.crossBoard.httpModel.moveInput.ReversiMoveInput
-import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
-import com.crossBoard.httpModel.moveInput.toMove
-import com.crossBoard.httpModel.moveOutput.ReversiMoveOutput
-import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
-import com.crossBoard.httpModel.moveOutput.toMoveOutput
-import kotlinx.serialization.json.Json
+import com.crossBoard.httpModel.moveHttp.ReversiMoveHttp
+import com.crossBoard.httpModel.moveHttp.TicTacToeMoveHttp
+import com.crossBoard.httpModel.moveHttp.toMove
+import com.crossBoard.httpModel.moveHttp.toMoveHttp
 
 class MoveTests {
     val player = Player.BLACK
     val revSquare = Square(Row(1, ReversiBoard.BOARD_DIM), Column('a' + 0))
     val ticSquare = Square(Row(1, TicTacToeBoard.BOARD_DIM), Column('a' + 0))
 
-    val revMoveInput = ReversiMoveInput(player.toString(), revSquare.toString())
-    val ticMoveInput = TicTacToeMoveInput(player.toString(), ticSquare.toString())
+    val revMoveInput = ReversiMoveHttp(player.toString(), revSquare.toString())
+    val ticMoveInput = TicTacToeMoveHttp(player.toString(), ticSquare.toString())
 
     val revMove = ReversiMove(player, revSquare)
     val ticMove = TicTacToeMove(player, ticSquare)
@@ -37,11 +33,11 @@ class MoveTests {
     }
 
     @Test fun `Test toMoveOutput`() {
-        val revMoveOutput = revMove.toMoveOutput(MatchType.Reversi)
-        val ticMoveOutput = ticMove.toMoveOutput(MatchType.TicTacToe)
+        val revMoveOutput = revMove.toMoveHttp(MatchType.Reversi)
+        val ticMoveOutput = ticMove.toMoveHttp(MatchType.TicTacToe)
 
-        assertTrue(revMoveOutput is ReversiMoveOutput)
-        assertTrue(ticMoveOutput is TicTacToeMoveOutput)
+        assertTrue(revMoveOutput is ReversiMoveHttp)
+        assertTrue(ticMoveOutput is TicTacToeMoveHttp)
 
         assertEquals(revMoveOutput.player, player.toString())
         assertEquals(revMoveOutput.square, revSquare.toString())

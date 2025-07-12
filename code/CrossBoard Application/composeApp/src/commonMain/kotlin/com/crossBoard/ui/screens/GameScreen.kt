@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.*
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.BoardWin
+import com.crossBoard.domain.board.ReversiBoard
 import com.crossBoard.domain.move.Move
 import com.crossBoard.model.PlayerInfo
 import com.crossBoard.ui.components.MyAlertDialog

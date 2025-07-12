@@ -16,8 +16,7 @@ import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
-import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveHttp.TicTacToeMoveHttp
 
 /**
  * Implementation of [MatchModule] for the Tic-Tac-Toe game.
@@ -40,18 +39,17 @@ class TicTacToeModule : MatchModule<
         TicTacToeBoard,
         TicTacToeMove,
         TicPosition,
-        TicTacToeMoveInput,
-        TicTacToeMoveOutput
+        TicTacToeMoveHttp
         >
 {
     override val matchType: MatchType = MatchType.TicTacToe
 
-    override fun moveInputToMove(input: TicTacToeMoveInput): TicTacToeMove {
-        return TicTacToeMove(input.player.toPlayer(), input.square.toSquare(TicTacToeBoard.BOARD_DIM))
+    override fun moveToMoveHttp(move: TicTacToeMove): TicTacToeMoveHttp {
+        return TicTacToeMoveHttp(move.player.toString(), move.square.toString())
     }
 
-    override fun moveToMoveOutput(move: TicTacToeMove): TicTacToeMoveOutput {
-        return TicTacToeMoveOutput(move.player.toString(), move.square.toString())
+    override fun moveHttpToMove(move: TicTacToeMoveHttp): TicTacToeMove {
+        return TicTacToeMove(move.player.toPlayer(), move.square.toSquare(TicTacToeBoard.BOARD_DIM))
     }
 
     override fun getInitialBoard(): TicTacToeBoard {
@@ -64,10 +62,6 @@ class TicTacToeModule : MatchModule<
             p1.other(),
         )
     }
-
-    override fun moveOutputToMove(move: TicTacToeMoveOutput): TicTacToeMove {
-        return TicTacToeMove(move.player.toPlayer(), move.square.toSquare(TicTacToeBoard.BOARD_DIM))
-    }
     override fun getSquare(rowIndex: Int, columnIndex: Int): Square {
         return Square(Row(rowIndex, TicTacToeBoard.BOARD_DIM), Column('a' + columnIndex))
     }
@@ -79,13 +73,6 @@ class TicTacToeModule : MatchModule<
 
     override fun positionToString(position: TicPosition): String {
         return position.toString()
-    }
-
-    override fun moveToMoveInput(move: TicTacToeMove): TicTacToeMoveInput {
-        return TicTacToeMoveInput(
-            move.player.toString(),
-            "${move.square.row.number}${move.square.column.symbol}",
-        )
     }
 
     override fun getBoard(

@@ -1,9 +1,9 @@
-package com.crossBoard.httpModel.moveInput
+package com.crossBoard.httpModel.moveHttp
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ReversiMoveInput(
+data class ReversiMoveHttp(
     val player: String,
     val square: String
-): MoveInput
+): MoveHttp

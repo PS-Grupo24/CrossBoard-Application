@@ -2,7 +2,6 @@ package com.crossBoard.httpModel
 
 import kotlinx.serialization.Serializable
 
-
 /**
  * Data class "UserCreationInput" represents the data format for the user creation.
  * @param username the username of the new user.

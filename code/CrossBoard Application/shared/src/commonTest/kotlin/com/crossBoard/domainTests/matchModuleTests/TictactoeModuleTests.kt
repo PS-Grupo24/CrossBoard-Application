@@ -7,9 +7,8 @@ import com.crossBoard.domain.matchModule.TicTacToeModule
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
-import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
-import com.crossBoard.httpModel.moveOutput.toMoveOutput
+import com.crossBoard.httpModel.moveHttp.TicTacToeMoveHttp
+import com.crossBoard.httpModel.moveHttp.toMoveHttp
 import com.crossBoard.httpModel.toBoard
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,8 +26,8 @@ class TictactoeModuleTests {
 
     @Test
     fun `moveInputToMove should convert valid input to TicTacToeMove`() {
-        val input = TicTacToeMoveInput("BLACK", "1a")
-        val move = module.moveInputToMove(input)
+        val input = TicTacToeMoveHttp("BLACK", "1a")
+        val move = module.moveHttpToMove(input)
 
         assertIs<TicTacToeMove>(move)
         assertEquals(Player.BLACK, move.player)
@@ -39,7 +38,7 @@ class TictactoeModuleTests {
     @Test
     fun `moveToMoveOutput should convert move correctly`() {
         val move = TicTacToeMove(Player.WHITE, Square(Row(2, 3), Column('b')))
-        val output = module.moveToMoveOutput(move)
+        val output = module.moveToMoveHttp(move)
 
         assertEquals("WHITE", output.player)
         assertEquals("1b", output.square)
@@ -71,7 +70,7 @@ class TictactoeModuleTests {
             player1 = "BLACK",
             player2 = "WHITE",
             positions = listOf("BLACK,1a"),
-            moves = listOf(TicTacToeMove(Player.BLACK, module.getSquare(1,1)).toMoveOutput(MatchType.TicTacToe)),
+            moves = listOf(TicTacToeMove(Player.BLACK, module.getSquare(1,1)).toMoveHttp(MatchType.TicTacToe)),
             winner = null
         )
 
@@ -93,7 +92,7 @@ class TictactoeModuleTests {
 
     @Test
     fun `getMoveInput should construct valid input`() {
-        val input = module.moveToMoveInput(TicTacToeMove(Player.WHITE, module.getSquare(2, 3)))
+        val input = module.moveToMoveHttp(TicTacToeMove(Player.WHITE, module.getSquare(2, 3)))
 
         assertEquals("WHITE", input.player)
         assertEquals("1d", input.square)
@@ -101,8 +100,8 @@ class TictactoeModuleTests {
 
     @Test
     fun `moveOutputToMove should correctly reconstruct move`() {
-        val output = TicTacToeMoveOutput("BLACK", "3b")
-        val move = module.moveOutputToMove(output)
+        val output = TicTacToeMoveHttp("BLACK", "3b")
+        val move = module.moveHttpToMove(output)
 
         assertIs<TicTacToeMove>(move)
         assertEquals(Player.BLACK, move.player)

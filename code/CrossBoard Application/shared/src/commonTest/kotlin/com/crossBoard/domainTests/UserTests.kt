@@ -73,7 +73,7 @@ class UserTests {
             id = 1,
             username = Username("User123"),
             email = Email("user@example.com"),
-            password = "Pass123!",
+            password = Password("Pass123!"),
             token = Token("token123"),
             state = UserState.NORMAL
         )
@@ -89,7 +89,7 @@ class UserTests {
                 id = 0,
                 username = Username("User123"),
                 email = Email("user@example.com"),
-                password = "Pass123!",
+                password = Password("Pass123!"),
                 token = Token("token123"),
                 state = UserState.NORMAL
             )
@@ -103,7 +103,7 @@ class UserTests {
             id = 5,
             username = Username("Admin01"),
             email = Email("admin@example.com"),
-            password = "Admin123!",
+            password = Password("Admin1234124!"),
             token = Token("adminToken")
         )
 

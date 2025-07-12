@@ -6,8 +6,8 @@ import com.crossBoard.ApiClient
 import com.crossBoard.domain.*
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
-import com.crossBoard.domain.move.toMove
-import com.crossBoard.httpModel.moveInput.MoveInput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
+import com.crossBoard.httpModel.moveHttp.toMove
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -377,7 +377,7 @@ class MultiplayerMatchViewModel(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun getMoveInput(matchType: MatchType, move: Move): MoveInput {
+private fun getMoveInput(matchType: MatchType, move: Move): MoveHttp {
     val module = ModuleProvider.getModule(matchType)
-    return module.moveToMoveInput(move)
+    return module.moveToMoveHttp(move)
 }

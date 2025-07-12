@@ -12,9 +12,8 @@ import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.board.initialTicTacToePositions
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.*
-import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveHttp.TicTacToeMoveHttp
 import kotlin.test.*
 
 class MatchTests {
@@ -76,7 +75,7 @@ class MatchTests {
 
         assertEquals(match.version, playedOutput.version)
 
-        val moveOutput = playedOutput.move as TicTacToeMoveOutput
+        val moveOutput = playedOutput.move as TicTacToeMoveHttp
         assertEquals("BLACK", moveOutput.player)
         assertEquals("3a", moveOutput.square)
     }

@@ -11,7 +11,6 @@ import com.crossBoard.domain.Username
 import com.crossBoard.repository.interfaces.UserRepository
 import com.crossBoard.repository.interfaces.generateTokenValue
 import com.crossBoard.util.PasswordHasher
-import com.crossBoard.util.hashPassword
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -75,7 +74,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
      * @return Boolean true if the user was deleted, false otherwise.
      */
     override fun deleteUser(userId: Int): Boolean = transaction(jdbc) { connection ->
-        val prepared = connection.prepareStatement("DELETE FROM users WHERE id = ?").apply {
+        connection.prepareStatement("DELETE FROM users WHERE id = ?").apply {
             setLong(1, userId.toLong())
             executeUpdate()
         }
@@ -87,7 +86,7 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
      * @param userId the id of the user being updated.
      * @param username the new username of the user.
      * @param email the new email of the user.
-     * @param passwordHash the new password of the user.
+     * @param password the new password of the user.
      * @return UserProfileInfo the user profile information of the updated user.
      */
     override fun updateUser(
@@ -138,11 +137,12 @@ class JdbcUserRepo(private val jdbc: DataSource): UserRepository {
     override fun addUser(username: Username, email: Email, password: Password): User = transaction(jdbc) { connection ->
         val token = generateTokenValue()
         val state = UserState.NORMAL.name
+        val hash = PasswordHasher.hashPassword(password.value)
         val prepared = connection.prepareStatement("INSERT INTO users (token, username, email, password, state) values (?,?,?,?, ?)", Statement.RETURN_GENERATED_KEYS).apply {
             setString(1, token)
             setString(2, username.value)
             setString(3, email.value)
-            setString(4, PasswordHasher.hashPassword(password.value))
+            setString(4,hash )
             setString(5, state)
             executeUpdate()
         }

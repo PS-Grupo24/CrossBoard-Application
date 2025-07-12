@@ -7,7 +7,8 @@ import com.crossBoard.domain.board.*
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.position.positionToString
 import com.crossBoard.domain.toPlayer
-import com.crossBoard.httpModel.moveOutput.MoveOutput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
+import com.crossBoard.httpModel.moveHttp.toMoveHttp
 import kotlinx.serialization.Serializable
 
 /**
@@ -24,7 +25,7 @@ data class BoardOutput(
     val winner: String?,
     val turn: String,
     val positions: List<String>,
-    val moves: List<MoveOutput>,
+    val moves: List<MoveHttp>,
 )
 
 /**
@@ -32,14 +33,13 @@ data class BoardOutput(
  * @param winner The winner.
  */
 fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput {
-    val module = ModuleProvider.getModule(matchType)
     return BoardOutput(
         player1.toString(),
         player2.toString(),
         winner?.toString(),
         turn.toString(),
         positions.map { positionToString(it, matchType) },
-        moves.map { module.moveToMoveOutput(it) },
+        moves.map { it.toMoveHttp(matchType) },
     )
 }
 
@@ -56,7 +56,7 @@ fun BoardOutput.toBoard(matchType: String, state: String): Board {
     val player1 = player1.toPlayer()
     val player2 = player1.other()
     val winner = winner?.toPlayer()
-    val moves = this.moves.map { move -> module.moveOutputToMove(move) }
+    val moves = this.moves.map { move -> module.moveHttpToMove(move) }
     val positions = this.positions.map { position -> module.stringToPosition(position) }
     return module.getBoard(positions, moves, player1, player2, turn, winner, MatchState.valueOf(state))
 }

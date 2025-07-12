@@ -17,7 +17,7 @@ import com.crossBoard.httpModel.UserCreationOutput
 import com.crossBoard.httpModel.UserLoginInput
 import com.crossBoard.httpModel.UserLoginOutput
 import com.crossBoard.httpModel.UserProfileOutput
-import com.crossBoard.httpModel.moveInput.MoveInput
+import com.crossBoard.httpModel.moveHttp.MoveHttp
 import com.crossBoard.httpModel.toMultiplayerMatch
 import com.crossBoard.interfaces.Clearable
 import io.ktor.client.*
@@ -342,7 +342,7 @@ class ApiClient(
         userToken: String,
         matchId: Int,
         version: Int,
-        moveInput: MoveInput,
+        moveInput: MoveHttp,
     ): Either<String, MatchPlayedOutput> = safeRequest<MatchPlayedOutput> {
         client.post(
             urlString = "$baseUrl/match/$matchId/version/$version/play",
