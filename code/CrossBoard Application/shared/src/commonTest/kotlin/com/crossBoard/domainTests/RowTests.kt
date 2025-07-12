@@ -27,7 +27,7 @@ class RowTest {
         val exception = assertFailsWith<IllegalArgumentException> {
             Row(-1, 5)
         }
-        assertEquals("Index must be between 0 and Board Dimension.", exception.message)
+        assertEquals("Index must be between 0 and Board Dimension", exception.message)
     }
 
     @Test
@@ -35,7 +35,7 @@ class RowTest {
         val exception = assertFailsWith<IllegalArgumentException> {
             Row(5, 5)
         }
-        assertEquals("Index must be between 0 and Board Dimension.", exception.message)
+        assertEquals("Index must be between 0 and Board Dimension", exception.message)
     }
 
     @Test
@@ -43,6 +43,6 @@ class RowTest {
         val exception = assertFailsWith<IllegalArgumentException> {
             Row(6, 5)
         }
-        assertEquals("Index must be between 0 and Board Dimension.", exception.message)
+        assertEquals("Index must be between 0 and Board Dimension", exception.message)
     }
 }

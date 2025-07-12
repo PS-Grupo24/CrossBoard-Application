@@ -1,9 +1,10 @@
 package com.crossBoard.domainTests
 import com.crossBoard.domain.*
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.move.moveToString
 import com.crossBoard.httpModel.*
+import com.crossBoard.httpModel.moveOutput.toMoveOutput
 import kotlin.test.*
 
 class MatchTests {
@@ -139,7 +140,7 @@ class MatchTests {
         assertTrue(newMatch.user2 != null)
 
         val turn = match.board.turn
-        val turnId = if(turn == newMatch.getPlayerType(1)) newMatch.user1 else newMatch.user2!!
+        val turnId = if(turn == newMatch.getPlayerType(1)) newMatch.user1 else newMatch.user2
 
         assertTrue(newMatch.isMyTurn(turnId))
         assertFalse(newMatch.isMyTurn(newMatch.otherPlayer(turnId)))
@@ -170,9 +171,10 @@ class MatchTests {
     }
 
     @Test fun toMatchOutputWithSuccess() {
-        val match = MultiPlayerMatch.startGame(1, MatchType.TicTacToe)
+        val matchType = MatchType.TicTacToe
+        val match = MultiPlayerMatch.startGame(1, matchType)
         val newMatch = match.join(2)
-
+        val module = ModuleProvider.getModule(matchType)
         val boardOutput = BoardOutput(
             newMatch.board.player1.toString(),
             newMatch.board.player2.toString(),
@@ -180,7 +182,7 @@ class MatchTests {
             newMatch.board.turn.toString(),
             newMatch.board.positions.map {it.toString()},
             newMatch.board.moves.map {
-            moveToString(it, MatchType.TicTacToe) }
+            module.moveToMoveOutput(it) }
         )
         val expectedMatchOutput = MatchOutput(
             newMatch.id, 1, 2,

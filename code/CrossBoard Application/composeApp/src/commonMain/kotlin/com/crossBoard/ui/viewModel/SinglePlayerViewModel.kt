@@ -4,6 +4,7 @@ import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.Player
+import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.possibleMoves
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.domain.position.TicPosition
@@ -13,6 +14,8 @@ import com.crossBoard.domain.toMatchType
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.SinglePlayerMatch
 import com.crossBoard.model.SinglePlayerState
+import com.crossBoard.ui.uiModule.UiModule
+import com.crossBoard.ui.uiModule.UiModuleProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -159,31 +162,16 @@ class SinglePlayerViewModel(
                 _singlePlayerMatch.update { it.copy(errorMessage = "Not the machine's turn!") }
                 return
             }
-            when(match.matchType) {
-                MatchType.Reversi -> {
-                    val possibleSquares = possibleMoves(match.board.player2, match.board.positions as List<ReversiPosition>)
-                    val position = possibleSquares.random()
-                    val newMatch = match.makeMove(ReversiMove(match.board.player2, position))
-                    _singlePlayerMatch.update { it.copy(
-                        newMatch
-                    )}
-                    if(newMatch.board.turn == newMatch.board.player2) {
-                        viewModelScope.launch {
-                            delay(1000L)
-                            randomMachineMove()
-                        }
-                    }
-                }
-                MatchType.TicTacToe -> {
-                    val position = match.board.positions.filter { (it as TicPosition).player == Player.EMPTY }.random()
-                    _singlePlayerMatch.update { it.copy(
-                        match.makeMove(
-                            TicTacToeMove(
-                                match.board.player2,
-                                position.square,
-                            )
-                        )
-                    )}
+            val module = UiModuleProvider.getModule<Board, Move>(match.matchType)
+            val move = module.generateRandomMachineMove(match.board,match.board.player2)
+            val newMatch = match.makeMove(move)
+            _singlePlayerMatch.update { it.copy(
+                newMatch
+            )}
+            if(newMatch.board.turn == newMatch.board.player2) {
+                viewModelScope.launch {
+                    delay(1000L)
+                    randomMachineMove()
                 }
             }
         }

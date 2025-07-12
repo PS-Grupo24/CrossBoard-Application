@@ -84,6 +84,7 @@ kotlin {
             implementation(libs.multiplatform.settings.v130)
             implementation(libs.bundles.coilBundle)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation(libs.bundles.voyager)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)
@@ -139,6 +140,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.ui.android)
     debugImplementation(libs.ui.tooling)
+
 }
 
 compose.desktop {

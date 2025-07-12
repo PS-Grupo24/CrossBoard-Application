@@ -13,8 +13,8 @@ fun Application.configureCors() {
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
-        allowHost("localhost:8080", schemes = listOf("http", "https"))
         allowHeader(HttpHeaders.ContentType)
+        anyHost()
         allowCredentials = true
     }
 }

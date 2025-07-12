@@ -2,12 +2,15 @@ package com.crossBoard.domainTests.matchModuleTests
 
 import com.crossBoard.domain.*
 import com.crossBoard.domain.board.TicTacToeBoard
+import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.matchModule.TicTacToeModule
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.TicTacToeMoveInput
-import com.crossBoard.httpModel.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
+import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveOutput.toMoveOutput
+import com.crossBoard.httpModel.toBoard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -43,15 +46,6 @@ class TictactoeModuleTests {
     }
 
     @Test
-    fun `moveToString and stringToMove should be symmetrical`() {
-        val originalMove = TicTacToeMove(Player.BLACK, Square(Row(1, 3), Column('a')))
-        val string = module.moveToString(originalMove)
-        val restoredMove = module.stringToMove(string)
-
-        assertEquals(originalMove, restoredMove)
-    }
-
-    @Test
     fun `getInitialBoard should return a valid board`() {
         val board = module.getInitialBoard()
 
@@ -77,13 +71,13 @@ class TictactoeModuleTests {
             player1 = "BLACK",
             player2 = "WHITE",
             positions = listOf("BLACK,1a"),
-            moves = listOf("BLACK,1a"),
+            moves = listOf(TicTacToeMove(Player.BLACK, module.getSquare(1,1)).toMoveOutput(MatchType.TicTacToe)),
             winner = null
         )
 
-        val board = module.boardOutputToBoard(output, "RUNNING")
+        val board = output.toBoard(MatchType.TicTacToe.name, MatchState.RUNNING.name)
 
-        assertIs<TicTacToeBoard>(board)
+        assertIs<TicTacToeBoardRun>(board)
         assertEquals(Player.BLACK, board.turn)
         assertEquals(1, board.positions.size)
         assertEquals(1, board.moves.size)
@@ -99,10 +93,10 @@ class TictactoeModuleTests {
 
     @Test
     fun `getMoveInput should construct valid input`() {
-        val input = module.getMoveInput(Player.WHITE, 2, 'c')
+        val input = module.moveToMoveInput(TicTacToeMove(Player.WHITE, module.getSquare(2, 3)))
 
         assertEquals("WHITE", input.player)
-        assertEquals("2c", input.square)
+        assertEquals("1d", input.square)
     }
 
     @Test

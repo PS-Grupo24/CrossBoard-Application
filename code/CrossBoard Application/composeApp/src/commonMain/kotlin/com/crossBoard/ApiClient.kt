@@ -17,7 +17,7 @@ import com.crossBoard.httpModel.UserCreationOutput
 import com.crossBoard.httpModel.UserLoginInput
 import com.crossBoard.httpModel.UserLoginOutput
 import com.crossBoard.httpModel.UserProfileOutput
-import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.httpModel.moveInput.MoveInput
 import com.crossBoard.httpModel.toMultiplayerMatch
 import com.crossBoard.interfaces.Clearable
 import io.ktor.client.*
@@ -49,7 +49,7 @@ class ApiClient(
      * Base URL where the server is hosted.
      */
     private val baseUrl = "http://${host.address}:${host.port}"
-
+    //private val baseUrl = "https://crossboard.onrender.com"
     /**
      * Function "banUser", responsible for the request to ban a user.
      * @param userToken The token of the admin performing the ban.
@@ -378,9 +378,7 @@ class ApiClient(
             val collectJob = launch{
                 try {
                     client.sse(
-                        host = host.address,
-                        port = host.port,
-                        path = "/events",
+                        "$baseUrl/events",
                         request = {
                             header(HttpHeaders.Authorization, "Bearer $userToken")
                         }

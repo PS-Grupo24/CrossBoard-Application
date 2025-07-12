@@ -9,6 +9,12 @@ import kotlin.test.*
 import com.crossBoard.httpModel.*
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.move.*
+import com.crossBoard.httpModel.moveInput.ReversiMoveInput
+import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
+import com.crossBoard.httpModel.moveInput.toMove
+import com.crossBoard.httpModel.moveOutput.ReversiMoveOutput
+import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveOutput.toMoveOutput
 import kotlinx.serialization.json.Json
 
 class MoveTests {

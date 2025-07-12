@@ -14,7 +14,7 @@ import com.crossBoard.domain.Square
  * @property turn Player whose turn it is.
  * @property play Function to play a move on the board.
  * @property forfeit Function to forfeit the game board.
- * @property get Function to get the player at a specific square or to verify if it is occupied the square.
+ * @property get Function to get the player at a specific position given a [Square] or to verify if it is occupied the square.
  */
 sealed interface Board {
     val positions: List<Position>
@@ -25,6 +25,7 @@ sealed interface Board {
     fun play(move: Move): Board
     fun forfeit(player: Player): Board
     fun get(square: Square): Player?
+
 }
 
 /**

@@ -168,7 +168,7 @@ fun GameStatusAndBoard(
     Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
     Spacer(Modifier.height(16.dp))
     UiModuleProvider
-        .getModule<Move>(matchType)
+        .getModule<Board, Move>(matchType)
         .BoardView(
             board,
             myPlayerType,

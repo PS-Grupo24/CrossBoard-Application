@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
 import com.crossBoard.model.AuthState
 import com.crossBoard.utils.CustomColor
 
@@ -56,13 +57,13 @@ fun AuthenticationScreen(
 
         if (authState.isLoginScreenVisible) {
             LoginScreen(
-                authState,
-                onLoginUsernameChange,
-                textFieldColors,
-                onLoginPasswordChange,
-                onLoginClick,
-                onSwitchScreen,
-                onMaintainSession
+                authState = authState,
+                onLoginUsernameChange = onLoginUsernameChange,
+                onLoginPasswordChange = onLoginPasswordChange,
+                textFieldColors = textFieldColors,
+                onLoginClick = onLoginClick,
+                onSwitchScreen = onSwitchScreen,
+                onMaintainSession = onMaintainSession,
             )
         } else {
             RegisterScreen(

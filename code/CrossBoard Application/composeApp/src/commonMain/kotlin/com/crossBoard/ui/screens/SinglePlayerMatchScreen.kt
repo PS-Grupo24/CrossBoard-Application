@@ -72,7 +72,7 @@ fun SinglePlayerMatchScreen(
 
         Text(status, style = MaterialTheme.typography.h5,  color = CustomColor.LightBrown.value)
         Spacer(Modifier.height(16.dp))
-        val module = UiModuleProvider.getModule<Move>(match.matchType)
+        val module = UiModuleProvider.getModule<Board, Move>(match.matchType)
         module.BoardView(
             match.board,
             player,

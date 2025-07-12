@@ -28,7 +28,7 @@ multiplatformSettingsVersion = "1.3.0"
 postgresql = "42.5.0"
 slf4jNop = "2.0.7"
 androidUi = "1.8.3"
-
+voyager = "1.1.0-beta02"
 ktorOpenAPIVersion = "5.0.2"
 coilComposeCore = "3.2.0"
 [libraries]
@@ -72,11 +72,14 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor"}
 
-
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coilComposeCore" }
 coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilComposeCore" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilComposeCore" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilComposeCore" }
+
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager"}
+voyager-screen-model = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager"}
+voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager"}
 
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "androidUi" }
@@ -119,4 +122,10 @@ ktorClient = [
     "ktor-client-content-negotiation",
     "ktor-client-logging",
     "ktor-client-core"
+]
+
+voyager = [
+    "voyager-screen-model",
+    "voyager-navigator",
+    "voyager-transitions"
 ]

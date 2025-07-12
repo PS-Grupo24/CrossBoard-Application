@@ -7,7 +7,7 @@ import com.crossBoard.domain.*
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.toMove
-import com.crossBoard.httpModel.MoveInput
+import com.crossBoard.httpModel.moveInput.MoveInput
 import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.MultiplayerMatchUiState
 import com.crossBoard.util.Failure
@@ -87,11 +87,14 @@ class MultiplayerMatchViewModel(
                         if (currentMatch?.version == 1 && matchUpdate.version == 2){
                             viewModelScope.launch { getPlayersUsernames(matchUpdate.user1, matchUpdate.user2) }
                             startTurnTimer()
+                            return@onEach
                         }
                         if (matchUpdate.state == MatchState.WIN || matchUpdate.state == MatchState.DRAW){
                             disconnectSSE()
                             stopTurnTimer()
+                            return@onEach
                         }
+                        startTurnTimer()
                     }
                     .catch { cause ->
                         println("VM: SSE Flow caught error: ${cause.message}")

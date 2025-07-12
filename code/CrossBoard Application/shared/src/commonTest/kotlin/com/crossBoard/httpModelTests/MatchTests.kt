@@ -1,12 +1,20 @@
-package com.crossBoard.domain
+package com.crossBoard.httpModelTests
 
+import com.crossBoard.domain.Column
+import com.crossBoard.domain.MatchState
+import com.crossBoard.domain.MatchType
+import com.crossBoard.domain.MultiPlayerMatch
+import com.crossBoard.domain.Player
+import com.crossBoard.domain.Row
+import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.board.initialTicTacToePositions
-import com.crossBoard.domain.matchModule.modules
+import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
 import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.httpModel.*
+import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
 import kotlin.test.*
 
 class MatchTests {
@@ -79,7 +87,7 @@ class MatchTests {
 
         val matchOutput = joined.toMatchOutput()
         val result = matchOutput.toMultiplayerMatch()
-        val module = modules.find { it.matchType == MatchType.TicTacToe }
+        val module = ModuleProvider.getModule(match.matchType)
         assertNotNull(module)
         assertEquals(Player.EMPTY,result.board.get(module.getSquare(0,0)) )
     }

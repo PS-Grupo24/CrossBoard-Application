@@ -4,8 +4,9 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.position.Position
-import com.crossBoard.httpModel.MoveInput
-import com.crossBoard.httpModel.MoveOutput
+import com.crossBoard.httpModel.moveInput.MoveInput
+import com.crossBoard.httpModel.moveOutput.MoveOutput
+
 
 /**
  * The helper object that provides access to the modules and stores the available modules.

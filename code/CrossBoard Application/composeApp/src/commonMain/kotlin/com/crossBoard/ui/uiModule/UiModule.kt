@@ -6,6 +6,7 @@ import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.move.Move
+import com.crossBoard.domain.position.Position
 
 /**
  * A contract for a self-contained UI module responsible for rendering a specific type of game
@@ -16,7 +17,7 @@ import com.crossBoard.domain.move.Move
  *
  * @param M The specific [Move] subclass that this UI module will create and handle.
  */
-interface UiModule<M: Move> {
+ interface UiModule<B: Board, M: Move> {
     /**
      * The unique [MatchType] that this module is responsible for.
      * This property acts as a key for looking up and selecting the correct UI module
@@ -26,9 +27,9 @@ interface UiModule<M: Move> {
     /**
      * A [Composable] function that renders the visual representation of a game board.
      *
-     * This function is the core of the UI module. It is responsible for taking a generic [Board] state
+     * This function is the core of the UI module. It is responsible for taking a generic [B] state
      * and displaying it appropriately for its specific game type. Crucially, it must also handle
-     * user interactions (like clicks) and construct the correct, game-specific [Move] object.
+     * user interactions (like clicks) and construct the correct, game-specific [M] object.
      *
      * @param board The current state of the game board to be displayed. The implementation
      *              will need to cast this to its specific board type (e.g., `TicTacToeBoard`).
@@ -46,10 +47,12 @@ interface UiModule<M: Move> {
      */
     @Composable
     fun BoardView(
-        board: Board,
+        board: B,
         myPlayerType: Player,
         onMakeMove: (move: M) -> Unit,
         enabled: Boolean = true,
         modifier: Modifier = Modifier
     )
+
+    fun generateRandomMachineMove(board: B, machinePlayerType: Player): M
 }

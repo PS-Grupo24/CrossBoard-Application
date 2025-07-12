@@ -1,13 +1,15 @@
 package com.crossBoard
 
 import androidx.compose.runtime.*
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.transitions.SlideTransition
 import com.crossBoard.ui.CrossBoardApplication
 import com.russhwolf.settings.Settings
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @Composable
-@Preview
 fun App(client: ApiClient, settings: Settings) {
-    CrossBoardApplication(client, settings)
+    Navigator(CrossBoardApplication(client, settings)){navigator->
+        SlideTransition(navigator)
+    }
 }

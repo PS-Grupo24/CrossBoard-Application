@@ -1,7 +1,7 @@
 package com.crossBoard.callReceiver
 
 import com.crossBoard.domain.MatchType
-import com.crossBoard.httpModel.ReversiMoveInput
+import com.crossBoard.httpModel.moveInput.ReversiMoveInput
 import io.ktor.server.request.receive
 import io.ktor.server.routing.RoutingCall
 

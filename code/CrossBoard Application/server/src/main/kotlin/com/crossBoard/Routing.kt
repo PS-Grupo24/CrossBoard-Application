@@ -8,6 +8,8 @@ import com.crossBoard.domain.UserState
 import com.crossBoard.domain.Username
 import com.crossBoard.domain.toMatchType
 import com.crossBoard.httpModel.*
+import com.crossBoard.httpModel.moveInput.MoveInput
+import com.crossBoard.httpModel.moveInput.toMove
 import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.request.*
@@ -24,7 +26,12 @@ import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktoropenapi.put
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.http.content.CompressedFileType
+import io.ktor.server.http.content.default
+import io.ktor.server.http.content.preCompressed
+import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.ContentTransformationException
+import java.io.File
 
 
 /**
@@ -34,10 +41,9 @@ import io.ktor.server.plugins.ContentTransformationException
  */
 fun Application.configureRouting(usersService: UsersService, matchService: MatchService) {
     routing {
-        route("/") {
-            get { call.respond("Hello World!") }
+        staticFiles("/", File("static")) {
+            default("index.html")
         }
-
         //route to get a list of users' name segment.
         route("/user/username/{username}") {
             get({

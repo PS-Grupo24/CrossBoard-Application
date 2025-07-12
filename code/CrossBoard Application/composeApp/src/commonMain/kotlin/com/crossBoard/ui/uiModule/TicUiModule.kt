@@ -23,7 +23,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
-import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
@@ -35,13 +34,21 @@ import crossboardapplication.composeapp.generated.resources.crossSymbol
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-class TicUiModule : UiModule<TicTacToeMove> {
+class TicUiModule : UiModule<TicTacToeBoard, TicTacToeMove> {
     override val matchType: MatchType
         get() = MatchType.TicTacToe
 
+    override fun generateRandomMachineMove(board: TicTacToeBoard, machinePlayerType: Player): TicTacToeMove {
+        val position = board.positions.filter { it .player == Player.EMPTY }.random()
+        return TicTacToeMove(
+            machinePlayerType,
+            position.square
+        )
+    }
+
     @Composable
     override fun BoardView(
-        board: Board,
+        board: TicTacToeBoard,
         myPlayerType: Player,
         onMakeMove: (move: TicTacToeMove) -> Unit,
         enabled: Boolean,

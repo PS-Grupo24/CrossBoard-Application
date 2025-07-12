@@ -11,17 +11,13 @@ import com.crossBoard.domain.board.TicTacToeBoardDraw
 import com.crossBoard.domain.board.TicTacToeBoardRun
 import com.crossBoard.domain.board.TicTacToeBoardWin
 import com.crossBoard.domain.board.initialTicTacToePositions
-import com.crossBoard.domain.move.Move
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.move.toMove
 import com.crossBoard.domain.position.TicPosition
-import com.crossBoard.domain.position.toPosition
-import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toPlayer
 import com.crossBoard.domain.toSquare
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.TicTacToeMoveInput
-import com.crossBoard.httpModel.TicTacToeMoveOutput
+import com.crossBoard.httpModel.moveInput.TicTacToeMoveInput
+import com.crossBoard.httpModel.moveOutput.TicTacToeMoveOutput
 
 /**
  * Implementation of [MatchModule] for the Tic-Tac-Toe game.
@@ -72,16 +68,6 @@ class TicTacToeModule : MatchModule<
     override fun moveOutputToMove(move: TicTacToeMoveOutput): TicTacToeMove {
         return TicTacToeMove(move.player.toPlayer(), move.square.toSquare(TicTacToeBoard.BOARD_DIM))
     }
-
-    override fun moveToString(move: TicTacToeMove): String {
-        return "${move.player},${move.square}"
-    }
-
-    override fun stringToMove(string: String): TicTacToeMove {
-        val values = string.split(",")
-        return TicTacToeMove(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
-    }
-
     override fun getSquare(rowIndex: Int, columnIndex: Int): Square {
         return Square(Row(rowIndex, TicTacToeBoard.BOARD_DIM), Column('a' + columnIndex))
     }
@@ -91,6 +77,10 @@ class TicTacToeModule : MatchModule<
         return TicPosition(values[0].toPlayer(), values[1].toSquare(TicTacToeBoard.BOARD_DIM))
     }
 
+    override fun positionToString(position: TicPosition): String {
+        return position.toString()
+    }
+
     override fun moveToMoveInput(move: TicTacToeMove): TicTacToeMoveInput {
         return TicTacToeMoveInput(
             move.player.toString(),
@@ -98,47 +88,46 @@ class TicTacToeModule : MatchModule<
         )
     }
 
-    override fun boardOutputToBoard(board: BoardOutput, state: String): TicTacToeBoard {
-        val tur = board.turn.toPlayer()
-        val player1 = board.player1.toPlayer()
-        val player2 = player1.other()
-
-        val pos = board.positions.map {
-            it.toPosition(matchType) as TicPosition
-        }
-        val mov = board.moves.map { it.toMove(matchType) as TicTacToeMove }
-
-        return when(state.toMatchState()){
+    override fun getBoard(
+        positions: List<TicPosition>,
+        moves: List<TicTacToeMove>,
+        player1: Player,
+        player2: Player,
+        turn: Player,
+        winner: Player?,
+        state: MatchState
+    ): TicTacToeBoard {
+        return when(state){
             MatchState.RUNNING -> {
                 TicTacToeBoardRun(
-                    pos,
-                    mov,
-                    tur,
+                    positions,
+                    moves,
+                    turn,
                     player1,
                     player2
                 )
             }
             MatchState.WAITING -> {
                 TicTacToeBoardRun(
-                    pos,
-                    mov,
-                    tur,
+                    positions,
+                    moves,
+                    turn,
                     player1,
                     player2
                 )
             }
             MatchState.WIN -> TicTacToeBoardWin(
-                board.winner?.toPlayer() ?: throw IllegalArgumentException("Winner must not be null"),
-                pos,
-                mov,
-                tur,
+                winner ?: throw IllegalArgumentException("State is win but winner is null"),
+                positions,
+                moves,
+                turn,
                 player1,
                 player2,
             )
             MatchState.DRAW-> TicTacToeBoardDraw(
-                pos,
-                mov,
-                tur,
+                positions,
+                moves,
+                turn,
                 player1,
                 player2,
             )

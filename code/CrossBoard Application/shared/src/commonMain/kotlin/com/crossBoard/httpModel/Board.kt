@@ -1,10 +1,13 @@
 package com.crossBoard.httpModel
 
+import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.matchModule.ModuleProvider
-import com.crossBoard.domain.move.moveToString
+import com.crossBoard.domain.position.positionToString
+import com.crossBoard.domain.toPlayer
+import com.crossBoard.httpModel.moveOutput.MoveOutput
 import kotlinx.serialization.Serializable
 
 /**
@@ -21,21 +24,24 @@ data class BoardOutput(
     val winner: String?,
     val turn: String,
     val positions: List<String>,
-    val moves: List<String>,
+    val moves: List<MoveOutput>,
 )
 
 /**
  * Function `toBoardOutput` converts a Board into its output format for an http response.
  * @param winner The winner.
  */
-fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput = BoardOutput(
-    player1.toString(),
-    player2.toString(),
-    winner?.toString(),
-    turn.toString(),
-    positions.map { it.toString() },
-    moves.map { moveToString(it, matchType = matchType ) },
-)
+fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput {
+    val module = ModuleProvider.getModule(matchType)
+    return BoardOutput(
+        player1.toString(),
+        player2.toString(),
+        winner?.toString(),
+        turn.toString(),
+        positions.map { positionToString(it, matchType) },
+        moves.map { module.moveToMoveOutput(it) },
+    )
+}
 
 /**
  * Function "toBoard" responsible to convert a BoardOutput object to a Board object.
@@ -46,5 +52,11 @@ fun Board.toBoardOutput(winner: Player?, matchType: MatchType): BoardOutput = Bo
 @Suppress("UNCHECKED_CAST")
 fun BoardOutput.toBoard(matchType: String, state: String): Board {
     val module = ModuleProvider.getModule(MatchType.valueOf(matchType))
-    return module.boardOutputToBoard(this, state)
+    val turn = turn.toPlayer()
+    val player1 = player1.toPlayer()
+    val player2 = player1.other()
+    val winner = winner?.toPlayer()
+    val moves = this.moves.map { move -> module.moveOutputToMove(move) }
+    val positions = this.positions.map { position -> module.stringToPosition(position) }
+    return module.getBoard(positions, moves, player1, player2, turn, winner, MatchState.valueOf(state))
 }

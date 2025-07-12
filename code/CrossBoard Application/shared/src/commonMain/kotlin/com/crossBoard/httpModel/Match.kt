@@ -5,6 +5,8 @@ import com.crossBoard.domain.MultiPlayerMatch
 import com.crossBoard.domain.board.BoardWin
 import com.crossBoard.domain.toMatchState
 import com.crossBoard.domain.toMatchType
+import com.crossBoard.httpModel.moveOutput.MoveOutput
+import com.crossBoard.httpModel.moveOutput.toMoveOutput
 import kotlinx.serialization.Serializable
 
 /**

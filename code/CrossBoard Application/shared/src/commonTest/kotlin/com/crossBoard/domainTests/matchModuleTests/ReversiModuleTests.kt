@@ -1,13 +1,15 @@
 package com.crossBoard.domainTests.matchModuleTests
 
+import com.crossBoard.domain.MatchState
 import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.*
 import com.crossBoard.domain.matchModule.ReversiModule
 import com.crossBoard.domain.move.ReversiMove
 import com.crossBoard.httpModel.BoardOutput
-import com.crossBoard.httpModel.ReversiMoveInput
-import com.crossBoard.httpModel.ReversiMoveOutput
+import com.crossBoard.httpModel.moveInput.ReversiMoveInput
+import com.crossBoard.httpModel.moveOutput.ReversiMoveOutput
+import com.crossBoard.httpModel.toBoard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -51,16 +53,6 @@ class ReversiModuleTest {
     }
 
     @Test
-    fun `moveToString and stringToMove should be reversible`() {
-        val originalMove = ReversiMove(Player.BLACK, module.getSquare(4, 1))
-        val str = module.moveToString(originalMove)
-        val parsed = module.stringToMove(str)
-
-        assertEquals(originalMove.player, parsed.player)
-        assertEquals(originalMove.square, parsed.square)
-    }
-
-    @Test
     fun `getInitialBoard should return ReversiBoardRun`() {
         val board = module.getInitialBoard()
         assertIs<ReversiBoardRun>(board)
@@ -79,25 +71,27 @@ class ReversiModuleTest {
 
     @Test
     fun `getMoveInput should format input properly`() {
-        val input = module.getMoveInput(Player.WHITE, 6, 'f')
+        val input = module.moveToMoveInput(ReversiMove(Player.WHITE, module.getSquare(6, 5)))
         assertEquals("WHITE", input.player)
-        assertEquals("6f", input.square)
+        assertEquals("2f", input.square)
     }
 
     @Test
     fun `boardOutputToBoard should return correct board by state`() {
         val boardOutput = BoardOutput(
-            positions = listOf(module.stringToPosition("BLACK,4d").toString()),
-            moves = listOf(module.stringToMove("WHITE,3d").toString()),
+            positions = listOf("BLACK,4d"),
+            moves = listOf(module.moveToMoveOutput(
+                ReversiMove(
+                    Player.WHITE,module.getSquare(5, 2),))),
             turn = "BLACK",
             player1 = "BLACK",
             winner = "WHITE",
             player2 = "WHITE",
         )
 
-        val runningBoard = module.boardOutputToBoard(boardOutput, "RUNNING")
-        val winBoard = module.boardOutputToBoard(boardOutput, "WIN")
-        val drawBoard = module.boardOutputToBoard(boardOutput.copy(winner = null), "DRAW")
+        val runningBoard = boardOutput.toBoard(MatchType.Reversi.name, MatchState.RUNNING.name )
+        val winBoard = boardOutput.toBoard(MatchType.Reversi.name, MatchState.WIN.name)
+        val drawBoard = boardOutput.toBoard(MatchType.Reversi.name, MatchState.DRAW.name)
 
         assertIs<ReversiBoardRun>(runningBoard)
         assertIs<ReversiBoardWin>(winBoard)
@@ -108,7 +102,9 @@ class ReversiModuleTest {
     fun `boardOutputToBoard should throw if WIN without winner`() {
         val boardOutput = BoardOutput(
             positions = listOf(module.stringToPosition("BLACK,4d").toString()),
-            moves = listOf(module.stringToMove("WHITE,3d").toString()),
+            moves = listOf(module.moveToMoveOutput(
+                ReversiMove(
+                    Player.WHITE,module.getSquare(5, 2),))),
             turn = "BLACK",
             player1 = "BLACK",
             winner = null,
@@ -116,7 +112,7 @@ class ReversiModuleTest {
         )
 
         assertFailsWith<IllegalArgumentException> {
-            module.boardOutputToBoard(boardOutput, "WIN")
+            boardOutput.toBoard(MatchType.Reversi.name, MatchState.WIN.name)
         }
     }
 }

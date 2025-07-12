@@ -13,7 +13,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import cafe.adriel.voyager.core.screen.Screen
 import com.crossBoard.domain.User
+import com.crossBoard.ui.components.TopBar
 import com.crossBoard.ui.screens.FindMatchScreen
 import com.crossBoard.ui.screens.SinglePlayerMatchScreen
 import com.crossBoard.ui.viewModel.SinglePlayerViewModel
@@ -26,61 +28,64 @@ import com.crossBoard.utils.CustomColor
  * @param ongoBack The action to perform when goBack button is pressed.
  */
 @OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun SinglePlayerMatch(
-    user: User?,
-    ongoBack: () -> Unit
-){
-    val vm = remember { SinglePlayerViewModel() }
-    val singleMatchState = vm.singlePlayerMatch.collectAsState()
+data class SinglePlayerMatch(
+    val user: User?,
+    val ongoBack: () -> Unit
+) : Screen {
+    @Composable
+    override fun Content() {
+        val vm = remember { SinglePlayerViewModel() }
+        val singleMatchState = vm.singlePlayerMatch.collectAsState()
 
-    DisposableEffect(Unit){
-        onDispose {
-            vm.clear()
-        }
-    }
-    Scaffold(
-        topBar = {
-            if (user == null){
-                TopAppBar(
-                    title = {
-                        Text("Single Player Match", color = Color.White)
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = ongoBack,
-                        ){
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                        }
-                    },
-                    backgroundColor = CustomColor.DarkBrown.value
-                )
+        DisposableEffect(Unit){
+            onDispose {
+                vm.clear()
             }
         }
-    ){
-        val match = singleMatchState.value.match
-        val player = singleMatchState.value.player
-        if (match == null || player == null){
-            FindMatchScreen(
-                selectedGameTypeValue = singleMatchState.value.matchTypeInput,
-                onGameTypeChange = vm::updateMatchTypeInput,
-                onFindMatchClick = vm::startMatch,
-                isLoading = false,
-                errorMessage = singleMatchState.value.errorMessage,
-                buttonMessage = "Start Game"
-            )
-        }
-        else{
-            SinglePlayerMatchScreen(
-                user,
-                match = match,
-                player = player,
-                errorMessage = singleMatchState.value.errorMessage,
-                onMakeMove = vm::makeMove,
-                onForfeit = vm::forfeit,
-                onPlayAgain = vm::startMatch,
-                onGoBack = vm::stopMatch)
-        }
+        Scaffold(
+            topBar = {
+                if (user == null){
+                    TopAppBar(
+                        title = {
+                            Text("Single Player Match", color = Color.White)
+                        },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = ongoBack,
+                            ){
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                            }
+                        },
+                        backgroundColor = CustomColor.DarkBrown.value
+                    )
+                }
+            }
+        ){
+            val match = singleMatchState.value.match
+            val player = singleMatchState.value.player
+            if (match == null || player == null){
+                FindMatchScreen(
+                    selectedGameTypeValue = singleMatchState.value.matchTypeInput,
+                    onGameTypeChange = vm::updateMatchTypeInput,
+                    onFindMatchClick = vm::startMatch,
+                    isLoading = false,
+                    errorMessage = singleMatchState.value.errorMessage,
+                    buttonMessage = "Start Game"
+                )
+            }
+            else{
+                SinglePlayerMatchScreen(
+                    user,
+                    match = match,
+                    player = player,
+                    errorMessage = singleMatchState.value.errorMessage,
+                    onMakeMove = vm::makeMove,
+                    onForfeit = vm::forfeit,
+                    onPlayAgain = vm::startMatch,
+                    onGoBack = vm::stopMatch)
+            }
 
+        }
     }
+
 }

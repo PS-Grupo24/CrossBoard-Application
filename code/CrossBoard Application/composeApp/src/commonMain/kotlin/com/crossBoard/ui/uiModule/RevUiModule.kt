@@ -28,8 +28,10 @@ import com.crossBoard.domain.Row
 import com.crossBoard.domain.Square
 import com.crossBoard.domain.board.Board
 import com.crossBoard.domain.board.ReversiBoard
+import com.crossBoard.domain.board.possibleMoves
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.ReversiMove
+import com.crossBoard.domain.position.ReversiPosition
 import crossboardapplication.composeapp.generated.resources.Res
 import crossboardapplication.composeapp.generated.resources.blackPiece
 import crossboardapplication.composeapp.generated.resources.whitePiece
@@ -44,12 +46,18 @@ val boardTextSize = 16.sp
 val whiteResource: DrawableResource = Res.drawable.whitePiece
 val blackResource: DrawableResource = Res.drawable.blackPiece
 
-class RevUiModule : UiModule<ReversiMove> {
+class RevUiModule : UiModule<ReversiBoard,ReversiMove> {
     override val matchType: MatchType = MatchType.Reversi
+
+    override fun generateRandomMachineMove(board : ReversiBoard, machinePlayerType: Player): ReversiMove {
+        val possibleSquares = possibleMoves(board.player2, board.positions)
+        val position = possibleSquares.random()
+        return ReversiMove(machinePlayerType, position)
+    }
 
     @Composable
     override fun BoardView(
-        board: Board,
+        board: ReversiBoard,
         myPlayerType: Player,
         onMakeMove: (move: ReversiMove) -> Unit,
         enabled: Boolean,

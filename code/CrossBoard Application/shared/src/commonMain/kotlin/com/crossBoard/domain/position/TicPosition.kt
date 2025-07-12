@@ -1,10 +1,7 @@
 package com.crossBoard.domain.position
 
-import com.crossBoard.domain.MatchType
 import com.crossBoard.domain.Player
 import com.crossBoard.domain.Square
-import com.crossBoard.domain.toPlayer
-import com.crossBoard.domain.toSquare
 
 
 
