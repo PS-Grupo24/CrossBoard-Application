@@ -56,7 +56,7 @@ class JdbcMatchRepoTests {
 
     @Test
     fun `addMatch should insert a match and getMatchById should retrieve it`() {
-        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), "pass")
+        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), Password("Aa12345!"))
         val match = MultiPlayerMatch(TicTacToeModule().getInitialBoard(), 101, MatchState.WAITING, user1.id, null, MatchType.TicTacToe, 1, null)
 
         matchRepo.addMatch(match)
@@ -70,7 +70,7 @@ class JdbcMatchRepoTests {
 
     @Test
     fun `getRunningMatchByUser should find a WAITING match`() {
-        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), "pass")
+        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), Password("Aa12345!"))
         val waitingMatch = MultiPlayerMatch(ReversiModule().getInitialBoard(), 102, MatchState.WAITING, user1.id, null, MatchType.Reversi, 1, null)
         matchRepo.addMatch(waitingMatch)
 
@@ -83,8 +83,8 @@ class JdbcMatchRepoTests {
     @Test
     fun `getRunningMatchByUser should return null if match is finished`() {
 
-        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), "pass")
-        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), "pass")
+        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), Password("Aa12345!"))
+        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), Password("Aa12345!"))
         val runningMatch = MultiPlayerMatch(TicTacToeModule().getInitialBoard(), 103, MatchState.RUNNING, user1.id, user2.id, MatchType.TicTacToe, 1, null)
         matchRepo.addMatch(runningMatch)
         matchRepo.updateMatch(103, runningMatch.board.forfeit(runningMatch.getPlayerType(user1.id)), user1.id, user2.id, MatchType.TicTacToe, 2, MatchState.WIN, user1.id)
@@ -98,8 +98,8 @@ class JdbcMatchRepoTests {
     @Test
     fun `updateMatch should correctly change state and add player2`() {
         val module = TicTacToeModule()
-        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), "pass")
-        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), "pass")
+        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), Password("Aa12345!"))
+        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), Password("Aa12345!"))
         val initialMatch = MultiPlayerMatch(module.getInitialBoard(), 104, MatchState.WAITING, user1.id, null, MatchType.TicTacToe, 1, null)
         matchRepo.addMatch(initialMatch)
         val played = initialMatch.play(TicTacToeMove(initialMatch.board.turn, module.getSquare(1, 1)))
@@ -119,8 +119,8 @@ class JdbcMatchRepoTests {
 
     @Test
     fun `getStatistics should calculate stats correctly across different game types`() {
-        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), "pass")
-        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), "pass")
+        val user1 = userRepo.addUser(Username("player1"), Email("p1@test.com"), Password("Aa12345!"))
+        val user2 = userRepo.addUser(Username("player2"), Email("p2@test.com"), Password("Aa12345!"))
 
         val initialTicBoard = TicTacToeModule().getInitialBoard()
         val initialRevBoard = ReversiModule().getInitialBoard()

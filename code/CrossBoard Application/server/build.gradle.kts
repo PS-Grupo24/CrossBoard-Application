@@ -31,6 +31,7 @@ dependencies {
     testImplementation(libs.jetbrains.kotlin.test)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.junit.jupiter)
+    implementation("at.favre.lib:bcrypt:0.10.2")
 }
 
 tasks.withType<Test> {

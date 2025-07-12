@@ -11,7 +11,6 @@ import com.crossBoard.interfaces.Clearable
 import com.crossBoard.model.AuthState
 import com.crossBoard.util.Failure
 import com.crossBoard.util.Success
-import com.crossBoard.util.hashPassword
 import com.russhwolf.settings.Settings
 
 /**
@@ -104,16 +103,6 @@ class AuthViewModel(
     }
 
     /**
-     * Responsible for indicating if a singleplayer match is wanted.
-     * @param value `Boolean` value; `True` if match is wanted; `False` otherwise.
-     */
-    fun playMatch(value: Boolean){
-        _authState.update {
-            it.copy(isLoading = false, errorMessage = null, playMatch = value)
-        }
-    }
-
-    /**
      * Responsible for performing the login with the field inputs.
      * It validates the username and password values by encapsulating them in the `Domain` entities `Username`
      * and `Password`.
@@ -125,11 +114,10 @@ class AuthViewModel(
 
             val username = Username(currentState.loginUsernameInput.trim())
             val password = Password(currentState.loginPasswordInput)
-            val passwordHash = hashPassword(password.value)
             viewModelScope.launch {
                 _authState.update { it.copy(isLoading = true, errorMessage = null) }
                 when(val result = client.login(
-                    username.value, passwordHash
+                    username.value, password.value
                 )){
                     is Success -> {
                         val user = if (result.value.state == Admin.STATE)
@@ -137,14 +125,14 @@ class AuthViewModel(
                                 result.value.id,
                                 username,
                                 result.value.email,
-                                passwordHash,
+                                Password(password.value),
                                 result.value.token,
                             )
                         else NormalUser(
                                 result.value.id,
                                 username,
                                 result.value.email,
-                                passwordHash,
+                                Password(password.value),
                                 result.value.token,
                                 UserState.valueOf(result.value.state)
                             )
@@ -159,7 +147,7 @@ class AuthViewModel(
                             result.value.id,
                             username.value,
                             result.value.email.value,
-                            passwordHash,
+                            password.value,
                             result.value.token.value,
                             result.value.state,
                         )
@@ -189,11 +177,10 @@ class AuthViewModel(
             val username = Username(currentState.registerUsernameInput.trim())
             val email = Email(currentState.registerEmailInput.trim())
             val password = Password(currentState.registerPasswordInput)
-            val passwordHash = hashPassword(password.value)
             viewModelScope.launch {
                 _authState.update { it.copy(isLoading = true, errorMessage = null) }
                 when(val result = client.register(
-                    username.value, email.value, passwordHash
+                    username.value, email.value, password.value
                 )){
                     is Success -> {
                         val state = result.value.state
@@ -203,7 +190,7 @@ class AuthViewModel(
                                 result.value.id,
                                 username,
                                 email,
-                                passwordHash,
+                                Password(password.value),
                                 result.value.token,
                                 UserState.valueOf(state)
                             ),
@@ -218,7 +205,7 @@ class AuthViewModel(
                             result.value.id,
                             username.value,
                             email.value,
-                            passwordHash,
+                            password.value,
                             result.value.token.value,
                             state,
                         )
@@ -259,9 +246,9 @@ class AuthViewModel(
         val state = settings.getStringOrNull(stateSettingsString)
         if (token != null && id != null && email != null && password != null && username != null && state != null) {
             val user = if (state == Admin.STATE)
-                Admin(id, Username(username), Email(email), password, Token(token))
+                Admin(id, Username(username), Email(email), Password(password), Token(token))
 
-            else NormalUser(id, Username(username), Email(email), password, Token(token), UserState.valueOf(state))
+            else NormalUser(id, Username(username), Email(email), Password(password), Token(token), UserState.valueOf(state))
             _authState.update{ it.copy(user = user,isLoading = false, errorMessage = null) }
         }
     }

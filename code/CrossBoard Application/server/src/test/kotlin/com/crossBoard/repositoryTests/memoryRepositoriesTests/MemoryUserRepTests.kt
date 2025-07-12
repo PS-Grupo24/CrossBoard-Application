@@ -19,9 +19,9 @@ class MemoryUserRepTest {
     fun testAddUserAndGetById() {
         val username = Username("testuser")
         val email = Email("testuser@example.com")
-        val passwordHash = "hashedPassword"
+        val password = Password("Aa12345!")
 
-        val user = userRepo.addUser(username, email, passwordHash)
+        val user = userRepo.addUser(username, email, password)
         assertNotNull(user)
         assertEquals(username, user.username)
         assertEquals(email, user.email)
@@ -35,7 +35,7 @@ class MemoryUserRepTest {
 
     @Test
     fun testDeleteUser() {
-        val user = userRepo.addUser(Username("toDelete"), Email("del@example.com"), "pw")
+        val user = userRepo.addUser(Username("toDelete"), Email("del@example.com"), Password("Aa12345!"))
         val deleted = userRepo.deleteUser(user.id)
         assertTrue(deleted)
         assertNull(userRepo.getUserProfileById(user.id))
@@ -43,12 +43,12 @@ class MemoryUserRepTest {
 
     @Test
     fun testUpdateUser() {
-        val user = userRepo.addUser(Username("toUpdate"), Email("up@example.com"), "pw")
+        val user = userRepo.addUser(Username("toUpdate"), Email("up@example.com"), Password("Aa12345!"))
         val newUsername = Username("updatedName")
         val newEmail = Email("updated@example.com")
-        val newPasswordHash = "newHash"
+        val newPassword = Password("Aa12345?")
 
-        val updatedUser = userRepo.updateUser(user.id, newUsername, newEmail, newPasswordHash, UserState.NORMAL)
+        val updatedUser = userRepo.updateUser(user.id, newUsername, newEmail, newPassword, UserState.NORMAL)
         assertEquals(newUsername, updatedUser.username)
         assertEquals(newEmail, updatedUser.email)
     }
@@ -56,7 +56,7 @@ class MemoryUserRepTest {
     @Test
     fun testGetUserByEmail() {
         val email = Email("findme@example.com")
-        val user = userRepo.addUser(Username("findUser"), email, "pw")
+        val user = userRepo.addUser(Username("findUser"), email, Password("Aa12345!"))
         val fetchedUser = userRepo.getUserProfileByEmail(email)
         assertNotNull(fetchedUser)
         assertEquals(user.id, fetchedUser?.id)
@@ -65,21 +65,21 @@ class MemoryUserRepTest {
     @Test
     fun testLoginSuccessAndFail() {
         val username = Username("loginUser")
-        val hashedPassword = "hashedPass"
-         userRepo.addUser(username, Email("login@example.com"), hashedPassword)
+        val password = Password("Aa12345!")
+         userRepo.addUser(username, Email("login@example.com"), password)
 
-        val success = userRepo.login(username, hashedPassword)
+        val success = userRepo.login(username, password)
         assertNotNull(success)
 
-        val fail = userRepo.login(username, "wrongPassword")
+        val fail = userRepo.login(username, Password("Aa12345??"))
         assertNull(fail)
     }
 
     @Test
     fun testGetUsersByNamePagination() {
-        userRepo.addUser(Username("alice"), Email("alice@example.com"), "pw")
-        userRepo.addUser(Username("alex"), Email("alex@example.com"), "pw")
-        userRepo.addUser(Username("bob"), Email("bob@example.com"), "pw")
+        userRepo.addUser(Username("alice"), Email("alice@example.com"), Password("Aa12345!"))
+        userRepo.addUser(Username("alex"), Email("alex@example.com"), Password("Aa12345!"))
+        userRepo.addUser(Username("bob"), Email("bob@example.com"), Password("Aa12345!"))
 
         val results = userRepo.getUsersByName("al", 0, 10)
         assertTrue(results.all { it.username.value.contains("al") })

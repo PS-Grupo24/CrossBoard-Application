@@ -54,7 +54,7 @@ class JdbcUserRepoTests {
     fun `addUser should create a user and return it with a generated ID`() {
         val username = Username("johndoe")
         val email = Email("john@doe.com")
-        val password = "hashed_password_123"
+        val password = Password("Aa12345!")
 
         val createdUser = userRepo.addUser(username, email, password)
 
@@ -68,7 +68,7 @@ class JdbcUserRepoTests {
 
     @Test
     fun `getUserProfileById should return user info for existing user`() {
-        val createdUser = userRepo.addUser(Username("testuser"), Email("test@user.com"), "pass")
+        val createdUser = userRepo.addUser(Username("testuser"), Email("test@user.com"), Password("Aa12345!"))
 
         val foundUser = userRepo.getUserProfileById(createdUser.id)
 
@@ -86,7 +86,7 @@ class JdbcUserRepoTests {
     @Test
     fun `getUserProfileByEmail should return user info`() {
         val email = Email("findme@example.com")
-        userRepo.addUser(Username("findme"), email, "pass")
+        userRepo.addUser(Username("findme"), email, Password("Aa12345!"))
 
         val foundUser = userRepo.getUserProfileByEmail(email)
 
@@ -96,7 +96,7 @@ class JdbcUserRepoTests {
 
     @Test
     fun `deleteUser should remove the user from the database`() {
-        val userToDelete = userRepo.addUser(Username("deleteme"), Email("delete@me.com"), "pass")
+        val userToDelete = userRepo.addUser(Username("deleteme"), Email("delete@me.com"), Password("Aa12345!"))
 
         val result = userRepo.deleteUser(userToDelete.id)
 
@@ -107,7 +107,7 @@ class JdbcUserRepoTests {
 
     @Test
     fun `updateUser should change username and state`() {
-        val originalUser = userRepo.addUser(Username("original"), Email("original@test.com"), "pass")
+        val originalUser = userRepo.addUser(Username("original"), Email("original@test.com"), Password("Aa12345!"))
         val newUsername = Username("updated")
         val newState = UserState.BANNED
 
@@ -126,9 +126,9 @@ class JdbcUserRepoTests {
 
     @Test
     fun `getUsersByName should return users matching a prefix`() {
-        userRepo.addUser(Username("testuser1"), Email("test1@test.com"), "pass")
-        userRepo.addUser(Username("testuser2"), Email("test2@test.com"), "pass")
-        userRepo.addUser(Username("anotheruser"), Email("another@test.com"), "pass")
+        userRepo.addUser(Username("testuser1"), Email("test1@test.com"), Password("Aa12345!"))
+        userRepo.addUser(Username("testuser2"), Email("test2@test.com"), Password("Aa12345!"))
+        userRepo.addUser(Username("anotheruser"), Email("another@test.com"), Password("Aa12345!"))
 
         val users = userRepo.getUsersByName("test", 0, 10)
 
@@ -139,7 +139,7 @@ class JdbcUserRepoTests {
     @Test
     fun `getUsersByName should respect limit and skip parameters`() {
         for (i in 1..10) {
-            userRepo.addUser(Username("user$i"), Email("user$i@test.com"), "pass")
+            userRepo.addUser(Username("user$i"), Email("user$i@test.com"), Password("Aa12345!"))
         }
 
         val users = userRepo.getUsersByName("user", 5, 3) // Skip 5, take 3

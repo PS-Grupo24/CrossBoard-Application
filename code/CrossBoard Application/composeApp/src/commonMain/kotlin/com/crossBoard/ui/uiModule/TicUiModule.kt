@@ -26,7 +26,6 @@ import com.crossBoard.domain.Player
 import com.crossBoard.domain.board.TicTacToeBoard
 import com.crossBoard.domain.matchModule.ModuleProvider
 import com.crossBoard.domain.move.TicTacToeMove
-import com.crossBoard.domain.position.TicPosition
 import com.crossBoard.utils.CustomColor
 import crossboardapplication.composeapp.generated.resources.Res
 import crossboardapplication.composeapp.generated.resources.circleSymbol
@@ -83,7 +82,7 @@ class TicUiModule : UiModule<TicTacToeBoard, TicTacToeMove> {
                 ) {
                     (0..<TicTacToeBoard.BOARD_DIM).forEach { colIndex ->
                         val positionIndex = rowIndex * TicTacToeBoard.BOARD_DIM + colIndex
-                        val position = board.positions[positionIndex] as TicPosition
+                        val position = board.positions[positionIndex]
                         val symbol = when (position.player) {
                             Player.EMPTY -> null
                             Player.BLACK -> blackResource

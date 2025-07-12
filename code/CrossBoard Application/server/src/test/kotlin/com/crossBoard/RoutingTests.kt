@@ -267,7 +267,7 @@ class RoutingTests {
 
         val response2 = client.post("/user/login"){
             contentType(ContentType.Application.Json)
-            setBody(UserLoginInput("johndoe","SecurePassword123" ))
+            setBody(UserLoginInput("johndoe","SecurePassword123!!!" ))
         }
         assertEquals(HttpStatusCode.Conflict, response2.status)
         val error = response2.body<ErrorMessage>()
@@ -322,7 +322,7 @@ class RoutingTests {
         val response = client.put("/user"){
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer ${john.token}")
-            setBody(UserUpdateInput(username = "johndoe2", password = "SecurePassword456?"))
+            setBody(UserUpdateInput(username = "johndoe2", password = "SecurePassword456!!"))
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val updated = response.body<UserProfileOutput>()
@@ -335,7 +335,7 @@ class RoutingTests {
         val response2 = client.put("/user"){
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer ${john.token}")
-            setBody(UserUpdateInput(username = "Alice", password = "SecurePassword456?"))
+            setBody(UserUpdateInput(username = "Alice", password = "SecurePassword456!!"))
         }
         assertEquals(HttpStatusCode.Conflict, response2.status)
         val error2 = response2.body<ErrorMessage>()

@@ -1,6 +1,7 @@
 package com.crossBoard.repository.interfaces
 
 import com.crossBoard.domain.Email
+import com.crossBoard.domain.Password
 import com.crossBoard.domain.User
 import com.crossBoard.domain.UserInfo
 import com.crossBoard.domain.UserState
@@ -21,13 +22,13 @@ interface UserRepository {
     //Function responsible to delete the user from the list of users.
     fun deleteUser(userId: Int): Boolean
     //Function responsible to update the user information.
-    fun updateUser(userId: Int, username: Username?, email: Email?, passwordHash: String?, userState: UserState?): UserInfo
+    fun updateUser(userId: Int, username: Username?, email: Email?, password: Password?, userState: UserState?): UserInfo
     //Function responsible to add the user to the list of users.
-    fun addUser(username: Username, email: Email, passwordHash: String): User
+    fun addUser(username: Username, email: Email, password: Password): User
     //Function responsible to get user details given a token.
     fun getUserProfileByToken(token: String): UserInfo?
     //Function responsible to log in a user.
-    fun login(username: Username, passwordHash: String): UserInfo?
+    fun login(username: Username, password: Password): UserInfo?
     //Function responsible to get all users given a username and a skip and limit.
     fun getUsersByName(username: String, skip: Int, limit: Int): List<UserInfo>
 }
