@@ -68,9 +68,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.ui.tooling.preview)
             implementation(libs.ktor.client.android)
-            implementation(libs.androidx.ui.test.junit4.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -95,7 +93,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.java)
-            implementation(libs.androidx.ui.test.junit4.desktop)
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
@@ -147,9 +144,6 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.ui.text.android)
     implementation(libs.androidx.foundation.android)
-    implementation(libs.androidx.foundation.layout.android)
-    implementation(libs.androidx.ui.android)
-    debugImplementation(libs.ui.tooling)
 
 }
 
@@ -160,7 +154,6 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.crossBoard"
             packageVersion = "1.0.0"
-
         }
     }
 }
