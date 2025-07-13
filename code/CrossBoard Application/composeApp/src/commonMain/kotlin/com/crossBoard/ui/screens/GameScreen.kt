@@ -67,17 +67,32 @@ fun GameScreen(
             timeLeft = timeLeft,
         )
 
-        GameStatusAndBoard(
-            board = board,
-            match.matchType,
-            match.state,
-            match.getPlayerType(currentUserId),
-            myUsername = myUsername,
-            opponentUsername = opponentUsername,
-            isGameOver = isGameOver,
-            isLoading = isLoading,
-            onMakeMove = onMakeMove
-        )
+        Spacer(Modifier.height(16.dp))
+
+        val turnString = if (match.board.turn == myPlayerType) "Your turn" else "Opponent's turn"
+        val status = when (val b = match.board) {
+            is BoardWin -> if (b.winner == myPlayerType) "You Won" else "You Lost"
+            else -> if (isGameOver) "Draw" else turnString
+        }
+        Text(status, style = MaterialTheme.typography.h5, color = CustomColor.LightBrown.value)
+
+        Spacer(Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false),
+            contentAlignment = Alignment.Center
+        ) {
+            val module = UiModuleProvider.getModule<Board, Move>(match.matchType)
+            module.BoardView(
+                board = match.board,
+                myPlayerType = myPlayerType,
+                onMakeMove = onMakeMove,
+                enabled = !isGameOver,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         GameActions(
             isLoading = isLoading,

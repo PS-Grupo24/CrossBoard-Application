@@ -235,7 +235,7 @@ class AuthViewModel(
     }
 
     fun playMatch(play: Boolean){
-        _authState.update { it.copy(isLoading = true, errorMessage = null, playMatch = play) }
+        _authState.update { it.copy(isLoading = false, errorMessage = null, playMatch = play) }
     }
 
     /**
