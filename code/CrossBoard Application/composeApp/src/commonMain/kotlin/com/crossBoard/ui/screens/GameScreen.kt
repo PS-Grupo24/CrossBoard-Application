@@ -48,10 +48,7 @@ fun GameScreen(
     val board = match.board
     val isGameOver = match.state == MatchState.WIN || match.state == MatchState.DRAW
 
-    val player1Type = remember(match.user1) { match.getPlayerType(match.user1) }
     val myPlayerType = remember(match.user1) { match.getPlayerType(currentUserId) }
-    val myUsername = if (myPlayerType == player1Type) player1Username else player2Username
-    val opponentUsername = if (myUsername == player1Username) player2Username else player1Username
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,9 +66,9 @@ fun GameScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        val turnString = if (match.board.turn == myPlayerType) "Your turn" else "Opponent's turn"
-        val status = when (val b = match.board) {
-            is BoardWin -> if (b.winner == myPlayerType) "You Won" else "You Lost"
+        val turnString = if (board.turn == myPlayerType) "Your turn" else "Opponent's turn"
+        val status = when (board) {
+            is BoardWin -> if (board.winner == myPlayerType) "You Won" else "You Lost"
             else -> if (isGameOver) "Draw" else turnString
         }
         Text(status, style = MaterialTheme.typography.h5, color = CustomColor.LightBrown.value)
@@ -86,7 +83,7 @@ fun GameScreen(
         ) {
             val module = UiModuleProvider.getModule<Board, Move>(match.matchType)
             module.BoardView(
-                board = match.board,
+                board = board,
                 myPlayerType = myPlayerType,
                 onMakeMove = onMakeMove,
                 enabled = !isGameOver,

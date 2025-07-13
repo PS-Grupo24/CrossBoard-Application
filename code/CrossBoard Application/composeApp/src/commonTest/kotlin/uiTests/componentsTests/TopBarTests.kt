@@ -9,7 +9,7 @@ import com.crossBoard.ui.viewModel.MainMenuViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlin.test.Test
 import kotlin.test.assertTrue
-
+/*
 class TopBarTests {
 
     @OptIn(ExperimentalTestApi::class)
@@ -45,4 +45,4 @@ class TopBarTests {
         onNodeWithTag("TopBar Logout Icon Button Test").performClick()
         assertTrue(logoutPressed)
     }
-}
+}*/

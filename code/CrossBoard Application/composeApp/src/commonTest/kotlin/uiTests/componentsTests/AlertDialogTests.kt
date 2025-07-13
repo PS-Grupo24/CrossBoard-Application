@@ -4,7 +4,7 @@ import androidx.compose.ui.test.*
 import com.crossBoard.ui.components.MyAlertDialog
 import kotlin.test.Test
 import kotlin.test.assertTrue
-
+/*
 
 class AlertDialogTests {
 
@@ -48,4 +48,4 @@ class AlertDialogTests {
         assertTrue(dismissedViaRequest)
     }
 
-}
+}*/

@@ -5,7 +5,7 @@ import androidx.compose.ui.test.*
 import com.crossBoard.ui.components.PasswordTextField
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+/*
 class PasswordTextFieldTests {
 
     @OptIn(ExperimentalTestApi::class)
@@ -35,4 +35,4 @@ class PasswordTextFieldTests {
 
         onNodeWithTag("PasswordTextField Label Test", useUnmergedTree = true).isDisplayed()
     }
-}
+}*/

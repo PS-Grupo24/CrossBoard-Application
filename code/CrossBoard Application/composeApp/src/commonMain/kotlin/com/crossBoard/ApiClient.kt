@@ -48,8 +48,8 @@ class ApiClient(
     /**
      * Base URL where the server is hosted.
      */
-    private val baseUrl = "http://${host.address}:${host.port}"
-    //private val baseUrl = "https://crossboard.onrender.com"
+    //private val baseUrl = "http://${host.address}:${host.port}"
+    private val baseUrl = "https://crossboard.onrender.com"
     /**
      * Function "banUser", responsible for the request to ban a user.
      * @param userToken The token of the admin performing the ban.
