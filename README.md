@@ -8,6 +8,9 @@ O projeto CrossBoard Application pode ser acedido online pelo link: **https://cr
 
 Os instaladores para Android ou Windows encontram-se na pasta [install](./install).
 
+**Important**  
+Após a instalação da aplicação é possível obter um erro de timeout ao realizar um login ou registo, pois está a ser usado um serviço gratuito de render que após um dado tempo suspende a atividade do serviço. O serviço será relançado assim que receber um novo pedido, que pode demorar cerca de 1 minuto. Para verificar o estado do serviço consulte: **https://crossboard.onrender.com/**.
+
 Para o desenvolvimento de novos jogos para a aplicação deve ser seguido o seguinte [guia de Novo Jogo](./docs/GuiaNovoJogo.md).
 ## Introdução
 

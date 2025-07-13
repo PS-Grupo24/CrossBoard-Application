@@ -1,0 +1,1 @@
+Para a instalação da aplicação em Android, é disponibilizado um APK enquanto os serviços Google Play confirmam o lancamento na sua loja.

@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import io.ktor.client.engine.okhttp.*
 import com.crossBoard.utils.createHttpClient
 
-class MainActivity : ComponentActivity() {
+class   MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidAppContext.initialize(this)

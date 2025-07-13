@@ -228,20 +228,19 @@ fun GameActions(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val elementHeight = 48.dp
-        if (isLoading) {
-            Box(modifier = Modifier.height(elementHeight)){
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-        } else {
-            errorMessage?.let {
-                Box(modifier = Modifier.height(elementHeight)){
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colors.error,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp).align(Alignment.Center)
-                    )
-                }
+        Box(
+            modifier = Modifier.height(elementHeight),
+            contentAlignment = Alignment.Center
+        ){
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colors.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
         }
 
