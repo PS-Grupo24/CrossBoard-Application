@@ -1,5 +1,12 @@
 package com.crossBoard.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.Button
@@ -14,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.NormalUser
 import com.crossBoard.domain.UserState
+import com.crossBoard.ui.components.SlideTransition
 import com.crossBoard.ui.screens.AuthenticationScreen
 import com.crossBoard.ui.viewModel.AuthViewModel
 import com.russhwolf.settings.Settings
@@ -27,6 +35,7 @@ import com.russhwolf.settings.Settings
  * @param client The client to perform server requests.
  * @param settings The `Settings` used for session data storage.
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CrossBoardApplication(client: ApiClient,settings: Settings){
     val authViewModel = remember { AuthViewModel(client, settings) }
@@ -37,59 +46,60 @@ fun CrossBoardApplication(client: ApiClient,settings: Settings){
     }
     authViewModel.checkSession()
     val authState by authViewModel.authState.collectAsState()
-    if (authState.isAuthenticated) {
-        val user = authState.user
-        if (user != null) {
-            if (user is NormalUser && user.state == UserState.BANNED){
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Error: User Banned. Please logout.", color = Color.Red)
-                    Spacer(Modifier.height(20.dp))
-                    Button(onClick = {
-                        authViewModel.logout()
-                    }) {
-                        Text("Logout")
+    SlideTransition(authState.isAuthenticated){ isAuth ->
+        if (isAuth) {
+            val user = authState.user
+            if (user != null) {
+                if (user is NormalUser && user.state == UserState.BANNED){
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Error: User Banned. Please logout.", color = Color.Red)
+                        Spacer(Modifier.height(20.dp))
+                        Button(onClick = {
+                            authViewModel.logout()
+                        }) {
+                            Text("Logout")
+                        }
                     }
                 }
+                else MainMenu(
+                    client = client,
+                    user = user,
+                    onLogout = {
+                        authViewModel.logout()
+                    },
+                )
             }
-            else MainMenu(
-                client = client,
-                user = user,
-                onLogout = {
-                    authViewModel.logout()
-                },
-            )
-        }
-        else{
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: Authentication Failed. Please logout.", color = Color.Red)
-                Spacer(Modifier.height(20.dp))
-                Button(onClick = { authViewModel.logout() }) { Text("Logout") }
+            else{
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: Authentication Failed. Please logout.", color = Color.Red)
+                    Spacer(Modifier.height(20.dp))
+                    Button(onClick = { authViewModel.logout() }) { Text("Logout") }
+                }
             }
-        }
-
-    }
-    else {
-        if (authState.playMatch) {
-            SinglePlayerMatch(
-                null,
-                ongoBack = { authViewModel.playMatch(false) }
-            )
         } else {
-            AuthenticationScreen(
-                authState = authState,
-                onLoginUsernameChange = authViewModel::updateLoginUsername,
-                onLoginPasswordChange = authViewModel::updateLoginPassword,
+            SlideTransition(authState.playMatch){ play ->
+                if (play) {
+                    SinglePlayerMatch(
+                        null,
+                        ongoBack = { authViewModel.playMatch(false) }
+                    )
+                } else {
+                    AuthenticationScreen(
+                        authState = authState,
+                        onLoginUsernameChange = authViewModel::updateLoginUsername,
+                        onLoginPasswordChange = authViewModel::updateLoginPassword,
 
-                onRegisterEmailChange = authViewModel::updateRegisterEmail,
-                onRegisterPasswordChange = authViewModel::updateRegisterPassword,
-                onRegisterUsernameChange = authViewModel::updateRegisterUsername,
+                        onRegisterEmailChange = authViewModel::updateRegisterEmail,
+                        onRegisterPasswordChange = authViewModel::updateRegisterPassword,
+                        onRegisterUsernameChange = authViewModel::updateRegisterUsername,
 
-                onLoginClick = authViewModel::login,
-                onRegisterClick = authViewModel::register,
-                onSwitchScreen = authViewModel::showLoginScreen,
-                onMaintainSession = authViewModel::maintainSession,
-                onPlayMatch = { authViewModel.playMatch(true) })
-        }
-
+                        onLoginClick = authViewModel::login,
+                        onRegisterClick = authViewModel::register,
+                        onSwitchScreen = authViewModel::showLoginScreen,
+                        onMaintainSession = authViewModel::maintainSession,
+                        onPlayMatch = { authViewModel.playMatch(true) })
+                }
+            }
+            }
     }
 }

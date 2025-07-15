@@ -1,65 +1,116 @@
 package com.crossBoard.ui.screens
-
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.crossBoard.utils.CustomColor
 
 /**
- * A simple screen displayed while waiting for an operation,
- * like finding a match or waiting for an opponent.
+ * A polished, animated screen displayed while waiting for an operation.
  *
- * @param message The message to display while waiting (optional).
- * @param onCancelClick Callback invoked when the user clicks the Cancel button.
+ * @param message The main message to display while waiting.
+ * @param errorMessage An optional error message to display.
+ * @param onCancelClick Callback invoked when the user cancels the operation.
+ * @param cancelEnabled Whether the cancel button is enabled.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WaitingScreen(
-    errorMessage: String? = null,
     message: String = "Waiting...",
+    errorMessage: String? = null,
     onCancelClick: () -> Unit,
     cancelEnabled: Boolean = true
-){
+) {
+    BackHandler(enabled = cancelEnabled) {
+        onCancelClick()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        PulsingHourglass()
 
-        CircularProgressIndicator(color = CustomColor.LightBrown.value)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         Text(
             text = message,
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h5,
             textAlign = TextAlign.Center,
             color = CustomColor.DarkBrown.value
         )
-        if (errorMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.body2,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+
+        Text(
+            text = "This shouldn't take long.",
+            style = MaterialTheme.typography.body2,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+        )
+        AnimatedVisibility(visible = errorMessage != null) {
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colors.error,
+                    style = MaterialTheme.typography.body2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.weight(1f))
 
-        Button(
+        OutlinedButton(
             onClick = onCancelClick,
             enabled = cancelEnabled,
-            colors = ButtonDefaults.buttonColors(backgroundColor = CustomColor.DarkBrown.value)
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, CustomColor.DarkBrown.value),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = CustomColor.DarkBrown.value
+            )
         ) {
-            Text("Cancel", color = Color.White)
+            Text("Cancel")
         }
     }
+}
+
+/**
+ * A composable that displays an hourglass icon with a subtle
+ * "breathing" or "pulsing" animation.
+ */
+@Composable
+private fun PulsingHourglass() {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    Icon(
+        imageVector = Icons.Default.HourglassTop,
+        contentDescription = "Waiting...",
+        modifier = Modifier
+            .size(80.dp)
+            .scale(scale)
+            .alpha(0.8f),
+        tint = CustomColor.LightBrown.value
+    )
 }

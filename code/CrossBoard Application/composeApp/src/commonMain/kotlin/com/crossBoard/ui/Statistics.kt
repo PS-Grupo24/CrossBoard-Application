@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.User
 import com.crossBoard.ui.screens.StatisticsScreen
@@ -15,10 +17,12 @@ import com.crossBoard.ui.viewModel.StatsViewModel
  * @param user The logged user.
  * @param client The client to perform requests.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Statistics(
     user: User,
     client: ApiClient,
+    onBack: () -> Unit
 ){
     val vm = remember { StatsViewModel(user.token.value, client) }
     DisposableEffect(Unit) {
@@ -26,6 +30,7 @@ fun Statistics(
             vm.clear()
         }
     }
+    BackHandler(onBack = onBack)
     vm.fetchStats()
     val statsState = vm.stats.collectAsState()
     StatisticsScreen(statsState.value)

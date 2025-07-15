@@ -1,17 +1,21 @@
 package com.crossBoard.ui
 
-import androidx.compose.animation.AnimatedContent
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import com.crossBoard.ApiClient
 import com.crossBoard.domain.Admin
 import com.crossBoard.domain.User
 import com.crossBoard.model.MainScreen
+import com.crossBoard.model.SubScreen
 import com.crossBoard.ui.screens.MainMenuScreen
 import com.crossBoard.ui.components.MyAlertDialog
+import com.crossBoard.ui.components.SlideTransition
 import com.crossBoard.ui.components.TopBar
 import com.crossBoard.ui.screens.ProfileScreen
 import com.crossBoard.ui.viewModel.MainMenuViewModel
@@ -23,6 +27,7 @@ import com.crossBoard.ui.viewModel.MainMenuViewModel
  * @param user The logged user.
  * @param onLogout The action to perform on logout.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MainMenu(
      client: ApiClient,
@@ -40,6 +45,9 @@ fun MainMenu(
     }
 
     var showConfirmDialog by remember { mutableStateOf(false) }
+    BackHandler(true) {
+        showConfirmDialog = true
+    }
     if (showConfirmDialog) {
         MyAlertDialog(
             {showConfirmDialog = false},
@@ -54,16 +62,22 @@ fun MainMenu(
             dismissText = "Cancel",
         )
     }
+    val showTopBar = when (mainMenuState.currentSubScreen) {
+        SubScreen.Match, SubScreen.MatchOver -> false
+        else -> true
+    }
     Scaffold(
         topBar = {
-            TopBar(
-                user, mainMenuState, vm, {showConfirmDialog = true}
-            )
+            if(showTopBar) {
+                TopBar(
+                    user, mainMenuState, vm
+                ) { showConfirmDialog = true }
+            }
+
         }
     ) { paddingValues ->
-        AnimatedContent(
+        SlideTransition(
             targetState = mainMenuState.currentMainScreen,
-            label = "MainMenuScreenFlow",
         ){
                 currentScreen ->
             Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
@@ -79,7 +93,8 @@ fun MainMenu(
                     }
                     MainScreen.Profile -> {
                         ProfileScreen(
-                            user
+                            user,
+                            onBack = { vm.goToMainMenu(user.username.value)}
                         )
                     }
                     MainScreen.GameFlow -> {
@@ -89,13 +104,15 @@ fun MainMenu(
                             client = client,
                             userToken = user.token.value,
                             currentUserId = user.id,
-                            onMatchOver = vm::goToMatchOver
+                            onMatchOver = vm::goToMatchOver,
+                            onBack = { vm.goToMainMenu(user.username.value) }
                         )
                     }
                     MainScreen.Statistics -> {
                         Statistics(
                             user,
-                            client
+                            client,
+                            onBack = { vm.goToMainMenu(user.username.value)}
                         )
                     }
                     MainScreen.SinglePlayer -> {
@@ -107,7 +124,8 @@ fun MainMenu(
                     MainScreen.AdminPanel -> {
                         AdminPanel(
                             (user as Admin),
-                            client
+                            client,
+                            onBack = { vm.goToMainMenu(user.username.value) }
                         )
                     }
                 }

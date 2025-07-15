@@ -1,5 +1,6 @@
 package com.crossBoard.ui
 
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -12,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import com.crossBoard.domain.User
 import com.crossBoard.ui.screens.FindMatchScreen
@@ -25,7 +29,7 @@ import com.crossBoard.utils.CustomColor
  * @param user The logged user or null for an anonymous user.
  * @param ongoBack The action to perform when goBack button is pressed.
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SinglePlayerMatch(
      user: User?,
@@ -39,16 +43,24 @@ fun SinglePlayerMatch(
             vm.clear()
         }
     }
+    BackHandler(true) {
+        ongoBack()
+    }
     Scaffold(
         topBar = {
             if (user == null){
                 TopAppBar(
+                    modifier = Modifier.statusBarsPadding(),
                     title = {
                         Text("Single Player Match", color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = ongoBack,
+                            onClick = {
+                                if (singleMatchState.value.match == null) ongoBack()
+                                else vm.stopMatch()
+                            }
+                            ,
                         ){
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                         }
@@ -79,8 +91,8 @@ fun SinglePlayerMatch(
                 onMakeMove = vm::makeMove,
                 onForfeit = vm::forfeit,
                 onPlayAgain = vm::startMatch,
-                onGoBack = vm::stopMatch)
+                onGoBack = vm::stopMatch
+            )
         }
-
     }
 }

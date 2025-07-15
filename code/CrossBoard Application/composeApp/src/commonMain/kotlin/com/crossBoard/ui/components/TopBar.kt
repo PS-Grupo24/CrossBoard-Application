@@ -1,6 +1,7 @@
 package com.crossBoard.ui.components
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -37,6 +38,7 @@ fun TopBar(
     onLogoutClick: () -> Unit,
 ) =
     TopAppBar(
+        modifier = Modifier.statusBarsPadding().testTag("TopBar Test"),
         title = {
             Text(
                 text = mainMenuState.topBarMessage,
@@ -89,6 +91,5 @@ fun TopBar(
             }
         },
         backgroundColor = CustomColor.DarkBrown.value,
-        modifier = Modifier.testTag("TopBar Test")
     )
 

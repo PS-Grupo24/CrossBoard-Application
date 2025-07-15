@@ -84,6 +84,7 @@ kotlin {
             implementation(libs.multiplatform.settings.v130)
             implementation(libs.bundles.coilBundle)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation(libs.backHandler)
         }
         nativeMain.dependencies {
             //implementation(libs.ktor.client.darwin)

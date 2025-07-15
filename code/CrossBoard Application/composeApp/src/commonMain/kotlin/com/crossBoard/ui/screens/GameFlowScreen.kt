@@ -14,7 +14,7 @@ import com.crossBoard.model.MultiplayerMatchUiState
  * @param onCancelSearch The action to perform when the match is canceled.
  * @param onMakeMove The action to perform when making a move.
  * @param onForfeit The action to perform when forfeiting.
- * @param onResetMatch The action to perform when cleaning up the match.
+ * @param onPlayAgain The action to perform when cleaning up the match.
  */
 @Composable
 fun GameFlowScreen(
@@ -23,8 +23,9 @@ fun GameFlowScreen(
     onCancelSearch: () -> Unit,
     onMakeMove: (move: Move) -> Unit,
     onForfeit: () -> Unit,
-    onResetMatch: () -> Unit,
+    onPlayAgain: () -> Unit,
     onMatchOver: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val currentMatch = multiplayerMatchUiState.currentMatch
     if (currentMatch != null) {
@@ -44,9 +45,10 @@ fun GameFlowScreen(
                 errorMessage = multiplayerMatchUiState.errorMessage,
                 onMakeMove = onMakeMove,
                 onForfeitClick = onForfeit,
-                onPlayAgainClick = onResetMatch,
+                onPlayAgainClick = onPlayAgain,
                 timeLeft = multiplayerMatchUiState.timeLeftSeconds,
-                onMatchOver = onMatchOver
+                onMatchOver = onMatchOver,
+                onBack = onBack,
             )
     }
 }

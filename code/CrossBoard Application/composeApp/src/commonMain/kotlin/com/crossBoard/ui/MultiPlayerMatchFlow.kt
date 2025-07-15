@@ -2,6 +2,8 @@ package com.crossBoard.ui
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import com.crossBoard.ApiClient
 import com.crossBoard.ui.screens.FindMatchScreen
 import com.crossBoard.ui.screens.GameFlowScreen
@@ -17,7 +19,7 @@ import com.crossBoard.ui.viewModel.MultiplayerMatchViewModel
  * @param onFindMatch Action to perform when FindMatchScreen is to be called.
  * @param onMatch Action to perform when a Match is found.
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MultiPlayerMatchFlow(
     client: ApiClient,
@@ -26,6 +28,7 @@ fun MultiPlayerMatchFlow(
     onFindMatch: () -> Unit,
     onMatch: () -> Unit,
     onMatchOver: () -> Unit,
+    onBack: () -> Unit,
 ){
     val vm = remember { MultiplayerMatchViewModel(client, userToken, currentUserId) }
     val matchUiState by vm.matchState.collectAsState()
@@ -34,6 +37,7 @@ fun MultiPlayerMatchFlow(
             vm.clear()
         }
     }
+    BackHandler(onBack = onBack)
     val currentMatch = matchUiState.currentMatch
     if (currentMatch == null){
         onFindMatch()
@@ -53,8 +57,9 @@ fun MultiPlayerMatchFlow(
             onCancelSearch = vm::cancelSearch,
             onMakeMove = { move -> vm.makeMove(move) },
             onForfeit = vm::forfeit,
-            onResetMatch = vm::resetMatch,
+            onPlayAgain = vm::findMatch,
             onMatchOver = onMatchOver,
+            onBack = vm::resetMatch
         )
     }
 
